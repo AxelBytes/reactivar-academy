@@ -105,7 +105,8 @@ const CheckoutDialog = ({ open, onOpenChange }: CheckoutDialogProps) => {
     setIsProcessing(true);
 
     try {
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+      // Usar la URL actual del sitio o la configurada
+      const API_URL = import.meta.env.VITE_API_URL || window.location.origin;
 
       const response = await fetch(`${API_URL}/api/payments/mercadopago/create-preference`, {
         method: 'POST',

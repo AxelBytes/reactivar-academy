@@ -1,6 +1,18 @@
 {
   "rewrites": [
     {
+      "source": "/api/health",
+      "destination": "/api/health"
+    },
+    {
+      "source": "/api/payments/mercadopago/create-preference",
+      "destination": "/api/mercadopago-create"
+    },
+    {
+      "source": "/api/payments/mercadopago/webhook",
+      "destination": "/api/mercadopago-webhook"
+    },
+    {
       "source": "/(.*)",
       "destination": "/"
     }
