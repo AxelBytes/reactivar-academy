@@ -25,6 +25,9 @@ import {
   GraduationCap,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import mercadopagoLogo from "@/assets/mercadopago-logo.png";
+import prexLogo from "@/assets/prex-logo.png";
+import paypalLogo from "@/assets/paypal-logo.png";
 
 type PaymentMethod = "mercadopago" | "prex" | "paypal";
 
@@ -246,7 +249,7 @@ const CheckoutDialog = ({ open, onOpenChange }: CheckoutDialogProps) => {
                   <Label htmlFor="mercadopago" className="flex items-center gap-3 flex-1 cursor-pointer">
                     <div className="w-14 h-14 rounded-lg bg-white flex items-center justify-center border border-border">
                       <img 
-                        src="https://http2.mlstatic.com/storage/logos-api-admin/51b446b0-571c-11e8-9a2d-4b2bd7b1bf77-m.svg" 
+                        src={mercadopagoLogo} 
                         alt="MercadoPago" 
                         className="w-10 h-10 object-contain"
                       />
@@ -267,7 +270,7 @@ const CheckoutDialog = ({ open, onOpenChange }: CheckoutDialogProps) => {
                   <Label htmlFor="prex" className="flex items-center gap-3 flex-1 cursor-pointer">
                     <div className="w-14 h-14 rounded-lg bg-[#00D632]/10 flex items-center justify-center border border-border">
                       <img 
-                        src="https://prexcard.com/hubfs/prex%20logo.svg" 
+                        src={prexLogo} 
                         alt="Prex" 
                         className="w-10 h-10 object-contain"
                       />
@@ -293,7 +296,7 @@ const CheckoutDialog = ({ open, onOpenChange }: CheckoutDialogProps) => {
                   <Label htmlFor="paypal" className="flex items-center gap-3 flex-1 cursor-pointer">
                     <div className="w-14 h-14 rounded-lg bg-white flex items-center justify-center border border-border">
                       <img 
-                        src="https://www.paypalobjects.com/webstatic/mktg/logo/pp_cc_mark_111x69.jpg" 
+                        src={paypalLogo} 
                         alt="PayPal" 
                         className="w-12 h-8 object-contain"
                       />
