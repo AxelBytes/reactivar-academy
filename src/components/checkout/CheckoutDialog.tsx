@@ -104,28 +104,51 @@ const CheckoutDialog = ({ open, onOpenChange }: CheckoutDialogProps) => {
   const handleMercadoPago = async () => {
     setIsProcessing(true);
 
-    // Aquí se integrará con MercadoPago SDK
-    // Por ahora simulamos el proceso
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    try {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
-    console.log("Iniciando checkout de MercadoPago");
-    
-    // En producción, esto redirigirá a la página de MercadoPago
-    toast({
-      title: "Redirigiendo a MercadoPago",
-      description: "Serás redirigido al checkout seguro de MercadoPago...",
-    });
-
-    // Simulación de pago exitoso
-    setTimeout(() => {
-      toast({
-        title: "¡Pago exitoso!",
-        description: "Tu pedido ha sido procesado correctamente.",
+      const response = await fetch(`${API_URL}/api/payments/mercadopago/create-preference`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          items: items.map(item => ({
+            id: item.id,
+            name: item.type === 'product' ? item.name : item.title,
+            title: item.type === 'product' ? item.name : item.title,
+            quantity: item.quantity,
+            price: item.price,
+            type: item.type,
+          })),
+          payer: {
+            email: user?.email || 'test@test.com',
+            name: user?.name || 'Usuario',
+          },
+        }),
       });
-      clearCart();
-      onOpenChange(false);
+
+      if (!response.ok) {
+        throw new Error('Error al crear la preferencia de pago');
+      }
+
+      const data = await response.json();
+
+      if (data.init_point) {
+        // Redirigir a MercadoPago
+        window.location.href = data.init_point;
+      } else {
+        throw new Error('No se recibió el link de pago');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo iniciar el pago. Intenta nuevamente.",
+        variant: "destructive",
+      });
       setIsProcessing(false);
-    }, 2000);
+    }
   };
 
   const handlePayPal = async () => {
