@@ -1,5 +1,5 @@
 // MercadoPago - Crear preferencia de pago
-const mercadopago = require('mercadopago');
+import { MercadoPagoConfig, Preference } from 'mercadopago';
 
 export default async function handler(req, res) {
   // Habilitar CORS - Permitir todos los orígenes
@@ -25,15 +25,16 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Items are required' });
     }
 
-    // Configurar MercadoPago
-    mercadopago.configure({
-      access_token: process.env.MERCADOPAGO_ACCESS_TOKEN
+    // Configurar cliente de MercadoPago (SDK v2)
+    const client = new MercadoPagoConfig({ 
+      accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN 
     });
+    const preference = new Preference(client);
 
     const FRONTEND_URL = process.env.VITE_FRONTEND_URL || 'https://reactivar-academy.vercel.app';
 
-    // Crear preferencia
-    const preference = {
+    // Crear preferencia de pago
+    const preferenceData = {
       items: items.map(item => ({
         id: item.id.toString(),
         title: item.name || item.title || 'Producto',
@@ -62,14 +63,14 @@ export default async function handler(req, res) {
 
     console.log('Creating preference for:', items.length, 'items');
 
-    const response = await mercadopago.preferences.create(preference);
+    const response = await preference.create({ body: preferenceData });
 
-    console.log('Preference created:', response.body.id);
+    console.log('Preference created:', response.id);
 
     res.status(200).json({
-      id: response.body.id,
-      init_point: response.body.init_point,
-      sandbox_init_point: response.body.sandbox_init_point
+      id: response.id,
+      init_point: response.init_point,
+      sandbox_init_point: response.sandbox_init_point
     });
 
   } catch (error) {
