@@ -26,14 +26,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-// Logos de métodos de pago (puedes reemplazar con imágenes reales)
-const PaymentLogos = {
-  card: "💳",
-  mercadopago: "🔵", // Logo de MercadoPago
-  paypal: "🅿️", // Logo de PayPal
-};
-
-type PaymentMethod = "card" | "mercadopago" | "paypal";
+type PaymentMethod = "mercadopago" | "prex" | "paypal";
 
 interface CheckoutDialogProps {
   open: boolean;
@@ -82,23 +75,29 @@ const CheckoutDialog = ({ open, onOpenChange }: CheckoutDialogProps) => {
   const hasProducts = items.some((item) => item.type === "product");
   const hasCourses = items.some((item) => item.type === "course");
 
-  const handleCardPayment = async (data: CardFormData) => {
+  const handlePrex = async () => {
     setIsProcessing(true);
 
-    // Simular procesamiento de pago
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    // Simulación de Prex - En producción, aquí integrarías con la API de Prex
+    await new Promise((resolve) => setTimeout(resolve, 1500));
 
-    console.log("Procesando pago con tarjeta:", data);
+    console.log("Procesando pago con Prex");
 
     toast({
-      title: "¡Pago exitoso!",
-      description: "Tu pedido ha sido procesado correctamente.",
+      title: "Redirigiendo a Prex",
+      description: "Serás redirigido al checkout seguro de Prex...",
     });
 
-    clearCart();
-    reset();
-    onOpenChange(false);
-    setIsProcessing(false);
+    // Simulación de pago exitoso
+    setTimeout(() => {
+      toast({
+        title: "¡Pago exitoso!",
+        description: "Tu pedido ha sido procesado correctamente.",
+      });
+      clearCart();
+      onOpenChange(false);
+      setIsProcessing(false);
+    }, 2000);
   };
 
   const handleMercadoPago = async () => {
@@ -177,11 +176,11 @@ const CheckoutDialog = ({ open, onOpenChange }: CheckoutDialogProps) => {
     }, 2000);
   };
 
-  const handlePayment = async (data?: CardFormData) => {
-    if (paymentMethod === "card" && data) {
-      await handleCardPayment(data);
-    } else if (paymentMethod === "mercadopago") {
+  const handlePayment = async () => {
+    if (paymentMethod === "mercadopago") {
       await handleMercadoPago();
+    } else if (paymentMethod === "prex") {
+      await handlePrex();
     } else if (paymentMethod === "paypal") {
       await handlePayPal();
     }
@@ -237,142 +236,81 @@ const CheckoutDialog = ({ open, onOpenChange }: CheckoutDialogProps) => {
             <Label className="text-base font-semibold">Método de Pago</Label>
             <RadioGroup value={paymentMethod} onValueChange={(value) => setPaymentMethod(value as PaymentMethod)}>
               
-              {/* MercadoPago */}
-              <div className="flex items-center space-x-3 border border-border rounded-lg p-4 hover:bg-accent/50 transition-colors cursor-pointer">
-                <RadioGroupItem value="mercadopago" id="mercadopago" />
-                <Label htmlFor="mercadopago" className="flex items-center gap-3 flex-1 cursor-pointer">
-                  <div className="w-12 h-12 rounded-lg bg-[#00b1ea]/10 flex items-center justify-center text-2xl">
-                    🔵
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-semibold">MercadoPago</p>
-                    <p className="text-sm text-muted-foreground">
-                      Tarjetas, efectivo, transferencia
-                    </p>
-                  </div>
-                  <ShieldCheck className="w-5 h-5 text-green-600" />
-                </Label>
+              {/* Pagos Nacionales */}
+              <div className="space-y-3">
+                <p className="text-sm font-medium text-muted-foreground">Pagos Nacionales</p>
+                
+                {/* MercadoPago */}
+                <div className="flex items-center space-x-3 border border-border rounded-lg p-4 hover:bg-accent/50 transition-colors cursor-pointer">
+                  <RadioGroupItem value="mercadopago" id="mercadopago" />
+                  <Label htmlFor="mercadopago" className="flex items-center gap-3 flex-1 cursor-pointer">
+                    <div className="w-14 h-14 rounded-lg bg-white flex items-center justify-center border border-border">
+                      <img 
+                        src="https://http2.mlstatic.com/storage/logos-api-admin/51b446b0-571c-11e8-9a2d-4b2bd7b1bf77-m.svg" 
+                        alt="MercadoPago" 
+                        className="w-10 h-10 object-contain"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-semibold">MercadoPago</p>
+                      <p className="text-sm text-muted-foreground">
+                        Tarjetas, efectivo, transferencia
+                      </p>
+                    </div>
+                    <ShieldCheck className="w-5 h-5 text-green-600" />
+                  </Label>
+                </div>
+
+                {/* Prex */}
+                <div className="flex items-center space-x-3 border border-border rounded-lg p-4 hover:bg-accent/50 transition-colors cursor-pointer">
+                  <RadioGroupItem value="prex" id="prex" />
+                  <Label htmlFor="prex" className="flex items-center gap-3 flex-1 cursor-pointer">
+                    <div className="w-14 h-14 rounded-lg bg-[#00D632]/10 flex items-center justify-center border border-border">
+                      <img 
+                        src="https://prexcard.com/hubfs/prex%20logo.svg" 
+                        alt="Prex" 
+                        className="w-10 h-10 object-contain"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-semibold">Prex</p>
+                      <p className="text-sm text-muted-foreground">
+                        Paga con tu tarjeta Prex
+                      </p>
+                    </div>
+                    <ShieldCheck className="w-5 h-5 text-green-600" />
+                  </Label>
+                </div>
               </div>
 
-              {/* PayPal */}
-              <div className="flex items-center space-x-3 border border-border rounded-lg p-4 hover:bg-accent/50 transition-colors cursor-pointer">
-                <RadioGroupItem value="paypal" id="paypal" />
-                <Label htmlFor="paypal" className="flex items-center gap-3 flex-1 cursor-pointer">
-                  <div className="w-12 h-12 rounded-lg bg-[#0070ba]/10 flex items-center justify-center text-2xl">
-                    🅿️
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-semibold">PayPal</p>
-                    <p className="text-sm text-muted-foreground">
-                      PayPal o tarjeta de crédito/débito
-                    </p>
-                  </div>
-                  <ShieldCheck className="w-5 h-5 text-green-600" />
-                </Label>
-              </div>
-
-              {/* Tarjeta de Crédito/Débito */}
-              <div className="flex items-center space-x-3 border border-border rounded-lg p-4 hover:bg-accent/50 transition-colors cursor-pointer">
-                <RadioGroupItem value="card" id="card" />
-                <Label htmlFor="card" className="flex items-center gap-3 flex-1 cursor-pointer">
-                  <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <CreditCard className="w-6 h-6 text-primary" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-semibold">Tarjeta de Crédito/Débito</p>
-                    <p className="text-sm text-muted-foreground">
-                      Visa, Mastercard, American Express
-                    </p>
-                  </div>
-                  <ShieldCheck className="w-5 h-5 text-green-600" />
-                </Label>
+              {/* Pago Internacional */}
+              <div className="space-y-3 pt-2">
+                <p className="text-sm font-medium text-muted-foreground">Pago Internacional</p>
+                
+                {/* PayPal */}
+                <div className="flex items-center space-x-3 border border-border rounded-lg p-4 hover:bg-accent/50 transition-colors cursor-pointer">
+                  <RadioGroupItem value="paypal" id="paypal" />
+                  <Label htmlFor="paypal" className="flex items-center gap-3 flex-1 cursor-pointer">
+                    <div className="w-14 h-14 rounded-lg bg-white flex items-center justify-center border border-border">
+                      <img 
+                        src="https://www.paypalobjects.com/webstatic/mktg/logo/pp_cc_mark_111x69.jpg" 
+                        alt="PayPal" 
+                        className="w-12 h-8 object-contain"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-semibold">PayPal</p>
+                      <p className="text-sm text-muted-foreground">
+                        Pago seguro internacional
+                      </p>
+                    </div>
+                    <ShieldCheck className="w-5 h-5 text-green-600" />
+                  </Label>
+                </div>
               </div>
             </RadioGroup>
           </div>
 
-          {/* Formulario de tarjeta (solo si se selecciona tarjeta) */}
-          {paymentMethod === "card" && (
-            <form onSubmit={handleSubmit(handlePayment)} className="space-y-4">
-              <Alert>
-                <ShieldCheck className="w-4 h-4" />
-                <AlertDescription>
-                  Tus datos están protegidos con encriptación SSL
-                </AlertDescription>
-              </Alert>
-
-              <div className="space-y-2">
-                <Label htmlFor="cardNumber">Número de Tarjeta</Label>
-                <Input
-                  id="cardNumber"
-                  placeholder="1234 5678 9012 3456"
-                  maxLength={19}
-                  {...register("cardNumber")}
-                  className={errors.cardNumber ? "border-red-500" : ""}
-                />
-                {errors.cardNumber && (
-                  <p className="text-sm text-red-500">{errors.cardNumber.message}</p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="cardName">Nombre del Titular</Label>
-                <Input
-                  id="cardName"
-                  placeholder="JUAN PEREZ"
-                  {...register("cardName")}
-                  className={errors.cardName ? "border-red-500" : ""}
-                />
-                {errors.cardName && (
-                  <p className="text-sm text-red-500">{errors.cardName.message}</p>
-                )}
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="expiryDate">Fecha de Vencimiento</Label>
-                  <Input
-                    id="expiryDate"
-                    placeholder="MM/YY"
-                    maxLength={5}
-                    {...register("expiryDate")}
-                    className={errors.expiryDate ? "border-red-500" : ""}
-                  />
-                  {errors.expiryDate && (
-                    <p className="text-sm text-red-500">{errors.expiryDate.message}</p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="cvv">CVV</Label>
-                  <Input
-                    id="cvv"
-                    placeholder="123"
-                    maxLength={4}
-                    type="password"
-                    {...register("cvv")}
-                    className={errors.cvv ? "border-red-500" : ""}
-                  />
-                  {errors.cvv && (
-                    <p className="text-sm text-red-500">{errors.cvv.message}</p>
-                  )}
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="email">Email para Confirmación</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="tu@email.com"
-                  {...register("email")}
-                  className={errors.email ? "border-red-500" : ""}
-                />
-                {errors.email && (
-                  <p className="text-sm text-red-500">{errors.email.message}</p>
-                )}
-              </div>
-            </form>
-          )}
 
           {/* Información de envío para productos */}
           {hasProducts && (
@@ -407,11 +345,17 @@ const CheckoutDialog = ({ open, onOpenChange }: CheckoutDialogProps) => {
             <Button
               className="flex-1"
               disabled={isProcessing}
-              onClick={paymentMethod === "card" ? handleSubmit(handlePayment) : () => handlePayment()}
+              onClick={() => handlePayment()}
             >
               {isProcessing && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               {isProcessing
                 ? "Procesando..."
+                : paymentMethod === "mercadopago"
+                ? "Procesar con MercadoPago"
+                : paymentMethod === "prex"
+                ? "Procesar con Prex"
+                : paymentMethod === "paypal"
+                ? "Procesar con PayPal"
                 : `Pagar $${getTotal().toLocaleString("es-AR")}`}
             </Button>
           </div>
