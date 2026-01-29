@@ -1,0 +1,122 @@
+import { Link } from "react-router-dom";
+import { Facebook, Instagram, Twitter, Youtube, Mail, Phone, MapPin } from "lucide-react";
+
+const Footer = () => {
+  return (
+    <footer className="bg-secondary text-secondary-foreground">
+      <div className="container mx-auto px-4 py-12 lg:py-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
+          {/* Brand */}
+          <div className="space-y-4">
+            <Link to="/" className="flex items-center gap-2 group">
+              <img src="/logo.svg" alt="Logo" className="w-[200px] h-[200px]" />
+              <span className="text-2xl font-bold group-hover:text-primary transition-colors">
+                REACTIVAR <span className="text-primary">ACADEMY</span>
+              </span>
+            </Link>
+            <p className="text-secondary-foreground/80 text-sm leading-relaxed">
+              Tu plataforma de capacitación deportiva y equipamiento de alta calidad. 
+              Aprende de los mejores y equípate para el éxito.
+            </p>
+            <div className="flex items-center gap-4">
+              <a href="#" className="text-secondary-foreground/60 hover:text-primary transition-colors">
+                <Facebook className="w-5 h-5" />
+              </a>
+              <a href="#" className="text-secondary-foreground/60 hover:text-primary transition-colors">
+                <Instagram className="w-5 h-5" />
+              </a>
+              <a href="#" className="text-secondary-foreground/60 hover:text-primary transition-colors">
+                <Twitter className="w-5 h-5" />
+              </a>
+              <a href="#" className="text-secondary-foreground/60 hover:text-primary transition-colors">
+                <Youtube className="w-5 h-5" />
+              </a>
+            </div>
+          </div>
+
+          {/* Quick Links */}
+          <div>
+            <h4 className="font-semibold text-lg mb-4">Enlaces Rápidos</h4>
+            <ul className="space-y-3">
+              {[
+                { href: "/cursos", label: "Capacitaciones" },
+                { href: "/tienda", label: "Tienda" },
+                { href: "/sobre-nosotros", label: "Sobre Nosotros" },
+                { href: "/contacto", label: "Contacto" },
+              ].map((link) => (
+                <li key={link.href}>
+                  <Link
+                    to={link.href}
+                    className="text-secondary-foreground/80 hover:text-primary transition-colors text-sm"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Categories */}
+          <div>
+            <h4 className="font-semibold text-lg mb-4">Categorías</h4>
+            <ul className="space-y-3">
+              {[
+                "Entrenamiento Funcional",
+                "Nutrición Deportiva",
+                "Psicología Deportiva",
+                "Preparación Física",
+              ].map((category) => (
+                <li key={category}>
+                  <a
+                    href="#"
+                    className="text-secondary-foreground/80 hover:text-primary transition-colors text-sm"
+                  >
+                    {category}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Contact */}
+          <div>
+            <h4 className="font-semibold text-lg mb-4">Contacto</h4>
+            <ul className="space-y-3">
+              <li className="flex items-center gap-3 text-sm text-secondary-foreground/80">
+                <Mail className="w-4 h-4 text-primary" />
+                <span>info@ReactivarAcademy.com</span>
+              </li>
+              <li className="flex items-center gap-3 text-sm text-secondary-foreground/80">
+                <Phone className="w-4 h-4 text-primary" />
+                <span>+1 (555) 123-4567</span>
+              </li>
+              <li className="flex items-start gap-3 text-sm text-secondary-foreground/80">
+                <MapPin className="w-4 h-4 text-primary mt-0.5" />
+                <span>123 Sports Avenue, Ciudad Deportiva, CP 12345</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Bottom Bar */}
+        <div className="mt-12 pt-8 border-t border-secondary-foreground/10">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-sm text-secondary-foreground/60">
+              © 2026 ReactivarAcademy. Todos los derechos reservados.
+            </p>
+            <div className="flex items-center gap-6">
+              <a href="#" className="text-sm text-secondary-foreground/60 hover:text-primary transition-colors">
+                Términos de Uso
+              </a>
+              <a href="#" className="text-sm text-secondary-foreground/60 hover:text-primary transition-colors">
+                Política de Privacidad
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+};
+
+export default Footer;
