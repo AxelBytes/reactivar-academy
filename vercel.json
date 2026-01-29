@@ -24,16 +24,10 @@
     {
       "source": "/api/payments/mercadopago/webhook",
       "destination": "/api/mercadopago-webhook"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
     },
     {
-      "src": "/(.*)",
-      "dest": "/"
+      "source": "/(.*)",
+      "destination": "/"
     }
   ]
 }
