@@ -13,6 +13,17 @@ import productShaker from "@/assets/product-shaker.jpg";
 
 const products = [
   {
+    id: 999,
+    name: "🧪 Producto de Prueba",
+    description: "Producto para probar pagos - Precio simbólico",
+    price: 1,
+    originalPrice: 100,
+    image: productShaker,
+    category: "Accesorios",
+    inStock: true,
+    isNew: true,
+  },
+  {
     id: 1,
     name: "Zapatillas Running Pro",
     description: "Zapatillas de alto rendimiento con amortiguación avanzada",
