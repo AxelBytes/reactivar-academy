@@ -1,9 +1,22 @@
 {
-  "rewrites": [
+  "functions": {
+    "api/**/*.js": {
+      "memory": 1024,
+      "maxDuration": 10
+    }
+  },
+  "headers": [
     {
-      "source": "/api/health",
-      "destination": "/api/health"
-    },
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Credentials", "value": "true" },
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET,OPTIONS,POST,PUT,DELETE" },
+        { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization, X-Requested-With" }
+      ]
+    }
+  ],
+  "rewrites": [
     {
       "source": "/api/payments/mercadopago/create-preference",
       "destination": "/api/mercadopago-create"
@@ -11,10 +24,16 @@
     {
       "source": "/api/payments/mercadopago/webhook",
       "destination": "/api/mercadopago-webhook"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
     },
     {
-      "source": "/(.*)",
-      "destination": "/"
+      "src": "/(.*)",
+      "dest": "/"
     }
   ]
 }

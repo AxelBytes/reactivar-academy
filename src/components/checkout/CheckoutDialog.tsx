@@ -105,10 +105,10 @@ const CheckoutDialog = ({ open, onOpenChange }: CheckoutDialogProps) => {
     setIsProcessing(true);
 
     try {
-      // Usar la URL actual del sitio o la configurada
-      const API_URL = import.meta.env.VITE_API_URL || window.location.origin;
+      // Siempre usar la URL del sitio actual (sin barra final)
+      const baseUrl = window.location.origin.replace(/\/$/, '');
 
-      const response = await fetch(`${API_URL}/api/payments/mercadopago/create-preference`, {
+      const response = await fetch(`${baseUrl}/api/payments/mercadopago/create-preference`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
