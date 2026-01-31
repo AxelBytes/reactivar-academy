@@ -31,7 +31,7 @@
     },
     {
       "source": "/api/payments/paypal/capture-payment",
-      "destination": "/api/paypal-capture"
+      "destination": "/api/paypal-capture-order"
     },
     {
       "source": "/(.*)",
