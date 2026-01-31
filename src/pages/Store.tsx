@@ -24,6 +24,17 @@ const products = [
     isNew: true,
   },
   {
+    id: 997,
+    name: "💵 Test $1 USD",
+    description: "Producto de prueba - Equivale a $1 USD exacto",
+    price: 1450,
+    originalPrice: 2000,
+    image: productShaker,
+    category: "Accesorios",
+    inStock: true,
+    isNew: true,
+  },
+  {
     id: 998,
     name: "🎯 Curso Básico de Fitness",
     description: "Curso completo de entrenamiento - Precio accesible",
