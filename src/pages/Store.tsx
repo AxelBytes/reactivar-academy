@@ -24,6 +24,17 @@ const products = [
     isNew: true,
   },
   {
+    id: 998,
+    name: "🎯 Curso Básico de Fitness",
+    description: "Curso completo de entrenamiento - Precio accesible",
+    price: 2000,
+    originalPrice: 3500,
+    image: productDumbbells,
+    category: "Cursos",
+    inStock: true,
+    isNew: true,
+  },
+  {
     id: 1,
     name: "Zapatillas Running Pro",
     description: "Zapatillas de alto rendimiento con amortiguación avanzada",
