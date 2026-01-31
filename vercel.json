@@ -26,6 +26,10 @@
       "destination": "/api/mercadopago-webhook"
     },
     {
+      "source": "/api/payments/paypal/create-order",
+      "destination": "/api/paypal-create"
+    },
+    {
       "source": "/(.*)",
       "destination": "/"
     }

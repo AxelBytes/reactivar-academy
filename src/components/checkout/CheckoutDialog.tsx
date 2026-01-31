@@ -157,26 +157,48 @@ const CheckoutDialog = ({ open, onOpenChange }: CheckoutDialogProps) => {
   const handlePayPal = async () => {
     setIsProcessing(true);
 
-    // Aquí se integrará con PayPal SDK
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    try {
+      // Siempre usar la URL del sitio actual (sin barra final)
+      const baseUrl = window.location.origin.replace(/\/$/, '');
 
-    console.log("Iniciando checkout de PayPal");
-
-    toast({
-      title: "Redirigiendo a PayPal",
-      description: "Serás redirigido al checkout seguro de PayPal...",
-    });
-
-    // Simulación de pago exitoso
-    setTimeout(() => {
-      toast({
-        title: "¡Pago exitoso!",
-        description: "Tu pedido ha sido procesado correctamente.",
+      const response = await fetch(`${baseUrl}/api/payments/paypal/create-order`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          items: items.map(item => ({
+            id: item.id,
+            name: item.type === 'product' ? item.name : item.title,
+            title: item.type === 'product' ? item.name : item.title,
+            quantity: item.quantity,
+            price: item.price,
+            type: item.type,
+          })),
+        }),
       });
-      clearCart();
-      onOpenChange(false);
+
+      if (!response.ok) {
+        throw new Error('Error al crear la orden de PayPal');
+      }
+
+      const data = await response.json();
+
+      if (data.approve_url) {
+        // Redirigir a PayPal
+        window.location.href = data.approve_url;
+      } else {
+        throw new Error('No se recibió el link de pago de PayPal');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo iniciar el pago con PayPal. Intenta nuevamente.",
+        variant: "destructive",
+      });
       setIsProcessing(false);
-    }, 2000);
+    }
   };
 
   const handlePayment = async () => {
