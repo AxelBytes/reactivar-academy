@@ -49,7 +49,8 @@ export default async function handler(req, res) {
     const total = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
     // Convertir ARS a USD (tasa aproximada, idealmente usar una API de cambio)
-    const totalUSD = (total / 1000).toFixed(2); // Ajusta según tasa real
+    // Mínimo: $0.01 USD
+    const totalUSD = Math.max(0.01, (total / 1000)).toFixed(2);
 
     // Crear orden de PayPal
     const orderData = {
@@ -70,7 +71,7 @@ export default async function handler(req, res) {
           description: `${item.type === 'product' ? 'Producto' : 'Curso'}: ${item.name || item.title}`,
           unit_amount: {
             currency_code: 'USD',
-            value: ((item.price / 1000) / item.quantity).toFixed(2)
+            value: Math.max(0.01, ((item.price / 1000) / item.quantity)).toFixed(2)
           },
           quantity: item.quantity.toString()
         }))
@@ -95,8 +96,8 @@ export default async function handler(req, res) {
 
     if (!orderResponse.ok) {
       const error = await orderResponse.json();
-      console.error('PayPal order creation error:', error);
-      throw new Error('Failed to create PayPal order');
+      console.error('PayPal order creation error:', JSON.stringify(error, null, 2));
+      throw new Error(`Failed to create PayPal order: ${JSON.stringify(error)}`);
     }
 
     const order = await orderResponse.json();
