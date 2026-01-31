@@ -1,5 +1,7 @@
+import { useState } from "react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import ProductDetailDialog from "@/components/products/ProductDetailDialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -22,6 +24,14 @@ const products = [
     category: "Accesorios",
     inStock: true,
     isNew: true,
+    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    detailedDescription: "Este es un producto de prueba diseñado para validar el sistema de pagos. No es un producto real, sino una herramienta de testing para asegurar que todas las pasarelas de pago funcionen correctamente antes del lanzamiento oficial.",
+    features: [
+      "Precio simbólico de $1 ARS para testing",
+      "Funciona con todas las pasarelas de pago",
+      "Ideal para probar el checkout completo",
+      "No incluye envío real"
+    ],
   },
   {
     id: 997,
@@ -33,6 +43,14 @@ const products = [
     category: "Accesorios",
     inStock: true,
     isNew: true,
+    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    detailedDescription: "Producto especial de prueba calibrado para convertirse exactamente a $1 USD en PayPal. Permite testear la conversión de moneda automática y verificar que los pagos internacionales funcionen correctamente.",
+    features: [
+      "Conversión automática ARS a USD",
+      "Precio equivalente a $1 USD",
+      "Prueba de pagos internacionales",
+      "Testing de tipo de cambio en tiempo real"
+    ],
   },
   {
     id: 998,
@@ -44,6 +62,15 @@ const products = [
     category: "Cursos",
     inStock: true,
     isNew: true,
+    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    detailedDescription: "Curso introductorio de fitness diseñado para principiantes. Aprende los fundamentos del entrenamiento físico con rutinas personalizadas, guías de nutrición y seguimiento profesional.",
+    features: [
+      "12 semanas de entrenamiento guiado",
+      "Videos instructivos en HD",
+      "Plan de nutrición personalizado",
+      "Soporte por WhatsApp",
+      "Certificado al finalizar"
+    ],
   },
   {
     id: 1,
@@ -55,6 +82,16 @@ const products = [
     category: "Calzado",
     inStock: true,
     isNew: true,
+    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    detailedDescription: "Zapatillas profesionales diseñadas para runners exigentes. Tecnología de amortiguación de última generación que reduce el impacto en articulaciones y mejora tu rendimiento en cada kilómetro.",
+    features: [
+      "Amortiguación React Foam de alta densidad",
+      "Suela de carbono para mayor impulso",
+      "Upper transpirable con tecnología Flyknit",
+      "Diseño anatómico para máximo confort",
+      "Peso ultra-ligero: solo 240g",
+      "Ideal para maratones y entrenamientos largos"
+    ],
   },
   {
     id: 2,
@@ -64,6 +101,16 @@ const products = [
     image: productDumbbells,
     category: "Pesas",
     inStock: true,
+    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    detailedDescription: "Set completo de mancuernas ajustables que reemplazan hasta 10 pares de mancuernas tradicionales. Sistema de ajuste rápido para cambiar el peso en segundos, ideal para entrenamientos intensos sin interrupciones.",
+    features: [
+      "Rango de peso: 5kg a 25kg por mancuerna",
+      "Sistema de ajuste rápido en 2 segundos",
+      "Incluye soporte para almacenamiento",
+      "Reemplazan 10 pares de mancuernas",
+      "Ahorra espacio en tu gimnasio casero",
+      "Material de alta durabilidad"
+    ],
   },
   {
     id: 3,
@@ -74,6 +121,16 @@ const products = [
     image: productYogaMat,
     category: "Accesorios",
     inStock: true,
+    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    detailedDescription: "Mat profesional de yoga y pilates fabricado con materiales ecológicos. Superficie antideslizante en ambos lados para máxima estabilidad en tus posturas más desafiantes.",
+    features: [
+      "Grosor de 6mm para máximo confort",
+      "Material TPE ecológico libre de tóxicos",
+      "Superficie antideslizante dual",
+      "Dimensiones: 183cm x 61cm",
+      "Incluye correa de transporte",
+      "Fácil de limpiar y mantener"
+    ],
   },
   {
     id: 4,
@@ -84,6 +141,16 @@ const products = [
     category: "Accesorios",
     inStock: true,
     isNew: true,
+    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    detailedDescription: "Shaker profesional con sistema de mezclado superior. Diseñado para preparar batidos perfectos sin grumos. Incluye compartimentos separados para llevar tus suplementos organizados.",
+    features: [
+      "Capacidad de 750ml",
+      "Sistema de bola mezcladora incluido",
+      "Compartimento para suplementos",
+      "Libre de BPA",
+      "Tapa a rosca anti-derrames",
+      "Marcas de medición en ml y oz"
+    ],
   },
   {
     id: 5,
@@ -93,6 +160,16 @@ const products = [
     image: productShaker,
     category: "Accesorios",
     inStock: true,
+    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    detailedDescription: "Cuerda profesional para saltar diseñada para CrossFit, boxing y entrenamientos de alta intensidad. Rodamientos de 360° para rotación ultra-suave.",
+    features: [
+      "Rodamientos de alta velocidad 360°",
+      "Cable de acero recubierto en PVC",
+      "Mangos ergonómicos con grip antideslizante",
+      "Longitud ajustable (2.4m a 3m)",
+      "Peso ideal para doble saltos",
+      "Contador digital integrado (opcional)"
+    ],
   },
   {
     id: 6,
@@ -103,6 +180,16 @@ const products = [
     image: productYogaMat,
     category: "Accesorios",
     inStock: true,
+    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    detailedDescription: "Kit completo de bandas elásticas para entrenamiento de resistencia. Perfecto para fortalecer todo el cuerpo sin necesidad de pesas. Incluye guía de ejercicios ilustrada.",
+    features: [
+      "5 niveles de resistencia (5-30 lbs)",
+      "Material de látex natural de alta calidad",
+      "Incluye anclas para puerta y manijas",
+      "Correas para tobillos incluidas",
+      "Bolsa de transporte",
+      "Guía de ejercicios PDF"
+    ],
   },
   {
     id: 7,
@@ -112,6 +199,16 @@ const products = [
     image: productDumbbells,
     category: "Accesorios",
     inStock: true,
+    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    detailedDescription: "Guantes profesionales para gimnasio con protección palmar reforzada. Diseño ergonómico que brinda máximo soporte y protección durante levantamiento de pesas.",
+    features: [
+      "Protección palmar acolchada",
+      "Muñequera ajustable de 30cm",
+      "Material transpirable",
+      "Sistema de agarre antideslizante",
+      "Dedos cortados para mejor sensibilidad",
+      "Cierre con velcro de alta resistencia"
+    ],
   },
   {
     id: 8,
@@ -121,6 +218,16 @@ const products = [
     image: productShoes,
     category: "Calzado",
     inStock: false,
+    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    detailedDescription: "Zapatillas especializadas para CrossFit y entrenamientos funcionales. Diseño versátil que combina estabilidad para levantamientos con flexibilidad para movimientos dinámicos.",
+    features: [
+      "Suela plana para mayor estabilidad",
+      "Refuerzo lateral para movimientos laterales",
+      "Upper resistente al desgaste",
+      "Amortiguación en talón para saltos",
+      "Sistema de atadura segura",
+      "Ideal para WODs y entrenamientos HIIT"
+    ],
   },
 ];
 
@@ -129,6 +236,7 @@ const categories = ["Todos", "Calzado", "Pesas", "Accesorios", "Ropa", "Nutrici�
 const Store = () => {
   const { addProduct, isInCart } = useCart();
   const { toast } = useToast();
+  const [selectedProduct, setSelectedProduct] = useState<typeof products[0] | null>(null);
 
   const handleAddToCart = (product: typeof products[0]) => {
     if (!product.inStock) {
@@ -213,7 +321,8 @@ const Store = () => {
               {products.map((product) => (
                 <article
                   key={product.id}
-                  className="group bg-card rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-border"
+                  className="group bg-card rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-border cursor-pointer"
+                  onClick={() => setSelectedProduct(product)}
                 >
                   {/* Image */}
                   <div className="relative overflow-hidden aspect-square bg-accent/20">
@@ -251,7 +360,10 @@ const Store = () => {
                         <Button 
                           className="w-full" 
                           size="sm"
-                          onClick={() => handleAddToCart(product)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleAddToCart(product);
+                          }}
                           disabled={isInCart(product.id, "product")}
                         >
                           <ShoppingCart className="w-4 h-4 mr-2" />
@@ -296,6 +408,12 @@ const Store = () => {
           </div>
         </section>
       </main>
+
+      <ProductDetailDialog
+        product={selectedProduct}
+        open={!!selectedProduct}
+        onOpenChange={(open) => !open && setSelectedProduct(null)}
+      />
 
       <Footer />
     </div>

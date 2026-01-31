@@ -1,5 +1,7 @@
+import { useState } from "react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import CourseDetailDialog from "@/components/courses/CourseDetailDialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -24,6 +26,24 @@ const courses = [
     lessons: 45,
     students: 2340,
     rating: 4.9,
+    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    detailedDescription: "Este curso completo de entrenamiento funcional te enseñará todo lo necesario para dominar ejercicios con peso corporal, movimientos multiarticulares y rutinas de alta intensidad.\n\nAprenderás progresiones desde nivel principiante hasta avanzado, programación de entrenamientos efectivos y cómo adaptar ejercicios según tus objetivos específicos.",
+    topics: [
+      "Fundamentos del entrenamiento funcional",
+      "Técnicas de ejercicios con peso corporal",
+      "Progresiones de movimientos complejos",
+      "Programación de rutinas personalizadas",
+      "Prevención de lesiones",
+      "Nutrición para rendimiento funcional"
+    ],
+    includes: [
+      "45 videos en HD",
+      "Material descargable",
+      "Certificado de finalización",
+      "Acceso de por vida",
+      "Grupo privado de estudiantes",
+      "Actualizaciones gratuitas"
+    ],
   },
   {
     id: 2,
@@ -37,6 +57,24 @@ const courses = [
     lessons: 32,
     students: 1856,
     rating: 4.8,
+    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    detailedDescription: "Descubre cómo la nutrición correcta puede transformar tu rendimiento deportivo. Este curso te enseña los principios científicos de la nutrición deportiva aplicados a casos reales.\n\nAprenderás a calcular macros, timing de nutrientes, suplementación inteligente y cómo adaptar tu alimentación según tu deporte y objetivos.",
+    topics: [
+      "Macronutrientes y su función en el deporte",
+      "Cálculo de requerimientos calóricos",
+      "Timing de nutrientes pre y post entreno",
+      "Hidratación óptima para atletas",
+      "Suplementación basada en evidencia",
+      "Planes de comidas prácticos"
+    ],
+    includes: [
+      "32 lecciones en video",
+      "Calculadoras de macros",
+      "Recetarios deportivos",
+      "Guías de suplementos",
+      "Certificado profesional",
+      "Soporte del instructor"
+    ],
   },
   {
     id: 3,
@@ -51,6 +89,26 @@ const courses = [
     lessons: 52,
     students: 3120,
     rating: 4.9,
+    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    detailedDescription: "La diferencia entre el éxito y el fracaso muchas veces está en la mente. Este curso avanzado te enseña técnicas de psicología deportiva utilizadas por atletas de élite mundial.\n\nAprenderás gestión del estrés competitivo, visualización, manejo de la presión, recuperación mental y cómo desarrollar rutinas mentales ganadoras.",
+    topics: [
+      "Psicología del alto rendimiento",
+      "Técnicas de visualización avanzada",
+      "Gestión de estrés competitivo",
+      "Rutinas mentales pre-competencia",
+      "Recuperación psicológica post-derrota",
+      "Construcción de confianza inquebrantable",
+      "Meditación para atletas",
+      "Manejo de diálogo interno"
+    ],
+    includes: [
+      "52 lecciones magistrales",
+      "Audios de meditación guiada",
+      "Workbooks interactivos",
+      "Sesión 1-1 con el instructor",
+      "Certificación profesional",
+      "Comunidad privada de élite"
+    ],
   },
   {
     id: 4,
@@ -64,6 +122,24 @@ const courses = [
     lessons: 68,
     students: 1540,
     rating: 4.7,
+    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    detailedDescription: "Programa integral de 12 semanas que cubre todas las cualidades físicas esenciales. Desarrolla fuerza, potencia, resistencia cardiovascular, flexibilidad y movilidad de forma equilibrada.\n\nIdeal para deportistas que buscan una preparación física completa o personas que quieren alcanzar su mejor versión física.",
+    topics: [
+      "Periodización del entrenamiento",
+      "Desarrollo de fuerza máxima",
+      "Entrenamiento de potencia explosiva",
+      "Acondicionamiento cardiovascular",
+      "Movilidad y flexibilidad",
+      "Prevención de lesiones"
+    ],
+    includes: [
+      "68 videos instructivos",
+      "Plan de 12 semanas",
+      "Plantillas de seguimiento",
+      "Certificado de logro",
+      "Foro de estudiantes",
+      "Bonus: Guía de recuperación"
+    ],
   },
   {
     id: 5,
@@ -78,6 +154,24 @@ const courses = [
     lessons: 24,
     students: 980,
     rating: 4.6,
+    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    detailedDescription: "Navega el confuso mundo de la suplementación deportiva con información basada 100% en ciencia. Aprende qué suplementos realmente funcionan, cuáles son innecesarios y cómo usarlos de forma segura.\n\nAhorra dinero evitando productos ineficaces e invierte inteligentemente en suplementos que realmente marcan diferencia.",
+    topics: [
+      "Fundamentos de suplementación",
+      "Proteínas: tipos y usos",
+      "Creatina: la ciencia completa",
+      "Pre-entrenos efectivos",
+      "Vitaminas y minerales esenciales",
+      "Suplementos para recuperación"
+    ],
+    includes: [
+      "24 lecciones concisas",
+      "Guía de compra inteligente",
+      "Comparativas de productos",
+      "Calculadora de dosis",
+      "Certificado digital",
+      "Actualizaciones anuales"
+    ],
   },
   {
     id: 6,
@@ -91,6 +185,24 @@ const courses = [
     lessons: 38,
     students: 760,
     rating: 4.8,
+    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    detailedDescription: "Curso especializado en manejo de presión competitiva. Aprende las mismas técnicas que utilizan atletas olímpicos para mantener la calma y el foco bajo máxima presión.\n\nDesarrolla protocolos personalizados para tus competiciones y transforma la ansiedad en energía productiva.",
+    topics: [
+      "Fisiología del estrés competitivo",
+      "Técnicas de respiración avanzada",
+      "Anclajes mentales para competencias",
+      "Protocolo pre-competencia personalizado",
+      "Manejo de expectativas externas",
+      "Recuperación mental post-competencia"
+    ],
+    includes: [
+      "38 videos especializados",
+      "Ejercicios prácticos diarios",
+      "Plantillas de protocolos",
+      "Audio de respiración guiada",
+      "Certificación avanzada",
+      "Mentoría mensual grupal"
+    ],
   },
 ];
 
@@ -110,6 +222,7 @@ const getLevelColor = (level: string) => {
 const Courses = () => {
   const { addCourse, isInCart } = useCart();
   const { toast } = useToast();
+  const [selectedCourse, setSelectedCourse] = useState<typeof courses[0] | null>(null);
 
   const handleBuyCourse = (course: typeof courses[0]) => {
     addCourse({
@@ -178,7 +291,8 @@ const Courses = () => {
               {courses.map((course) => (
                 <article
                   key={course.id}
-                  className="group bg-card rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-border"
+                  className="group bg-card rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-border cursor-pointer"
+                  onClick={() => setSelectedCourse(course)}
                 >
                   {/* Image */}
                   <div className="relative overflow-hidden aspect-video">
@@ -243,7 +357,10 @@ const Courses = () => {
                       </div>
                       <Button 
                         size="sm"
-                        onClick={() => handleBuyCourse(course)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleBuyCourse(course);
+                        }}
                         disabled={isInCart(course.id, "course")}
                       >
                         {isInCart(course.id, "course") ? "En el Carrito" : "Comprar"}
@@ -256,6 +373,12 @@ const Courses = () => {
           </div>
         </section>
       </main>
+
+      <CourseDetailDialog
+        course={selectedCourse}
+        open={!!selectedCourse}
+        onOpenChange={(open) => !open && setSelectedCourse(null)}
+      />
 
       <Footer />
     </div>
