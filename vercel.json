@@ -30,6 +30,10 @@
       "destination": "/api/paypal-create"
     },
     {
+      "source": "/api/payments/paypal/capture-payment",
+      "destination": "/api/paypal-capture"
+    },
+    {
       "source": "/(.*)",
       "destination": "/"
     }

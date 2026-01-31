@@ -1,59 +1,118 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle, Package, GraduationCap, Home, ShoppingBag } from "lucide-react";
+import { CheckCircle, Package, GraduationCap, Home, ShoppingBag, Loader2 } from "lucide-react";
 
 const Success = () => {
   const [searchParams] = useSearchParams();
   const paymentId = searchParams.get("payment_id");
   const status = searchParams.get("status");
   const merchantOrderId = searchParams.get("merchant_order_id");
+  const token = searchParams.get("token"); // PayPal order ID
+  const payerId = searchParams.get("PayerID"); // PayPal payer ID
+  
+  const [isCapturing, setIsCapturing] = useState(false);
+  const [captureError, setCaptureError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Limpiar el carrito del localStorage
-    localStorage.removeItem("cart");
-  }, []);
+    // Capturar pago de PayPal si viene de PayPal
+    if (token && payerId) {
+      capturePayPalPayment(token);
+    } else {
+      // Limpiar el carrito del localStorage (para MercadoPago)
+      localStorage.removeItem("cart");
+    }
+  }, [token, payerId]);
+
+  const capturePayPalPayment = async (orderId: string) => {
+    setIsCapturing(true);
+    try {
+      const baseUrl = window.location.origin.replace(/\/$/, '');
+      const response = await fetch(`${baseUrl}/api/payments/paypal/capture-payment`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ orderId }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al capturar el pago');
+      }
+
+      const data = await response.json();
+      console.log('Pago capturado:', data);
+      
+      // Limpiar carrito después de captura exitosa
+      localStorage.removeItem("cart");
+      
+    } catch (error) {
+      console.error('Error capturando pago:', error);
+      setCaptureError('Hubo un problema al procesar tu pago. Contacta con soporte.');
+    } finally {
+      setIsCapturing(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-background p-4">
       <Card className="max-w-2xl w-full">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
-            <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center">
-              <CheckCircle className="w-12 h-12 text-green-600" />
-            </div>
+            {isCapturing ? (
+              <div className="w-20 h-20 rounded-full bg-blue-100 flex items-center justify-center">
+                <Loader2 className="w-12 h-12 text-blue-600 animate-spin" />
+              </div>
+            ) : (
+              <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center">
+                <CheckCircle className="w-12 h-12 text-green-600" />
+              </div>
+            )}
           </div>
-          <CardTitle className="text-3xl text-green-600">¡Pago Exitoso!</CardTitle>
+          <CardTitle className="text-3xl text-green-600">
+            {isCapturing ? 'Procesando pago...' : '¡Pago Exitoso!'}
+          </CardTitle>
           <CardDescription className="text-lg">
-            Tu pedido ha sido procesado correctamente
+            {isCapturing 
+              ? 'Estamos confirmando tu pago con PayPal...'
+              : 'Tu pedido ha sido procesado correctamente'
+            }
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Payment Details */}
-          <div className="bg-accent/30 rounded-lg p-4 space-y-2">
-            <h3 className="font-semibold text-sm text-muted-foreground mb-3">
-              Detalles del Pago
-            </h3>
-            {paymentId && (
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">ID de Pago:</span>
-                <span className="font-medium">{paymentId}</span>
+          {captureError && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
+              <p className="text-sm text-red-600">{captureError}</p>
+            </div>
+          )}
+
+          {!isCapturing && !captureError && (
+            <>
+              {/* Payment Details */}
+              <div className="bg-accent/30 rounded-lg p-4 space-y-2">
+                <h3 className="font-semibold text-sm text-muted-foreground mb-3">
+                  Detalles del Pago
+                </h3>
+                {(paymentId || token) && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">ID de Pago:</span>
+                    <span className="font-medium">{paymentId || token}</span>
+                  </div>
+                )}
+                {status && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Estado:</span>
+                    <span className="font-medium capitalize">{status}</span>
+                  </div>
+                )}
+                {merchantOrderId && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Orden:</span>
+                    <span className="font-medium">{merchantOrderId}</span>
+                  </div>
+                )}
               </div>
-            )}
-            {status && (
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Estado:</span>
-                <span className="font-medium capitalize">{status}</span>
-              </div>
-            )}
-            {merchantOrderId && (
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Orden:</span>
-                <span className="font-medium">{merchantOrderId}</span>
-              </div>
-            )}
-          </div>
 
           {/* Next Steps */}
           <div className="space-y-4">
@@ -89,20 +148,24 @@ const Success = () => {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-3 pt-4">
-            <Button asChild className="flex-1">
-              <Link to="/">
-                <Home className="w-4 h-4 mr-2" />
-                Volver al Inicio
-              </Link>
-            </Button>
-            <Button asChild variant="outline" className="flex-1">
-              <Link to="/tienda">
-                <ShoppingBag className="w-4 h-4 mr-2" />
-                Seguir Comprando
-              </Link>
-            </Button>
-          </div>
+          {!isCapturing && (
+            <div className="flex flex-col sm:flex-row gap-3 pt-4">
+              <Button asChild className="flex-1">
+                <Link to="/">
+                  <Home className="w-4 h-4 mr-2" />
+                  Volver al Inicio
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="flex-1">
+                <Link to="/tienda">
+                  <ShoppingBag className="w-4 h-4 mr-2" />
+                  Seguir Comprando
+                </Link>
+              </Button>
+            </div>
+          )}
+            </>
+          )}
         </CardContent>
       </Card>
     </div>
