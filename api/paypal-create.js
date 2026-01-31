@@ -40,6 +40,12 @@ export default async function handler(req, res) {
       console.warn('No se pudo obtener tipo de cambio, usando valor por defecto:', exchangeRate);
     }
 
+    console.log('PayPal Config:', {
+      clientId: PAYPAL_CLIENT_ID?.substring(0, 20) + '...',
+      hasSecret: !!PAYPAL_SECRET,
+      apiUrl: PAYPAL_API
+    });
+
     // Obtener access token de PayPal
     const auth = Buffer.from(`${PAYPAL_CLIENT_ID}:${PAYPAL_SECRET}`).toString('base64');
     
@@ -53,7 +59,9 @@ export default async function handler(req, res) {
     });
 
     if (!tokenResponse.ok) {
-      throw new Error('Failed to get PayPal access token');
+      const errorData = await tokenResponse.text();
+      console.error('PayPal token error:', tokenResponse.status, errorData);
+      throw new Error(`Failed to get PayPal access token: ${tokenResponse.status} - ${errorData}`);
     }
 
     const { access_token } = await tokenResponse.json();
