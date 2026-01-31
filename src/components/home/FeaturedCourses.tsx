@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import CourseDetailDialog from "@/components/courses/CourseDetailDialog";
 import { Star, Clock, Users, ArrowRight } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { useToast } from "@/hooks/use-toast";
@@ -19,6 +21,11 @@ interface Course {
   duration: string;
   students: number;
   rating: number;
+  lessons: number;
+  videoUrl?: string;
+  detailedDescription?: string;
+  topics?: string[];
+  includes?: string[];
 }
 
 const courses: Course[] = [
@@ -32,8 +39,27 @@ const courses: Course[] = [
     image: courseFitness,
     level: "Intermedio",
     duration: "12 horas",
+    lessons: 45,
     students: 2340,
     rating: 4.9,
+    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    detailedDescription: "Este curso completo de entrenamiento funcional te enseñará todo lo necesario para dominar ejercicios con peso corporal, movimientos multiarticulares y rutinas de alta intensidad.\n\nAprenderás progresiones desde nivel principiante hasta avanzado, programación de entrenamientos efectivos y cómo adaptar ejercicios según tus objetivos específicos.",
+    topics: [
+      "Fundamentos del entrenamiento funcional",
+      "Técnicas de ejercicios con peso corporal",
+      "Progresiones de movimientos complejos",
+      "Programación de rutinas personalizadas",
+      "Prevención de lesiones",
+      "Nutrición para rendimiento funcional"
+    ],
+    includes: [
+      "45 videos en HD",
+      "Material descargable",
+      "Certificado de finalización",
+      "Acceso de por vida",
+      "Grupo privado de estudiantes",
+      "Actualizaciones gratuitas"
+    ],
   },
   {
     id: 2,
@@ -44,8 +70,27 @@ const courses: Course[] = [
     image: courseNutrition,
     level: "Básico",
     duration: "8 horas",
+    lessons: 32,
     students: 1856,
     rating: 4.8,
+    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    detailedDescription: "Descubre cómo la nutrición correcta puede transformar tu rendimiento deportivo. Este curso te enseña los principios científicos de la nutrición deportiva aplicados a casos reales.\n\nAprenderás a calcular macros, timing de nutrientes, suplementación inteligente y cómo adaptar tu alimentación según tu deporte y objetivos.",
+    topics: [
+      "Macronutrientes y su función en el deporte",
+      "Cálculo de requerimientos calóricos",
+      "Timing de nutrientes pre y post entreno",
+      "Hidratación óptima para atletas",
+      "Suplementación basada en evidencia",
+      "Planes de comidas prácticos"
+    ],
+    includes: [
+      "32 lecciones en video",
+      "Calculadoras de macros",
+      "Recetarios deportivos",
+      "Guías de suplementos",
+      "Certificado profesional",
+      "Soporte del instructor"
+    ],
   },
   {
     id: 3,
@@ -57,8 +102,29 @@ const courses: Course[] = [
     image: courseMental,
     level: "Avanzado",
     duration: "15 horas",
+    lessons: 52,
     students: 3120,
     rating: 4.9,
+    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    detailedDescription: "La diferencia entre el éxito y el fracaso muchas veces está en la mente. Este curso avanzado te enseña técnicas de psicología deportiva utilizadas por atletas de élite mundial.\n\nAprenderás gestión del estrés competitivo, visualización, manejo de la presión, recuperación mental y cómo desarrollar rutinas mentales ganadoras.",
+    topics: [
+      "Psicología del alto rendimiento",
+      "Técnicas de visualización avanzada",
+      "Gestión de estrés competitivo",
+      "Rutinas mentales pre-competencia",
+      "Recuperación psicológica post-derrota",
+      "Construcción de confianza inquebrantable",
+      "Meditación para atletas",
+      "Manejo de diálogo interno"
+    ],
+    includes: [
+      "52 lecciones magistrales",
+      "Audios de meditación guiada",
+      "Workbooks interactivos",
+      "Sesión 1-1 con el instructor",
+      "Certificación profesional",
+      "Comunidad privada de élite"
+    ],
   },
 ];
 
@@ -78,6 +144,7 @@ const getLevelColor = (level: string) => {
 const FeaturedCourses = () => {
   const { addCourse, isInCart } = useCart();
   const { toast } = useToast();
+  const [selectedCourse, setSelectedCourse] = useState<typeof courses[0] | null>(null);
 
   const handleBuyCourse = (course: Course) => {
     addCourse({
@@ -115,7 +182,8 @@ const FeaturedCourses = () => {
           {courses.map((course) => (
             <article
               key={course.id}
-              className="group bg-card rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-border"
+              className="group bg-card rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-border cursor-pointer"
+              onClick={() => setSelectedCourse(course)}
             >
               {/* Image */}
               <div className="relative overflow-hidden aspect-video">
@@ -181,7 +249,10 @@ const FeaturedCourses = () => {
                   <Button 
                     size="sm" 
                     className="group/btn"
-                    onClick={() => handleBuyCourse(course)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleBuyCourse(course);
+                    }}
                     disabled={isInCart(course.id, "course")}
                   >
                     {isInCart(course.id, "course") ? "En el Carrito" : "Comprar"}
@@ -203,6 +274,12 @@ const FeaturedCourses = () => {
           </Button>
         </div>
       </div>
+
+      <CourseDetailDialog
+        course={selectedCourse}
+        open={!!selectedCourse}
+        onOpenChange={(open) => !open && setSelectedCourse(null)}
+      />
     </section>
   );
 };

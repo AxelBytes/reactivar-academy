@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import ProductDetailDialog from "@/components/products/ProductDetailDialog";
 import { ShoppingCart, Heart, ArrowRight } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { useToast } from "@/hooks/use-toast";
@@ -18,6 +20,9 @@ interface Product {
   category: string;
   inStock: boolean;
   isNew?: boolean;
+  videoUrl?: string;
+  detailedDescription?: string;
+  features?: string[];
 }
 
 const products: Product[] = [
@@ -31,6 +36,16 @@ const products: Product[] = [
     category: "Calzado",
     inStock: true,
     isNew: true,
+    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    detailedDescription: "Zapatillas profesionales diseñadas para runners exigentes. Tecnología de amortiguación de última generación que reduce el impacto en articulaciones y mejora tu rendimiento en cada kilómetro.",
+    features: [
+      "Amortiguación React Foam de alta densidad",
+      "Suela de carbono para mayor impulso",
+      "Upper transpirable con tecnología Flyknit",
+      "Diseño anatómico para máximo confort",
+      "Peso ultra-ligero: solo 240g",
+      "Ideal para maratones y entrenamientos largos"
+    ],
   },
   {
     id: 2,
@@ -40,6 +55,16 @@ const products: Product[] = [
     image: productDumbbells,
     category: "Pesas",
     inStock: true,
+    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    detailedDescription: "Set completo de mancuernas ajustables que reemplazan hasta 10 pares de mancuernas tradicionales. Sistema de ajuste rápido para cambiar el peso en segundos.",
+    features: [
+      "Rango de peso: 5kg a 25kg por mancuerna",
+      "Sistema de ajuste rápido en 2 segundos",
+      "Incluye soporte para almacenamiento",
+      "Reemplazan 10 pares de mancuernas",
+      "Ahorra espacio en tu gimnasio casero",
+      "Material de alta durabilidad"
+    ],
   },
   {
     id: 3,
@@ -50,6 +75,16 @@ const products: Product[] = [
     image: productYogaMat,
     category: "Accesorios",
     inStock: true,
+    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    detailedDescription: "Mat profesional de yoga y pilates fabricado con materiales ecológicos. Superficie antideslizante en ambos lados para máxima estabilidad.",
+    features: [
+      "Grosor de 6mm para máximo confort",
+      "Material TPE ecológico libre de tóxicos",
+      "Superficie antideslizante dual",
+      "Dimensiones: 183cm x 61cm",
+      "Incluye correa de transporte",
+      "Fácil de limpiar y mantener"
+    ],
   },
   {
     id: 4,
@@ -60,12 +95,23 @@ const products: Product[] = [
     category: "Accesorios",
     inStock: true,
     isNew: true,
+    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    detailedDescription: "Shaker profesional con sistema de mezclado superior. Diseñado para preparar batidos perfectos sin grumos.",
+    features: [
+      "Capacidad de 750ml",
+      "Sistema de bola mezcladora incluido",
+      "Compartimento para suplementos",
+      "Libre de BPA",
+      "Tapa a rosca anti-derrames",
+      "Marcas de medición en ml y oz"
+    ],
   },
 ];
 
 const FeaturedProducts = () => {
   const { addProduct, isInCart } = useCart();
   const { toast } = useToast();
+  const [selectedProduct, setSelectedProduct] = useState<typeof products[0] | null>(null);
 
   const handleAddToCart = (product: typeof products[0]) => {
     if (!product.inStock) {
@@ -112,7 +158,8 @@ const FeaturedProducts = () => {
           {products.map((product) => (
             <article
               key={product.id}
-              className="group bg-card rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-border"
+              className="group bg-card rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-border cursor-pointer"
+              onClick={() => setSelectedProduct(product)}
             >
               {/* Image */}
               <div className="relative overflow-hidden aspect-square bg-accent/20">
@@ -146,7 +193,10 @@ const FeaturedProducts = () => {
                   <Button 
                     className="w-full" 
                     size="sm"
-                    onClick={() => handleAddToCart(product)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleAddToCart(product);
+                    }}
                     disabled={isInCart(product.id, "product")}
                   >
                     <ShoppingCart className="w-4 h-4 mr-2" />
@@ -189,6 +239,12 @@ const FeaturedProducts = () => {
           </Button>
         </div>
       </div>
+
+      <ProductDetailDialog
+        product={selectedProduct}
+        open={!!selectedProduct}
+        onOpenChange={(open) => !open && setSelectedProduct(null)}
+      />
     </section>
   );
 };
