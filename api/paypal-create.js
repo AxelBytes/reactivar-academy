@@ -27,6 +27,19 @@ export default async function handler(req, res) {
     const PAYPAL_SECRET = process.env.PAYPAL_SECRET;
     const PAYPAL_API = process.env.PAYPAL_API_URL || 'https://api-m.sandbox.paypal.com';
 
+    // Obtener tipo de cambio actual USD/ARS
+    let exchangeRate = 1000; // Fallback por defecto
+    try {
+      const exchangeResponse = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
+      if (exchangeResponse.ok) {
+        const exchangeData = await exchangeResponse.json();
+        exchangeRate = exchangeData.rates.ARS || 1000; // Tasa ARS por 1 USD
+        console.log(`Tipo de cambio actual: 1 USD = ${exchangeRate} ARS`);
+      }
+    } catch (error) {
+      console.warn('No se pudo obtener tipo de cambio, usando valor por defecto:', exchangeRate);
+    }
+
     // Obtener access token de PayPal
     const auth = Buffer.from(`${PAYPAL_CLIENT_ID}:${PAYPAL_SECRET}`).toString('base64');
     
@@ -45,12 +58,13 @@ export default async function handler(req, res) {
 
     const { access_token } = await tokenResponse.json();
 
-    // Calcular total
-    const total = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    // Calcular total en ARS
+    const totalARS = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
-    // Convertir ARS a USD (tasa aproximada, idealmente usar una API de cambio)
-    // Mínimo: $0.01 USD
-    const totalUSD = Math.max(0.01, (total / 1000)).toFixed(2);
+    // Convertir a USD usando el tipo de cambio real
+    const totalUSD = Math.max(0.01, (totalARS / exchangeRate)).toFixed(2);
+
+    console.log(`Total: ${totalARS} ARS = ${totalUSD} USD (tasa: ${exchangeRate})`);
 
     // Crear orden de PayPal
     const orderData = {
@@ -66,15 +80,18 @@ export default async function handler(req, res) {
             }
           }
         },
-        items: items.map(item => ({
-          name: item.name || item.title || 'Producto',
-          description: `${item.type === 'product' ? 'Producto' : 'Curso'}: ${item.name || item.title}`,
-          unit_amount: {
-            currency_code: 'USD',
-            value: Math.max(0.01, ((item.price / 1000) / item.quantity)).toFixed(2)
-          },
-          quantity: item.quantity.toString()
-        }))
+        items: items.map(item => {
+          const itemPriceUSD = Math.max(0.01, ((item.price / exchangeRate) / item.quantity)).toFixed(2);
+          return {
+            name: item.name || item.title || 'Producto',
+            description: `${item.type === 'product' ? 'Producto' : 'Curso'}: ${item.name || item.title} (${item.price} ARS)`,
+            unit_amount: {
+              currency_code: 'USD',
+              value: itemPriceUSD
+            },
+            quantity: item.quantity.toString()
+          };
+        })
       }],
       application_context: {
         brand_name: 'Reactivar Academy',
