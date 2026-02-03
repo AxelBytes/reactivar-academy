@@ -20,8 +20,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Plus, Search, MoreHorizontal, Pencil, Trash2, Eye } from "lucide-react";
+import { Plus, Search, MoreHorizontal, Pencil, Trash2, Eye, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/lib/supabase";
 
 interface Product {
   id: number;
@@ -37,93 +38,71 @@ const Products = () => {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const [products, setProducts] = useState<Product[]>([
-    {
-      id: 1,
-      name: "Zapatillas Running Pro",
-      category: "Calzado",
-      price: 180000,
-      stock: 45,
-      status: "active",
-      sales: 234,
-    },
-    {
-      id: 2,
-      name: "Set de Mancuernas Ajustables",
-      category: "Pesas",
-      price: 350000,
-      stock: 23,
-      status: "active",
-      sales: 156,
-    },
-    {
-      id: 3,
-      name: "Mat de Yoga Premium",
-      category: "Accesorios",
-      price: 55000,
-      stock: 89,
-      status: "active",
-      sales: 389,
-    },
-    {
-      id: 4,
-      name: "Shaker Pro 750ml",
-      category: "Accesorios",
-      price: 30000,
-      stock: 0,
-      status: "inactive",
-      sales: 445,
-    },
-    {
-      id: 5,
-      name: "Cuerda de Saltar Profesional",
-      category: "Accesorios",
-      price: 25000,
-      stock: 67,
-      status: "active",
-      sales: 203,
-    },
-    {
-      id: 6,
-      name: "Banda de Resistencia Kit",
-      category: "Accesorios",
-      price: 42000,
-      stock: 34,
-      status: "active",
-      sales: 178,
-    },
-    {
-      id: 7,
-      name: "Guantes de Entrenamiento",
-      category: "Accesorios",
-      price: 38000,
-      stock: 56,
-      status: "active",
-      sales: 134,
-    },
-    {
-      id: 8,
-      name: "Zapatillas CrossFit Elite",
-      category: "Calzado",
-      price: 195000,
-      stock: 12,
-      status: "active",
-      sales: 89,
-    },
-  ]);
-
-  // Cargar productos del localStorage
+  // Cargar productos desde Supabase
   useEffect(() => {
-    const savedProducts = localStorage.getItem("adminProducts");
-    if (savedProducts) {
-      const parsedProducts = JSON.parse(savedProducts);
-      setProducts([...products, ...parsedProducts]);
-    }
+    loadProducts();
   }, []);
 
-  const handleSaveProduct = (newProduct: Product) => {
-    setProducts([newProduct, ...products]);
+  const loadProducts = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from("products")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Error cargando productos:", error);
+        toast({
+          title: "Error",
+          description: "No se pudieron cargar los productos",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (data) {
+        setProducts(data);
+      }
+    } catch (error) {
+      console.error("Error inesperado:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSaveProduct = async (newProduct: any) => {
+    try {
+      const { data, error } = await supabase
+        .from("products")
+        .insert([newProduct])
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Error guardando producto:", error);
+        toast({
+          title: "Error",
+          description: "No se pudo guardar el producto",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (data) {
+        setProducts([data, ...products]);
+        toast({
+          title: "¡Producto creado!",
+          description: `${data.name} ha sido agregado exitosamente`,
+        });
+        setIsDialogOpen(false);
+      }
+    } catch (error) {
+      console.error("Error inesperado guardando producto:", error);
+    }
   };
 
   const filteredProducts = products.filter((product) =>
@@ -134,22 +113,42 @@ const Products = () => {
   const handleEdit = (product: Product) => {
     toast({
       title: "Editar producto",
-      description: `Editando: ${product.name}`,
+      description: `Editando: ${product.name} (próximamente)`,
     });
   };
 
-  const handleDelete = (product: Product) => {
-    toast({
-      title: "Producto eliminado",
-      description: `${product.name} ha sido eliminado.`,
-      variant: "destructive",
-    });
+  const handleDelete = async (product: Product) => {
+    try {
+      const { error } = await supabase
+        .from("products")
+        .delete()
+        .eq("id", product.id);
+
+      if (error) {
+        console.error("Error eliminando producto:", error);
+        toast({
+          title: "Error",
+          description: "No se pudo eliminar el producto",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setProducts(products.filter(p => p.id !== product.id));
+      toast({
+        title: "Producto eliminado",
+        description: `${product.name} ha sido eliminado.`,
+        variant: "destructive",
+      });
+    } catch (error) {
+      console.error("Error inesperado eliminando producto:", error);
+    }
   };
 
   const handleView = (product: Product) => {
     toast({
       title: "Ver detalles",
-      description: `Viendo detalles de: ${product.name}`,
+      description: `Viendo detalles de: ${product.name} (próximamente)`,
     });
   };
 
@@ -225,7 +224,16 @@ const Products = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredProducts.length === 0 ? (
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center py-8">
+                    <div className="flex items-center justify-center">
+                      <Loader2 className="h-6 w-6 animate-spin text-primary mr-2" />
+                      <span className="text-muted-foreground">Cargando productos...</span>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ) : filteredProducts.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                     No se encontraron productos

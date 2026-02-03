@@ -3,6 +3,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle, Package, GraduationCap, Home, ShoppingBag, Loader2, Mail } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 
 const Success = () => {
   const [searchParams] = useSearchParams();
@@ -45,8 +46,60 @@ const Success = () => {
         return;
       }
 
+      // 1. GUARDAR LA ORDEN EN SUPABASE
+      try {
+        // Calcular total
+        const total = courses.reduce((sum: number, course: any) => sum + (course.price || 0), 0);
+
+        // Crear la orden
+        const { data: orderData, error: orderError } = await supabase
+          .from('orders')
+          .insert({
+            user_email: userEmail,
+            user_name: userName || null,
+            user_dni: userDni || null,
+            user_pais: userPais || null,
+            user_provincia: userProvincia || null,
+            user_localidad: userLocalidad || null,
+            total: total,
+            status: 'completed',
+            payment_id: paymentIdParam || null,
+            payment_method: paymentIdParam?.includes('PAYID') ? 'paypal' : 'mercadopago',
+          })
+          .select()
+          .single();
+
+        if (orderError) {
+          console.error('Error creando orden:', orderError);
+        } else if (orderData) {
+          // Crear los items de la orden
+          const orderItems = courses.map((course: any) => ({
+            order_id: orderData.id,
+            course_id: course.id,
+            item_type: 'course',
+            item_name: course.title,
+            quantity: 1,
+            price: course.price || 0,
+          }));
+
+          const { error: itemsError } = await supabase
+            .from('order_items')
+            .insert(orderItems);
+
+          if (itemsError) {
+            console.error('Error creando order_items:', itemsError);
+          } else {
+            console.log('✅ Orden guardada en Supabase:', orderData.id);
+          }
+        }
+      } catch (dbError) {
+        console.error('Error guardando en base de datos:', dbError);
+        // Continuar con el email aunque falle la BD
+      }
+
+      // 2. ENVIAR EMAIL DE CONFIRMACIÓN
       const baseUrl = window.location.origin.replace(/\/$/, '');
-      const response = await fetch(`${baseUrl}/api/email/send-course-email`, {
+      const response = await fetch(`${baseUrl}/api/send-course-email`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -67,7 +120,7 @@ const Success = () => {
         throw new Error('Error al enviar email');
       }
 
-      console.log('Email enviado exitosamente');
+      console.log('✅ Email enviado exitosamente');
       setEmailSent(true);
       
       // Limpiar datos de sessionStorage después de enviar el email

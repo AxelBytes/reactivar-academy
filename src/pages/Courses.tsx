@@ -1,18 +1,20 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import CourseDetailDialog from "@/components/courses/CourseDetailDialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Star, Clock, Users, Search, Filter } from "lucide-react";
+import { Star, Clock, Users, Search, Filter, Loader2 } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/lib/supabase";
 import courseFitness from "@/assets/course-fitness.jpg";
 import courseNutrition from "@/assets/course-nutrition.jpg";
 import courseMental from "@/assets/course-mental.jpg";
 
-const courses = [
+// Cursos de respaldo (fallback) por si no hay conexión a Supabase
+const FALLBACK_COURSES = [
   {
     id: 999,
     title: "🧪 Curso de Prueba GRATIS",
@@ -250,9 +252,64 @@ const getLevelColor = (level: string) => {
 };
 
 const Courses = () => {
+  const [courses, setCourses] = useState<typeof FALLBACK_COURSES>([]);
+  const [loading, setLoading] = useState(true);
   const { addCourse, isInCart } = useCart();
   const { toast } = useToast();
   const [selectedCourse, setSelectedCourse] = useState<typeof courses[0] | null>(null);
+
+  // Cargar cursos desde Supabase
+  useEffect(() => {
+    const loadCourses = async () => {
+      try {
+        setLoading(true);
+        const { data, error } = await supabase
+          .from("courses")
+          .select("*")
+          .eq("status", "active")
+          .order("created_at", { ascending: false });
+
+        if (error) {
+          console.error("Error cargando cursos:", error);
+          setCourses(FALLBACK_COURSES);
+          return;
+        }
+
+        if (data && data.length > 0) {
+          // Mapear los cursos de Supabase al formato esperado
+          const mappedCourses = data.map((course) => ({
+            id: course.id,
+            title: course.title,
+            description: course.description,
+            instructor: course.instructor,
+            price: course.price,
+            originalPrice: course.original_price || undefined,
+            image: course.image_url || courseFitness,
+            level: course.level,
+            duration: course.duration,
+            lessons: course.lessons,
+            students: course.students,
+            rating: course.rating,
+            videoUrl: course.video_url || undefined,
+            detailedDescription: course.detailed_description || undefined,
+            topics: course.topics || [],
+            includes: course.includes || [],
+          }));
+          setCourses(mappedCourses);
+        } else {
+          // Si no hay cursos en Supabase, usar fallback
+          setCourses(FALLBACK_COURSES);
+        }
+      } catch (error) {
+        console.error("Error inesperado cargando cursos:", error);
+        setCourses(FALLBACK_COURSES);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadCourses();
+  }, []);
 
   const handleBuyCourse = (course: typeof courses[0]) => {
     addCourse({
@@ -317,8 +374,14 @@ const Courses = () => {
         {/* Courses Grid */}
         <section className="py-12">
           <div className="container mx-auto px-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {courses.map((course) => (
+            {loading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <span className="ml-2 text-muted-foreground">Cargando cursos...</span>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {courses.map((course) => (
                 <article
                   key={course.id}
                   className="group bg-card rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-border cursor-pointer"
@@ -398,8 +461,9 @@ const Courses = () => {
                     </div>
                   </div>
                 </article>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         </section>
       </main>

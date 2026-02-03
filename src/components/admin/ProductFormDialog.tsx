@@ -81,36 +81,26 @@ const ProductFormDialog = ({ open, onOpenChange, onSave }: ProductFormDialogProp
         .filter(f => f.trim() !== "")
         .map(f => f.trim());
 
-      // Crear objeto del producto
+      // Crear objeto del producto para Supabase
       const newProduct = {
-        id: Date.now(), // En producción, esto vendría de la BD
         name: formData.name,
         description: formData.description,
-        detailedDescription: formData.detailedDescription,
+        detailed_description: formData.detailedDescription || null,
         price: parseInt(formData.price),
-        originalPrice: formData.originalPrice ? parseInt(formData.originalPrice) : undefined,
+        original_price: formData.originalPrice ? parseInt(formData.originalPrice) : null,
         category: formData.category,
         stock: parseInt(formData.stock) || 0,
-        image: formData.image || "/placeholder-product.jpg",
-        videoUrl: formData.videoUrl || undefined,
-        features: featuresArray.length > 0 ? featuresArray : undefined,
-        inStock: parseInt(formData.stock) > 0,
-        isNew: true,
+        image_url: formData.image || null,
+        video_url: formData.videoUrl || null,
+        features: featuresArray.length > 0 ? featuresArray : null,
         status: "active",
+        is_new: true,
         sales: 0,
       };
 
-      // Guardar en localStorage (temporal hasta conectar BD)
-      const existingProducts = JSON.parse(localStorage.getItem("adminProducts") || "[]");
-      localStorage.setItem("adminProducts", JSON.stringify([...existingProducts, newProduct]));
-
-      toast({
-        title: "¡Producto creado!",
-        description: `${formData.name} ha sido agregado exitosamente`,
-      });
-
+      // Enviar al handler de guardado (que guardará en Supabase)
       if (onSave) {
-        onSave(newProduct);
+        await onSave(newProduct);
       }
 
       // Resetear formulario

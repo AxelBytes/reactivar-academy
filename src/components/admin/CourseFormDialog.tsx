@@ -89,40 +89,31 @@ const CourseFormDialog = ({ open, onOpenChange, onSave }: CourseFormDialogProps)
         .filter(i => i.trim() !== "")
         .map(i => i.trim());
 
-      // Crear objeto del curso
+      // Crear objeto del curso para Supabase
       const newCourse = {
-        id: Date.now(),
         title: formData.title,
         description: formData.description,
-        detailedDescription: formData.detailedDescription,
+        detailed_description: formData.detailedDescription || null,
         price: parseInt(formData.price),
-        originalPrice: formData.originalPrice ? parseInt(formData.originalPrice) : undefined,
+        original_price: formData.originalPrice ? parseInt(formData.originalPrice) : null,
         level: formData.level as "Básico" | "Intermedio" | "Avanzado",
         duration: formData.duration,
         lessons: parseInt(formData.lessons) || 0,
-        image: formData.image || "/placeholder-course.jpg",
-        videoUrl: formData.videoUrl || undefined,
-        topics: topicsArray.length > 0 ? topicsArray : undefined,
-        includes: includesArray.length > 0 ? includesArray : undefined,
+        image_url: formData.image || null,
+        video_url: formData.videoUrl || null,
+        topics: topicsArray.length > 0 ? topicsArray : null,
+        includes: includesArray.length > 0 ? includesArray : null,
         instructor: formData.instructor,
         category: formData.category,
         students: 0,
         rating: 5.0,
         status: "active",
-        isNew: true,
+        is_new: true,
       };
 
-      // Guardar en localStorage (temporal hasta conectar BD)
-      const existingCourses = JSON.parse(localStorage.getItem("adminCourses") || "[]");
-      localStorage.setItem("adminCourses", JSON.stringify([...existingCourses, newCourse]));
-
-      toast({
-        title: "¡Curso creado!",
-        description: `${formData.title} ha sido agregado exitosamente`,
-      });
-
+      // Enviar al handler de guardado (que guardará en Supabase)
       if (onSave) {
-        onSave(newCourse);
+        await onSave(newCourse);
       }
 
       // Resetear formulario

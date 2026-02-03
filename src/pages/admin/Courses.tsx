@@ -20,8 +20,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Plus, Search, MoreHorizontal, Pencil, Trash2, Eye, Star } from "lucide-react";
+import { Plus, Search, MoreHorizontal, Pencil, Trash2, Eye, Star, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/lib/supabase";
 
 interface Course {
   id: number;
@@ -39,87 +40,71 @@ const Courses = () => {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const [courses, setCourses] = useState<Course[]>([
-    {
-      id: 1,
-      title: "Entrenamiento Funcional Completo",
-      instructor: "Carlos Mendoza",
-      price: 150000,
-      students: 2340,
-      rating: 4.9,
-      level: "Intermedio",
-      duration: "12 horas",
-      status: "active",
-    },
-    {
-      id: 2,
-      title: "Nutrición para Atletas",
-      instructor: "Ana García",
-      price: 110000,
-      students: 1856,
-      rating: 4.8,
-      level: "Básico",
-      duration: "8 horas",
-      status: "active",
-    },
-    {
-      id: 3,
-      title: "Mentalidad Ganadora",
-      instructor: "Roberto Díaz",
-      price: 190000,
-      students: 3120,
-      rating: 4.9,
-      level: "Avanzado",
-      duration: "15 horas",
-      status: "active",
-    },
-    {
-      id: 4,
-      title: "Preparación Física Integral",
-      instructor: "Carlos Mendoza",
-      price: 170000,
-      students: 1540,
-      rating: 4.7,
-      level: "Intermedio",
-      duration: "20 horas",
-      status: "active",
-    },
-    {
-      id: 5,
-      title: "Suplementación Deportiva",
-      instructor: "Ana García",
-      price: 95000,
-      students: 980,
-      rating: 4.6,
-      level: "Básico",
-      duration: "6 horas",
-      status: "active",
-    },
-    {
-      id: 6,
-      title: "Gestión del Estrés Competitivo",
-      instructor: "Roberto Díaz",
-      price: 140000,
-      students: 760,
-      rating: 4.8,
-      level: "Avanzado",
-      duration: "10 horas",
-      status: "active",
-    },
-  ]);
-
-  // Cargar cursos del localStorage
+  // Cargar cursos desde Supabase
   useEffect(() => {
-    const savedCourses = localStorage.getItem("adminCourses");
-    if (savedCourses) {
-      const parsedCourses = JSON.parse(savedCourses);
-      setCourses([...courses, ...parsedCourses]);
-    }
+    loadCourses();
   }, []);
 
-  const handleSaveCourse = (newCourse: Course) => {
-    setCourses([newCourse, ...courses]);
+  const loadCourses = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from("courses")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Error cargando cursos:", error);
+        toast({
+          title: "Error",
+          description: "No se pudieron cargar los cursos",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (data) {
+        setCourses(data);
+      }
+    } catch (error) {
+      console.error("Error inesperado:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSaveCourse = async (newCourse: any) => {
+    try {
+      const { data, error } = await supabase
+        .from("courses")
+        .insert([newCourse])
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Error guardando curso:", error);
+        toast({
+          title: "Error",
+          description: "No se pudo guardar el curso",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (data) {
+        setCourses([data, ...courses]);
+        toast({
+          title: "¡Curso creado!",
+          description: `${data.title} ha sido agregado exitosamente`,
+        });
+        setIsDialogOpen(false);
+      }
+    } catch (error) {
+      console.error("Error inesperado guardando curso:", error);
+    }
   };
 
   const filteredCourses = courses.filter((course) =>
@@ -130,22 +115,42 @@ const Courses = () => {
   const handleEdit = (course: Course) => {
     toast({
       title: "Editar curso",
-      description: `Editando: ${course.title}`,
+      description: `Editando: ${course.title} (próximamente)`,
     });
   };
 
-  const handleDelete = (course: Course) => {
-    toast({
-      title: "Curso eliminado",
-      description: `${course.title} ha sido eliminado.`,
-      variant: "destructive",
-    });
+  const handleDelete = async (course: Course) => {
+    try {
+      const { error } = await supabase
+        .from("courses")
+        .delete()
+        .eq("id", course.id);
+
+      if (error) {
+        console.error("Error eliminando curso:", error);
+        toast({
+          title: "Error",
+          description: "No se pudo eliminar el curso",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setCourses(courses.filter(c => c.id !== course.id));
+      toast({
+        title: "Curso eliminado",
+        description: `${course.title} ha sido eliminado.`,
+        variant: "destructive",
+      });
+    } catch (error) {
+      console.error("Error inesperado eliminando curso:", error);
+    }
   };
 
   const handleView = (course: Course) => {
     toast({
       title: "Ver detalles",
-      description: `Viendo detalles de: ${course.title}`,
+      description: `Viendo detalles de: ${course.title} (próximamente)`,
     });
   };
 
@@ -238,7 +243,16 @@ const Courses = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredCourses.length === 0 ? (
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={8} className="text-center py-8">
+                    <div className="flex items-center justify-center">
+                      <Loader2 className="h-6 w-6 animate-spin text-primary mr-2" />
+                      <span className="text-muted-foreground">Cargando cursos...</span>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ) : filteredCourses.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                     No se encontraron cursos

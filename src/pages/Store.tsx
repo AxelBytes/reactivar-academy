@@ -1,19 +1,21 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import ProductDetailDialog from "@/components/products/ProductDetailDialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { ShoppingCart, Heart, Search, Filter, Grid, List } from "lucide-react";
+import { ShoppingCart, Heart, Search, Filter, Grid, List, Loader2 } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/lib/supabase";
 import productShoes from "@/assets/product-shoes.jpg";
 import productDumbbells from "@/assets/product-dumbbells.jpg";
 import productYogaMat from "@/assets/product-yoga-mat.jpg";
 import productShaker from "@/assets/product-shaker.jpg";
 
-const products = [
+// Productos de respaldo (fallback) por si no hay conexión a Supabase
+const FALLBACK_PRODUCTS = [
   {
     id: 999,
     name: "🧪 Producto de Prueba",
@@ -234,9 +236,60 @@ const products = [
 const categories = ["Todos", "Calzado", "Pesas", "Accesorios", "Ropa", "Nutrición"];
 
 const Store = () => {
+  const [products, setProducts] = useState<typeof FALLBACK_PRODUCTS>([]);
+  const [loading, setLoading] = useState(true);
   const { addProduct, isInCart } = useCart();
   const { toast } = useToast();
   const [selectedProduct, setSelectedProduct] = useState<typeof products[0] | null>(null);
+
+  // Cargar productos desde Supabase
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        setLoading(true);
+        const { data, error } = await supabase
+          .from("products")
+          .select("*")
+          .eq("status", "active")
+          .order("created_at", { ascending: false });
+
+        if (error) {
+          console.error("Error cargando productos:", error);
+          setProducts(FALLBACK_PRODUCTS);
+          return;
+        }
+
+        if (data && data.length > 0) {
+          // Mapear los productos de Supabase al formato esperado
+          const mappedProducts = data.map((product) => ({
+            id: product.id,
+            name: product.name,
+            description: product.description,
+            price: product.price,
+            originalPrice: product.original_price || undefined,
+            image: product.image_url || productShaker,
+            category: product.category,
+            inStock: product.stock > 0,
+            isNew: product.is_new,
+            videoUrl: product.video_url || undefined,
+            detailedDescription: product.detailed_description || undefined,
+            features: product.features || [],
+          }));
+          setProducts(mappedProducts);
+        } else {
+          // Si no hay productos en Supabase, usar fallback
+          setProducts(FALLBACK_PRODUCTS);
+        }
+      } catch (error) {
+        console.error("Error inesperado cargando productos:", error);
+        setProducts(FALLBACK_PRODUCTS);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProducts();
+  }, []);
 
   const handleAddToCart = (product: typeof products[0]) => {
     if (!product.inStock) {
@@ -317,8 +370,14 @@ const Store = () => {
         {/* Products Grid */}
         <section className="py-12">
           <div className="container mx-auto px-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {products.map((product) => (
+            {loading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <span className="ml-2 text-muted-foreground">Cargando productos...</span>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {products.map((product) => (
                 <article
                   key={product.id}
                   className="group bg-card rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-border cursor-pointer"
@@ -396,8 +455,9 @@ const Store = () => {
                     </div>
                   </div>
                 </article>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
 
             {/* Load More */}
             <div className="text-center mt-12">
