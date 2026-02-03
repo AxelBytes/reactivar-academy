@@ -287,7 +287,7 @@ const Login = () => {
     confirmPassword: "",
     provincia: "",
     localidad: "",
-    pais: "Argentina"
+    pais: ""
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
