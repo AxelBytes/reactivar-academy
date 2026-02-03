@@ -20,6 +20,7 @@ interface PaisConfig {
   divisionLabel: string; // Provincia, Estado, Región, etc.
   divisionPlaceholder: string;
   requiereDivision: boolean;
+  divisiones?: string[]; // Lista de divisiones específicas del país
 }
 
 const PAISES_CONFIG: Record<string, PaisConfig> = {
@@ -29,7 +30,13 @@ const PAISES_CONFIG: Record<string, PaisConfig> = {
     documentMaxLength: 8,
     divisionLabel: "Provincia",
     divisionPlaceholder: "Buenos Aires",
-    requiereDivision: true
+    requiereDivision: true,
+    divisiones: [
+      "Buenos Aires", "Catamarca", "Chaco", "Chubut", "Ciudad Autónoma de Buenos Aires",
+      "Córdoba", "Corrientes", "Entre Ríos", "Formosa", "Jujuy", "La Pampa", "La Rioja",
+      "Mendoza", "Misiones", "Neuquén", "Río Negro", "Salta", "San Juan", "San Luis",
+      "Santa Cruz", "Santa Fe", "Santiago del Estero", "Tierra del Fuego", "Tucumán"
+    ]
   },
   "Brasil": {
     documentLabel: "CPF",
@@ -37,7 +44,14 @@ const PAISES_CONFIG: Record<string, PaisConfig> = {
     documentMaxLength: 14,
     divisionLabel: "Estado",
     divisionPlaceholder: "São Paulo",
-    requiereDivision: true
+    requiereDivision: true,
+    divisiones: [
+      "Acre", "Alagoas", "Amapá", "Amazonas", "Bahia", "Ceará", "Distrito Federal",
+      "Espírito Santo", "Goiás", "Maranhão", "Mato Grosso", "Mato Grosso do Sul",
+      "Minas Gerais", "Pará", "Paraíba", "Paraná", "Pernambuco", "Piauí",
+      "Rio de Janeiro", "Rio Grande do Norte", "Rio Grande do Sul", "Rondônia",
+      "Roraima", "Santa Catarina", "São Paulo", "Sergipe", "Tocantins"
+    ]
   },
   "Chile": {
     documentLabel: "RUT",
@@ -45,7 +59,15 @@ const PAISES_CONFIG: Record<string, PaisConfig> = {
     documentMaxLength: 12,
     divisionLabel: "Región",
     divisionPlaceholder: "Metropolitana de Santiago",
-    requiereDivision: true
+    requiereDivision: true,
+    divisiones: [
+      "Región de Arica y Parinacota", "Región de Tarapacá", "Región de Antofagasta",
+      "Región de Atacama", "Región de Coquimbo", "Región de Valparaíso",
+      "Región Metropolitana de Santiago", "Región del Libertador General Bernardo O'Higgins",
+      "Región del Maule", "Región de Ñuble", "Región del Biobío", "Región de La Araucanía",
+      "Región de Los Ríos", "Región de Los Lagos", "Región de Aysén del General Carlos Ibáñez del Campo",
+      "Región de Magallanes y de la Antártica Chilena"
+    ]
   },
   "Colombia": {
     documentLabel: "Cédula",
@@ -53,7 +75,14 @@ const PAISES_CONFIG: Record<string, PaisConfig> = {
     documentMaxLength: 10,
     divisionLabel: "Departamento",
     divisionPlaceholder: "Cundinamarca",
-    requiereDivision: true
+    requiereDivision: true,
+    divisiones: [
+      "Amazonas", "Antioquia", "Arauca", "Atlántico", "Bogotá D.C.", "Bolívar", "Boyacá",
+      "Caldas", "Caquetá", "Casanare", "Cauca", "Cesar", "Chocó", "Córdoba", "Cundinamarca",
+      "Guainía", "Guaviare", "Huila", "La Guajira", "Magdalena", "Meta", "Nariño",
+      "Norte de Santander", "Putumayo", "Quindío", "Risaralda", "San Andrés y Providencia",
+      "Santander", "Sucre", "Tolima", "Valle del Cauca", "Vaupés", "Vichada"
+    ]
   },
   "México": {
     documentLabel: "CURP",
@@ -61,7 +90,14 @@ const PAISES_CONFIG: Record<string, PaisConfig> = {
     documentMaxLength: 18,
     divisionLabel: "Estado",
     divisionPlaceholder: "Ciudad de México",
-    requiereDivision: true
+    requiereDivision: true,
+    divisiones: [
+      "Aguascalientes", "Baja California", "Baja California Sur", "Campeche", "Chiapas",
+      "Chihuahua", "Ciudad de México", "Coahuila", "Colima", "Durango", "Guanajuato",
+      "Guerrero", "Hidalgo", "Jalisco", "México", "Michoacán", "Morelos", "Nayarit",
+      "Nuevo León", "Oaxaca", "Puebla", "Querétaro", "Quintana Roo", "San Luis Potosí",
+      "Sinaloa", "Sonora", "Tabasco", "Tamaulipas", "Tlaxcala", "Veracruz", "Yucatán", "Zacatecas"
+    ]
   },
   "Perú": {
     documentLabel: "DNI",
@@ -69,7 +105,13 @@ const PAISES_CONFIG: Record<string, PaisConfig> = {
     documentMaxLength: 8,
     divisionLabel: "Departamento",
     divisionPlaceholder: "Lima",
-    requiereDivision: true
+    requiereDivision: true,
+    divisiones: [
+      "Amazonas", "Áncash", "Apurímac", "Arequipa", "Ayacucho", "Cajamarca", "Callao",
+      "Cusco", "Huancavelica", "Huánuco", "Ica", "Junín", "La Libertad", "Lambayeque",
+      "Lima", "Loreto", "Madre de Dios", "Moquegua", "Pasco", "Piura", "Puno",
+      "San Martín", "Tacna", "Tumbes", "Ucayali"
+    ]
   },
   "Uruguay": {
     documentLabel: "CI",
@@ -77,7 +119,12 @@ const PAISES_CONFIG: Record<string, PaisConfig> = {
     documentMaxLength: 11,
     divisionLabel: "Departamento",
     divisionPlaceholder: "Montevideo",
-    requiereDivision: true
+    requiereDivision: true,
+    divisiones: [
+      "Artigas", "Canelones", "Cerro Largo", "Colonia", "Durazno", "Flores", "Florida",
+      "Lavalleja", "Maldonado", "Montevideo", "Paysandú", "Río Negro", "Rivera", "Rocha",
+      "Salto", "San José", "Soriano", "Tacuarembó", "Treinta y Tres"
+    ]
   },
   "Paraguay": {
     documentLabel: "Cédula",
@@ -85,7 +132,12 @@ const PAISES_CONFIG: Record<string, PaisConfig> = {
     documentMaxLength: 10,
     divisionLabel: "Departamento",
     divisionPlaceholder: "Central",
-    requiereDivision: true
+    requiereDivision: true,
+    divisiones: [
+      "Alto Paraguay", "Alto Paraná", "Amambay", "Asunción", "Boquerón", "Caaguazú",
+      "Caazapá", "Canindeyú", "Central", "Concepción", "Cordillera", "Guairá", "Itapúa",
+      "Misiones", "Ñeembucú", "Paraguarí", "Presidente Hayes", "San Pedro"
+    ]
   },
   "Venezuela": {
     documentLabel: "Cédula",
@@ -93,7 +145,13 @@ const PAISES_CONFIG: Record<string, PaisConfig> = {
     documentMaxLength: 11,
     divisionLabel: "Estado",
     divisionPlaceholder: "Miranda",
-    requiereDivision: true
+    requiereDivision: true,
+    divisiones: [
+      "Amazonas", "Anzoátegui", "Apure", "Aragua", "Barinas", "Bolívar", "Carabobo",
+      "Cojedes", "Delta Amacuro", "Distrito Capital", "Falcón", "Guárico", "Lara",
+      "Mérida", "Miranda", "Monagas", "Nueva Esparta", "Portuguesa", "Sucre", "Táchira",
+      "Trujillo", "Vargas", "Yaracuy", "Zulia"
+    ]
   },
   "Ecuador": {
     documentLabel: "Cédula",
@@ -101,7 +159,13 @@ const PAISES_CONFIG: Record<string, PaisConfig> = {
     documentMaxLength: 10,
     divisionLabel: "Provincia",
     divisionPlaceholder: "Pichincha",
-    requiereDivision: true
+    requiereDivision: true,
+    divisiones: [
+      "Azuay", "Bolívar", "Cañar", "Carchi", "Chimborazo", "Cotopaxi", "El Oro", "Esmeraldas",
+      "Galápagos", "Guayas", "Imbabura", "Loja", "Los Ríos", "Manabí", "Morona Santiago",
+      "Napo", "Orellana", "Pastaza", "Pichincha", "Santa Elena", "Santo Domingo de los Tsáchilas",
+      "Sucumbíos", "Tungurahua", "Zamora Chinchipe"
+    ]
   },
   "Bolivia": {
     documentLabel: "CI",
@@ -109,7 +173,10 @@ const PAISES_CONFIG: Record<string, PaisConfig> = {
     documentMaxLength: 10,
     divisionLabel: "Departamento",
     divisionPlaceholder: "La Paz",
-    requiereDivision: true
+    requiereDivision: true,
+    divisiones: [
+      "Chuquisaca", "Cochabamba", "Beni", "La Paz", "Oruro", "Pando", "Potosí", "Santa Cruz", "Tarija"
+    ]
   },
   "España": {
     documentLabel: "DNI/NIE",
@@ -117,7 +184,12 @@ const PAISES_CONFIG: Record<string, PaisConfig> = {
     documentMaxLength: 9,
     divisionLabel: "Comunidad Autónoma",
     divisionPlaceholder: "Madrid",
-    requiereDivision: true
+    requiereDivision: true,
+    divisiones: [
+      "Andalucía", "Aragón", "Asturias", "Baleares", "Canarias", "Cantabria",
+      "Castilla-La Mancha", "Castilla y León", "Cataluña", "Ceuta", "Comunidad Valenciana",
+      "Extremadura", "Galicia", "La Rioja", "Madrid", "Melilla", "Murcia", "Navarra", "País Vasco"
+    ]
   },
   "Estados Unidos": {
     documentLabel: "SSN",
@@ -125,7 +197,17 @@ const PAISES_CONFIG: Record<string, PaisConfig> = {
     documentMaxLength: 11,
     divisionLabel: "Estado",
     divisionPlaceholder: "California",
-    requiereDivision: true
+    requiereDivision: true,
+    divisiones: [
+      "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut",
+      "Delaware", "Florida", "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa",
+      "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan",
+      "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire",
+      "New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio",
+      "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota",
+      "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia",
+      "Wisconsin", "Wyoming"
+    ]
   },
   "Costa Rica": {
     documentLabel: "Cédula",
@@ -133,7 +215,10 @@ const PAISES_CONFIG: Record<string, PaisConfig> = {
     documentMaxLength: 12,
     divisionLabel: "Provincia",
     divisionPlaceholder: "San José",
-    requiereDivision: true
+    requiereDivision: true,
+    divisiones: [
+      "Alajuela", "Cartago", "Guanacaste", "Heredia", "Limón", "Puntarenas", "San José"
+    ]
   },
   "Panamá": {
     documentLabel: "Cédula",
@@ -141,7 +226,11 @@ const PAISES_CONFIG: Record<string, PaisConfig> = {
     documentMaxLength: 11,
     divisionLabel: "Provincia",
     divisionPlaceholder: "Panamá",
-    requiereDivision: true
+    requiereDivision: true,
+    divisiones: [
+      "Bocas del Toro", "Chiriquí", "Coclé", "Colón", "Darién", "Emberá-Wounaan",
+      "Guna Yala", "Herrera", "Los Santos", "Ngäbe-Buglé", "Panamá", "Panamá Oeste", "Veraguas"
+    ]
   },
   // Configuración por defecto para países sin configuración específica
   "default": {
@@ -427,7 +516,7 @@ const Login = () => {
                     <Label htmlFor="register-pais">País</Label>
                     <Select 
                       value={registerData.pais} 
-                      onValueChange={(value) => setRegisterData({ ...registerData, pais: value })}
+                      onValueChange={(value) => setRegisterData({ ...registerData, pais: value, provincia: "" })}
                     >
                       <SelectTrigger className="w-full">
                         <div className="flex items-center gap-2">
@@ -448,18 +537,39 @@ const Login = () => {
                   {paisConfig.requiereDivision && (
                     <div className="space-y-2">
                       <Label htmlFor="register-provincia">{paisConfig.divisionLabel}</Label>
-                      <div className="relative">
-                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <Input
-                          id="register-provincia"
-                          type="text"
-                          placeholder={paisConfig.divisionPlaceholder}
-                          className="pl-10"
-                          value={registerData.provincia}
-                          onChange={(e) => setRegisterData({ ...registerData, provincia: e.target.value })}
-                          required
-                        />
-                      </div>
+                      {paisConfig.divisiones ? (
+                        <Select 
+                          value={registerData.provincia} 
+                          onValueChange={(value) => setRegisterData({ ...registerData, provincia: value })}
+                        >
+                          <SelectTrigger className="w-full">
+                            <div className="flex items-center gap-2">
+                              <MapPin className="w-4 h-4 text-muted-foreground" />
+                              <SelectValue placeholder={`Seleccioná tu ${paisConfig.divisionLabel.toLowerCase()}`} />
+                            </div>
+                          </SelectTrigger>
+                          <SelectContent className="max-h-[300px]">
+                            {paisConfig.divisiones.map((division) => (
+                              <SelectItem key={division} value={division}>
+                                {division}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <div className="relative">
+                          <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                          <Input
+                            id="register-provincia"
+                            type="text"
+                            placeholder={paisConfig.divisionPlaceholder}
+                            className="pl-10"
+                            value={registerData.provincia}
+                            onChange={(e) => setRegisterData({ ...registerData, provincia: e.target.value })}
+                            required
+                          />
+                        </div>
+                      )}
                     </div>
                   )}
 
