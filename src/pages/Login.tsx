@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,148 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Lock, Mail, User, Loader2, CreditCard, MapPin, Globe, Info } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+
+// Configuración inteligente por país
+interface PaisConfig {
+  documentLabel: string;
+  documentPlaceholder: string;
+  documentMaxLength: number;
+  divisionLabel: string; // Provincia, Estado, Región, etc.
+  divisionPlaceholder: string;
+  requiereDivision: boolean;
+}
+
+const PAISES_CONFIG: Record<string, PaisConfig> = {
+  "Argentina": {
+    documentLabel: "DNI",
+    documentPlaceholder: "12345678",
+    documentMaxLength: 8,
+    divisionLabel: "Provincia",
+    divisionPlaceholder: "Buenos Aires",
+    requiereDivision: true
+  },
+  "Brasil": {
+    documentLabel: "CPF",
+    documentPlaceholder: "123.456.789-00",
+    documentMaxLength: 14,
+    divisionLabel: "Estado",
+    divisionPlaceholder: "São Paulo",
+    requiereDivision: true
+  },
+  "Chile": {
+    documentLabel: "RUT",
+    documentPlaceholder: "12.345.678-9",
+    documentMaxLength: 12,
+    divisionLabel: "Región",
+    divisionPlaceholder: "Metropolitana de Santiago",
+    requiereDivision: true
+  },
+  "Colombia": {
+    documentLabel: "Cédula",
+    documentPlaceholder: "1234567890",
+    documentMaxLength: 10,
+    divisionLabel: "Departamento",
+    divisionPlaceholder: "Cundinamarca",
+    requiereDivision: true
+  },
+  "México": {
+    documentLabel: "CURP",
+    documentPlaceholder: "ABCD123456HDFMRN09",
+    documentMaxLength: 18,
+    divisionLabel: "Estado",
+    divisionPlaceholder: "Ciudad de México",
+    requiereDivision: true
+  },
+  "Perú": {
+    documentLabel: "DNI",
+    documentPlaceholder: "12345678",
+    documentMaxLength: 8,
+    divisionLabel: "Departamento",
+    divisionPlaceholder: "Lima",
+    requiereDivision: true
+  },
+  "Uruguay": {
+    documentLabel: "CI",
+    documentPlaceholder: "1.234.567-8",
+    documentMaxLength: 11,
+    divisionLabel: "Departamento",
+    divisionPlaceholder: "Montevideo",
+    requiereDivision: true
+  },
+  "Paraguay": {
+    documentLabel: "Cédula",
+    documentPlaceholder: "1234567",
+    documentMaxLength: 10,
+    divisionLabel: "Departamento",
+    divisionPlaceholder: "Central",
+    requiereDivision: true
+  },
+  "Venezuela": {
+    documentLabel: "Cédula",
+    documentPlaceholder: "V-12345678",
+    documentMaxLength: 11,
+    divisionLabel: "Estado",
+    divisionPlaceholder: "Miranda",
+    requiereDivision: true
+  },
+  "Ecuador": {
+    documentLabel: "Cédula",
+    documentPlaceholder: "1234567890",
+    documentMaxLength: 10,
+    divisionLabel: "Provincia",
+    divisionPlaceholder: "Pichincha",
+    requiereDivision: true
+  },
+  "Bolivia": {
+    documentLabel: "CI",
+    documentPlaceholder: "1234567",
+    documentMaxLength: 10,
+    divisionLabel: "Departamento",
+    divisionPlaceholder: "La Paz",
+    requiereDivision: true
+  },
+  "España": {
+    documentLabel: "DNI/NIE",
+    documentPlaceholder: "12345678A",
+    documentMaxLength: 9,
+    divisionLabel: "Comunidad Autónoma",
+    divisionPlaceholder: "Madrid",
+    requiereDivision: true
+  },
+  "Estados Unidos": {
+    documentLabel: "SSN",
+    documentPlaceholder: "123-45-6789",
+    documentMaxLength: 11,
+    divisionLabel: "Estado",
+    divisionPlaceholder: "California",
+    requiereDivision: true
+  },
+  "Costa Rica": {
+    documentLabel: "Cédula",
+    documentPlaceholder: "1-2345-6789",
+    documentMaxLength: 12,
+    divisionLabel: "Provincia",
+    divisionPlaceholder: "San José",
+    requiereDivision: true
+  },
+  "Panamá": {
+    documentLabel: "Cédula",
+    documentPlaceholder: "8-123-456",
+    documentMaxLength: 11,
+    divisionLabel: "Provincia",
+    divisionPlaceholder: "Panamá",
+    requiereDivision: true
+  },
+  // Configuración por defecto para países sin configuración específica
+  "default": {
+    documentLabel: "Documento de Identidad",
+    documentPlaceholder: "Número de documento",
+    documentMaxLength: 20,
+    divisionLabel: "Provincia/Estado",
+    divisionPlaceholder: "Tu provincia o estado",
+    requiereDivision: true
+  }
+};
 
 // Lista completa de países en español
 const PAISES = [
@@ -61,6 +203,11 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // Obtener configuración del país seleccionado
+  const paisConfig = useMemo(() => {
+    return PAISES_CONFIG[registerData.pais] || PAISES_CONFIG["default"];
+  }, [registerData.pais]);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -99,10 +246,9 @@ const Login = () => {
       return;
     }
 
-    // Validación de DNI (solo números, entre 7 y 8 dígitos)
-    const dniRegex = /^\d{7,8}$/;
-    if (!dniRegex.test(registerData.dni)) {
-      setError("El DNI debe tener entre 7 y 8 dígitos numéricos");
+    // Validación del documento de identidad (flexible según el país)
+    if (!registerData.dni || registerData.dni.trim().length === 0) {
+      setError(`El ${paisConfig.documentLabel} es requerido`);
       setIsLoading(false);
       return;
     }
@@ -256,28 +402,25 @@ const Login = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="register-dni">DNI</Label>
+                    <Label htmlFor="register-dni">{paisConfig.documentLabel}</Label>
                     <div className="relative">
                       <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                       <Input
                         id="register-dni"
                         type="text"
-                        placeholder="12345678"
+                        placeholder={paisConfig.documentPlaceholder}
                         className="pl-10"
                         value={registerData.dni}
                         onChange={(e) => {
-                          const value = e.target.value.replace(/\D/g, '');
-                          if (value.length <= 8) {
+                          const value = e.target.value;
+                          if (value.length <= paisConfig.documentMaxLength) {
                             setRegisterData({ ...registerData, dni: value });
                           }
                         }}
                         required
-                        maxLength={8}
+                        maxLength={paisConfig.documentMaxLength}
                       />
                     </div>
-                    <p className="text-xs text-muted-foreground">
-                      7 u 8 dígitos sin puntos ni espacios
-                    </p>
                   </div>
 
                   <div className="space-y-2">
@@ -302,21 +445,23 @@ const Login = () => {
                     </Select>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="register-provincia">Provincia</Label>
-                    <div className="relative">
-                      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <Input
-                        id="register-provincia"
-                        type="text"
-                        placeholder="Buenos Aires"
-                        className="pl-10"
-                        value={registerData.provincia}
-                        onChange={(e) => setRegisterData({ ...registerData, provincia: e.target.value })}
-                        required
-                      />
+                  {paisConfig.requiereDivision && (
+                    <div className="space-y-2">
+                      <Label htmlFor="register-provincia">{paisConfig.divisionLabel}</Label>
+                      <div className="relative">
+                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                          id="register-provincia"
+                          type="text"
+                          placeholder={paisConfig.divisionPlaceholder}
+                          className="pl-10"
+                          value={registerData.provincia}
+                          onChange={(e) => setRegisterData({ ...registerData, provincia: e.target.value })}
+                          required
+                        />
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   <div className="space-y-2">
                     <Label htmlFor="register-localidad">Localidad</Label>
