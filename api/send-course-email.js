@@ -17,7 +17,11 @@ export default async function handler(req, res) {
   try {
     const { userEmail, userName, courses, paymentId, userDni, userProvincia, userLocalidad, userPais } = req.body;
 
+    console.log('📧 Intentando enviar email a:', userEmail);
+    console.log('📚 Cursos:', courses?.length || 0);
+
     if (!userEmail || !courses || courses.length === 0) {
+      console.error('❌ Datos incompletos:', { userEmail, coursesCount: courses?.length });
       return res.status(400).json({ error: 'Datos incompletos' });
     }
 
@@ -25,9 +29,11 @@ export default async function handler(req, res) {
     const BREVO_API_KEY = process.env.BREVO_API_KEY;
     
     if (!BREVO_API_KEY) {
-      console.error('BREVO_API_KEY no configurada');
+      console.error('❌ BREVO_API_KEY no configurada en variables de entorno');
       return res.status(500).json({ error: 'Servicio de email no configurado' });
     }
+
+    console.log('✅ BREVO_API_KEY encontrada');
 
     // Construir el HTML del email
     const coursesListHTML = courses.map(course => `
@@ -103,6 +109,7 @@ export default async function handler(req, res) {
     `;
 
     // Enviar email usando Brevo (antes Sendinblue)
+    console.log('🚀 Enviando email a Brevo API...');
     const response = await fetch('https://api.brevo.com/v3/smtp/email', {
       method: 'POST',
       headers: {
@@ -126,19 +133,23 @@ export default async function handler(req, res) {
       }),
     });
 
+    console.log('📡 Respuesta de Brevo - Status:', response.status);
+
     if (!response.ok) {
       const errorData = await response.json();
-      console.error('Error de Brevo:', errorData);
-      throw new Error(`Error al enviar email: ${response.status}`);
+      console.error('❌ Error de Brevo:', JSON.stringify(errorData, null, 2));
+      throw new Error(`Error al enviar email: ${response.status} - ${JSON.stringify(errorData)}`);
     }
 
     const data = await response.json();
-    console.log('Email enviado exitosamente via Brevo:', data.messageId);
+    console.log('✅ Email enviado exitosamente via Brevo:', data.messageId);
+    console.log('📬 Destinatario:', userEmail);
 
     return res.status(200).json({ 
       success: true, 
       message: 'Email enviado exitosamente via Brevo',
-      emailId: data.messageId 
+      emailId: data.messageId,
+      recipient: userEmail
     });
 
   } catch (error) {
