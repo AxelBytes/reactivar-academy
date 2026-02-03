@@ -73,19 +73,6 @@ export default async function handler(req, res) {
               ${paymentId ? `<p style="margin: 5px 0; font-size: 14px;"><strong>ID de Pago:</strong> ${paymentId}</p>` : ''}
             </div>
 
-            <div style="background: #d1ecf1; border-left: 4px solid #17a2b8; padding: 15px; margin: 20px 0; border-radius: 4px;">
-              <div style="display: flex; align-items: start;">
-                <div style="font-size: 24px; margin-right: 10px;">ℹ️</div>
-                <div>
-                  <h4 style="color: #0c5460; margin: 0 0 8px 0; font-size: 15px;">Información Importante</h4>
-                  <p style="margin: 0; color: #0c5460; font-size: 14px; line-height: 1.5;">
-                    <strong>Este correo debe ser tu email personal</strong> o el que uses habitualmente para recibir información. 
-                    Asegúrate de que sea una dirección válida donde podamos enviarte los accesos a tus capacitaciones.
-                  </p>
-                </div>
-              </div>
-            </div>
-
             <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0;">
               <h3 style="color: #856404; margin-top: 0;">📧 Próximos Pasos</h3>
               <p style="margin: 5px 0; color: #856404;">
