@@ -4,6 +4,10 @@ export interface User {
   id: number;
   email: string;
   name: string;
+  dni?: string;
+  provincia?: string;
+  localidad?: string;
+  pais?: string;
   role: "admin" | "user";
   avatar?: string;
 }
@@ -14,7 +18,7 @@ interface AuthContextType {
   isAdmin: boolean;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
-  register: (email: string, password: string, name: string) => Promise<{ success: boolean; error?: string }>;
+  register: (email: string, password: string, name: string, dni: string, provincia: string, localidad: string, pais: string) => Promise<{ success: boolean; error?: string }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -94,7 +98,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const register = async (
     email: string,
     password: string,
-    name: string
+    name: string,
+    dni: string,
+    provincia: string,
+    localidad: string,
+    pais: string
   ): Promise<{ success: boolean; error?: string }> => {
     // Simular delay de red
     await new Promise((resolve) => setTimeout(resolve, 800));
@@ -111,11 +119,19 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       id: MOCK_USERS.length + 1,
       email,
       name,
+      dni,
+      provincia,
+      localidad,
+      pais,
       role: "user",
       avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${name}`,
     };
 
     setUser(newUser);
+    
+    // Guardar también en una lista de usuarios registrados (simulado)
+    console.log('Usuario registrado:', { email, name, dni, provincia, localidad, pais });
+    
     return { success: true };
   };
 

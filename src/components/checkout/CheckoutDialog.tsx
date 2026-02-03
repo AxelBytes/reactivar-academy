@@ -119,6 +119,10 @@ const CheckoutDialog = ({ open, onOpenChange }: CheckoutDialogProps) => {
           })),
           userEmail: user?.email || '',
           userName: user?.name || '',
+          userDni: user?.dni || '',
+          userProvincia: user?.provincia || '',
+          userLocalidad: user?.localidad || '',
+          userPais: user?.pais || '',
           timestamp: Date.now(),
         }));
       }
@@ -186,6 +190,10 @@ const CheckoutDialog = ({ open, onOpenChange }: CheckoutDialogProps) => {
           })),
           userEmail: user?.email || '',
           userName: user?.name || '',
+          userDni: user?.dni || '',
+          userProvincia: user?.provincia || '',
+          userLocalidad: user?.localidad || '',
+          userPais: user?.pais || '',
           timestamp: Date.now(),
         }));
       }

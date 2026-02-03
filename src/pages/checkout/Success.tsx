@@ -38,7 +38,7 @@ const Success = () => {
         return;
       }
 
-      const { courses, userEmail, userName } = JSON.parse(purchasedCoursesData);
+      const { courses, userEmail, userName, userDni, userProvincia, userLocalidad, userPais } = JSON.parse(purchasedCoursesData);
 
       if (!courses || courses.length === 0 || !userEmail) {
         console.log('Datos insuficientes para enviar email');
@@ -54,6 +54,10 @@ const Success = () => {
         body: JSON.stringify({
           userEmail,
           userName,
+          userDni,
+          userProvincia,
+          userLocalidad,
+          userPais,
           courses,
           paymentId: paymentIdParam,
         }),

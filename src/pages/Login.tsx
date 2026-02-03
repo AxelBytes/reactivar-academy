@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Lock, Mail, User, Loader2 } from "lucide-react";
+import { Lock, Mail, User, Loader2, CreditCard, MapPin, Globe } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const Login = () => {
@@ -16,7 +16,16 @@ const Login = () => {
   const { toast } = useToast();
   
   const [loginData, setLoginData] = useState({ email: "", password: "" });
-  const [registerData, setRegisterData] = useState({ name: "", email: "", password: "" });
+  const [registerData, setRegisterData] = useState({ 
+    name: "", 
+    dni: "",
+    email: "", 
+    password: "",
+    confirmPassword: "",
+    provincia: "",
+    localidad: "",
+    pais: "Argentina"
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -45,13 +54,36 @@ const Login = () => {
     setError("");
     setIsLoading(true);
 
+    // Validación de contraseñas
+    if (registerData.password !== registerData.confirmPassword) {
+      setError("Las contraseñas no coinciden");
+      setIsLoading(false);
+      return;
+    }
+
     if (registerData.password.length < 6) {
       setError("La contraseña debe tener al menos 6 caracteres");
       setIsLoading(false);
       return;
     }
 
-    const result = await register(registerData.email, registerData.password, registerData.name);
+    // Validación de DNI (solo números, entre 7 y 8 dígitos)
+    const dniRegex = /^\d{7,8}$/;
+    if (!dniRegex.test(registerData.dni)) {
+      setError("El DNI debe tener entre 7 y 8 dígitos numéricos");
+      setIsLoading(false);
+      return;
+    }
+
+    const result = await register(
+      registerData.email, 
+      registerData.password, 
+      registerData.name, 
+      registerData.dni,
+      registerData.provincia,
+      registerData.localidad,
+      registerData.pais
+    );
 
     setIsLoading(false);
 
@@ -176,13 +208,13 @@ const Login = () => {
                   )}
 
                   <div className="space-y-2">
-                    <Label htmlFor="register-name">Nombre Completo</Label>
+                    <Label htmlFor="register-name">Nombre y Apellido</Label>
                     <div className="relative">
                       <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                       <Input
                         id="register-name"
                         type="text"
-                        placeholder="Tu nombre"
+                        placeholder="Juan Pérez"
                         className="pl-10"
                         value={registerData.name}
                         onChange={(e) => setRegisterData({ ...registerData, name: e.target.value })}
@@ -192,7 +224,80 @@ const Login = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="register-email">Email</Label>
+                    <Label htmlFor="register-dni">DNI</Label>
+                    <div className="relative">
+                      <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input
+                        id="register-dni"
+                        type="text"
+                        placeholder="12345678"
+                        className="pl-10"
+                        value={registerData.dni}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/\D/g, '');
+                          if (value.length <= 8) {
+                            setRegisterData({ ...registerData, dni: value });
+                          }
+                        }}
+                        required
+                        maxLength={8}
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      7 u 8 dígitos sin puntos ni espacios
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="register-pais">País</Label>
+                    <div className="relative">
+                      <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input
+                        id="register-pais"
+                        type="text"
+                        placeholder="Argentina"
+                        className="pl-10"
+                        value={registerData.pais}
+                        onChange={(e) => setRegisterData({ ...registerData, pais: e.target.value })}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="register-provincia">Provincia</Label>
+                    <div className="relative">
+                      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input
+                        id="register-provincia"
+                        type="text"
+                        placeholder="Buenos Aires"
+                        className="pl-10"
+                        value={registerData.provincia}
+                        onChange={(e) => setRegisterData({ ...registerData, provincia: e.target.value })}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="register-localidad">Localidad</Label>
+                    <div className="relative">
+                      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input
+                        id="register-localidad"
+                        type="text"
+                        placeholder="Ciudad Autónoma de Buenos Aires"
+                        className="pl-10"
+                        value={registerData.localidad}
+                        onChange={(e) => setRegisterData({ ...registerData, localidad: e.target.value })}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="register-email">Correo Electrónico</Label>
                     <div className="relative">
                       <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                       <Input
@@ -225,6 +330,23 @@ const Login = () => {
                     <p className="text-xs text-muted-foreground">
                       Mínimo 6 caracteres
                     </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="register-confirm-password">Repetir Contraseña</Label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input
+                        id="register-confirm-password"
+                        type="password"
+                        placeholder="••••••••"
+                        className="pl-10"
+                        value={registerData.confirmPassword}
+                        onChange={(e) => setRegisterData({ ...registerData, confirmPassword: e.target.value })}
+                        required
+                        minLength={6}
+                      />
+                    </div>
                   </div>
                 </CardContent>
                 <CardFooter className="flex flex-col gap-2">

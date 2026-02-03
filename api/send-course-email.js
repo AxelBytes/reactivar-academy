@@ -15,7 +15,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { userEmail, userName, courses, paymentId } = req.body;
+    const { userEmail, userName, courses, paymentId, userDni, userProvincia, userLocalidad, userPais } = req.body;
 
     if (!userEmail || !courses || courses.length === 0) {
       return res.status(400).json({ error: 'Datos incompletos' });
@@ -63,13 +63,15 @@ export default async function handler(req, res) {
               </ul>
             </div>
 
-            ${paymentId ? `
-              <div style="background: #e8f4f8; padding: 15px; border-radius: 8px; margin: 20px 0;">
-                <p style="margin: 5px 0; font-size: 14px;">
-                  <strong>ID de Pago:</strong> ${paymentId}
-                </p>
-              </div>
-            ` : ''}
+            <div style="background: #e8f4f8; padding: 15px; border-radius: 8px; margin: 20px 0;">
+              <h3 style="color: #333; margin-top: 0; font-size: 16px;">📋 Datos del Cliente:</h3>
+              ${userName ? `<p style="margin: 5px 0; font-size: 14px;"><strong>Nombre:</strong> ${userName}</p>` : ''}
+              ${userDni ? `<p style="margin: 5px 0; font-size: 14px;"><strong>DNI:</strong> ${userDni}</p>` : ''}
+              ${userPais ? `<p style="margin: 5px 0; font-size: 14px;"><strong>País:</strong> ${userPais}</p>` : ''}
+              ${userProvincia ? `<p style="margin: 5px 0; font-size: 14px;"><strong>Provincia:</strong> ${userProvincia}</p>` : ''}
+              ${userLocalidad ? `<p style="margin: 5px 0; font-size: 14px;"><strong>Localidad:</strong> ${userLocalidad}</p>` : ''}
+              ${paymentId ? `<p style="margin: 5px 0; font-size: 14px;"><strong>ID de Pago:</strong> ${paymentId}</p>` : ''}
+            </div>
 
             <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0;">
               <h3 style="color: #856404; margin-top: 0;">📧 Próximos Pasos</h3>
