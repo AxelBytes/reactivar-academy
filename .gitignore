@@ -32,3 +32,16 @@ dist-ssr
 
 # Vercel
 .vercel
+
+# Executable files and installers
+*.exe
+*.dll
+*.vbs
+*.msi
+*.bat
+*.cmd
+
+# System and temp files
+*.ini
+*.inf
+*.cif
