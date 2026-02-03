@@ -21,6 +21,8 @@ interface PaisConfig {
   divisionPlaceholder: string;
   requiereDivision: boolean;
   divisiones?: string[]; // Lista de divisiones específicas del país
+  localidadLabel: string; // Localidad, Ciudad, Municipio, Comuna, etc.
+  localidadPlaceholder: string;
 }
 
 const PAISES_CONFIG: Record<string, PaisConfig> = {
@@ -36,7 +38,9 @@ const PAISES_CONFIG: Record<string, PaisConfig> = {
       "Córdoba", "Corrientes", "Entre Ríos", "Formosa", "Jujuy", "La Pampa", "La Rioja",
       "Mendoza", "Misiones", "Neuquén", "Río Negro", "Salta", "San Juan", "San Luis",
       "Santa Cruz", "Santa Fe", "Santiago del Estero", "Tierra del Fuego", "Tucumán"
-    ]
+    ],
+    localidadLabel: "Localidad",
+    localidadPlaceholder: "Ciudad Autónoma de Buenos Aires"
   },
   "Brasil": {
     documentLabel: "CPF",
@@ -51,7 +55,9 @@ const PAISES_CONFIG: Record<string, PaisConfig> = {
       "Minas Gerais", "Pará", "Paraíba", "Paraná", "Pernambuco", "Piauí",
       "Rio de Janeiro", "Rio Grande do Norte", "Rio Grande do Sul", "Rondônia",
       "Roraima", "Santa Catarina", "São Paulo", "Sergipe", "Tocantins"
-    ]
+    ],
+    localidadLabel: "Município",
+    localidadPlaceholder: "São Paulo"
   },
   "Chile": {
     documentLabel: "RUT",
@@ -67,7 +73,9 @@ const PAISES_CONFIG: Record<string, PaisConfig> = {
       "Región del Maule", "Región de Ñuble", "Región del Biobío", "Región de La Araucanía",
       "Región de Los Ríos", "Región de Los Lagos", "Región de Aysén del General Carlos Ibáñez del Campo",
       "Región de Magallanes y de la Antártica Chilena"
-    ]
+    ],
+    localidadLabel: "Comuna",
+    localidadPlaceholder: "Santiago"
   },
   "Colombia": {
     documentLabel: "Cédula",
@@ -82,7 +90,9 @@ const PAISES_CONFIG: Record<string, PaisConfig> = {
       "Guainía", "Guaviare", "Huila", "La Guajira", "Magdalena", "Meta", "Nariño",
       "Norte de Santander", "Putumayo", "Quindío", "Risaralda", "San Andrés y Providencia",
       "Santander", "Sucre", "Tolima", "Valle del Cauca", "Vaupés", "Vichada"
-    ]
+    ],
+    localidadLabel: "Municipio",
+    localidadPlaceholder: "Bogotá"
   },
   "México": {
     documentLabel: "CURP",
@@ -97,7 +107,9 @@ const PAISES_CONFIG: Record<string, PaisConfig> = {
       "Guerrero", "Hidalgo", "Jalisco", "México", "Michoacán", "Morelos", "Nayarit",
       "Nuevo León", "Oaxaca", "Puebla", "Querétaro", "Quintana Roo", "San Luis Potosí",
       "Sinaloa", "Sonora", "Tabasco", "Tamaulipas", "Tlaxcala", "Veracruz", "Yucatán", "Zacatecas"
-    ]
+    ],
+    localidadLabel: "Municipio",
+    localidadPlaceholder: "Ciudad de México"
   },
   "Perú": {
     documentLabel: "DNI",
@@ -111,7 +123,9 @@ const PAISES_CONFIG: Record<string, PaisConfig> = {
       "Cusco", "Huancavelica", "Huánuco", "Ica", "Junín", "La Libertad", "Lambayeque",
       "Lima", "Loreto", "Madre de Dios", "Moquegua", "Pasco", "Piura", "Puno",
       "San Martín", "Tacna", "Tumbes", "Ucayali"
-    ]
+    ],
+    localidadLabel: "Distrito",
+    localidadPlaceholder: "Lima"
   },
   "Uruguay": {
     documentLabel: "CI",
@@ -124,7 +138,9 @@ const PAISES_CONFIG: Record<string, PaisConfig> = {
       "Artigas", "Canelones", "Cerro Largo", "Colonia", "Durazno", "Flores", "Florida",
       "Lavalleja", "Maldonado", "Montevideo", "Paysandú", "Río Negro", "Rivera", "Rocha",
       "Salto", "San José", "Soriano", "Tacuarembó", "Treinta y Tres"
-    ]
+    ],
+    localidadLabel: "Ciudad",
+    localidadPlaceholder: "Montevideo"
   },
   "Paraguay": {
     documentLabel: "Cédula",
@@ -137,7 +153,9 @@ const PAISES_CONFIG: Record<string, PaisConfig> = {
       "Alto Paraguay", "Alto Paraná", "Amambay", "Asunción", "Boquerón", "Caaguazú",
       "Caazapá", "Canindeyú", "Central", "Concepción", "Cordillera", "Guairá", "Itapúa",
       "Misiones", "Ñeembucú", "Paraguarí", "Presidente Hayes", "San Pedro"
-    ]
+    ],
+    localidadLabel: "Ciudad",
+    localidadPlaceholder: "Asunción"
   },
   "Venezuela": {
     documentLabel: "Cédula",
@@ -151,7 +169,9 @@ const PAISES_CONFIG: Record<string, PaisConfig> = {
       "Cojedes", "Delta Amacuro", "Distrito Capital", "Falcón", "Guárico", "Lara",
       "Mérida", "Miranda", "Monagas", "Nueva Esparta", "Portuguesa", "Sucre", "Táchira",
       "Trujillo", "Vargas", "Yaracuy", "Zulia"
-    ]
+    ],
+    localidadLabel: "Municipio",
+    localidadPlaceholder: "Caracas"
   },
   "Ecuador": {
     documentLabel: "Cédula",
@@ -165,7 +185,9 @@ const PAISES_CONFIG: Record<string, PaisConfig> = {
       "Galápagos", "Guayas", "Imbabura", "Loja", "Los Ríos", "Manabí", "Morona Santiago",
       "Napo", "Orellana", "Pastaza", "Pichincha", "Santa Elena", "Santo Domingo de los Tsáchilas",
       "Sucumbíos", "Tungurahua", "Zamora Chinchipe"
-    ]
+    ],
+    localidadLabel: "Cantón",
+    localidadPlaceholder: "Quito"
   },
   "Bolivia": {
     documentLabel: "CI",
@@ -176,7 +198,9 @@ const PAISES_CONFIG: Record<string, PaisConfig> = {
     requiereDivision: true,
     divisiones: [
       "Chuquisaca", "Cochabamba", "Beni", "La Paz", "Oruro", "Pando", "Potosí", "Santa Cruz", "Tarija"
-    ]
+    ],
+    localidadLabel: "Municipio",
+    localidadPlaceholder: "La Paz"
   },
   "España": {
     documentLabel: "DNI/NIE",
@@ -189,7 +213,9 @@ const PAISES_CONFIG: Record<string, PaisConfig> = {
       "Andalucía", "Aragón", "Asturias", "Baleares", "Canarias", "Cantabria",
       "Castilla-La Mancha", "Castilla y León", "Cataluña", "Ceuta", "Comunidad Valenciana",
       "Extremadura", "Galicia", "La Rioja", "Madrid", "Melilla", "Murcia", "Navarra", "País Vasco"
-    ]
+    ],
+    localidadLabel: "Municipio",
+    localidadPlaceholder: "Madrid"
   },
   "Estados Unidos": {
     documentLabel: "SSN",
@@ -207,7 +233,9 @@ const PAISES_CONFIG: Record<string, PaisConfig> = {
       "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota",
       "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia",
       "Wisconsin", "Wyoming"
-    ]
+    ],
+    localidadLabel: "Ciudad",
+    localidadPlaceholder: "Los Angeles"
   },
   "Costa Rica": {
     documentLabel: "Cédula",
@@ -218,7 +246,9 @@ const PAISES_CONFIG: Record<string, PaisConfig> = {
     requiereDivision: true,
     divisiones: [
       "Alajuela", "Cartago", "Guanacaste", "Heredia", "Limón", "Puntarenas", "San José"
-    ]
+    ],
+    localidadLabel: "Cantón",
+    localidadPlaceholder: "San José"
   },
   "Panamá": {
     documentLabel: "Cédula",
@@ -230,7 +260,9 @@ const PAISES_CONFIG: Record<string, PaisConfig> = {
     divisiones: [
       "Bocas del Toro", "Chiriquí", "Coclé", "Colón", "Darién", "Emberá-Wounaan",
       "Guna Yala", "Herrera", "Los Santos", "Ngäbe-Buglé", "Panamá", "Panamá Oeste", "Veraguas"
-    ]
+    ],
+    localidadLabel: "Distrito",
+    localidadPlaceholder: "Ciudad de Panamá"
   },
   // Configuración por defecto para países sin configuración específica
   "default": {
@@ -239,7 +271,9 @@ const PAISES_CONFIG: Record<string, PaisConfig> = {
     documentMaxLength: 20,
     divisionLabel: "Provincia/Estado",
     divisionPlaceholder: "Tu provincia o estado",
-    requiereDivision: true
+    requiereDivision: true,
+    localidadLabel: "Ciudad",
+    localidadPlaceholder: "Tu ciudad"
   }
 };
 
@@ -574,13 +608,13 @@ const Login = () => {
                   )}
 
                   <div className="space-y-2">
-                    <Label htmlFor="register-localidad">Localidad</Label>
+                    <Label htmlFor="register-localidad">{paisConfig.localidadLabel}</Label>
                     <div className="relative">
                       <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                       <Input
                         id="register-localidad"
                         type="text"
-                        placeholder="Ciudad Autónoma de Buenos Aires"
+                        placeholder={paisConfig.localidadPlaceholder}
                         className="pl-10"
                         value={registerData.localidad}
                         onChange={(e) => setRegisterData({ ...registerData, localidad: e.target.value })}
