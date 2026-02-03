@@ -14,6 +14,36 @@ import courseMental from "@/assets/course-mental.jpg";
 
 const courses = [
   {
+    id: 999,
+    title: "🧪 Curso de Prueba GRATIS",
+    description: "Curso gratuito para probar el sistema de emails y pagos - No requiere pago real",
+    instructor: "Diego Machado",
+    price: 0,
+    originalPrice: 50000,
+    image: courseFitness,
+    level: "Básico",
+    duration: "1 hora",
+    lessons: 5,
+    students: 0,
+    rating: 5.0,
+    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    detailedDescription: "Este es un curso completamente GRATUITO diseñado específicamente para probar el sistema de notificaciones por email y el flujo de compra completo.\n\nAl 'comprar' este curso (sin costo), recibirás un email de confirmación automático con todos los detalles de tu 'compra'. Esto permite verificar que:\n\n✅ El sistema de emails funciona correctamente\n✅ Los datos del cliente se capturan bien\n✅ La integración con Brevo está activa\n✅ El flujo completo de checkout funciona\n\nEs una herramienta de testing esencial antes de lanzar cursos de pago.",
+    topics: [
+      "Introducción al sistema de testing",
+      "Cómo funciona el flujo de compra",
+      "Verificación de emails automáticos",
+      "Prueba de integración completa",
+      "Testing de checkout sin costo"
+    ],
+    includes: [
+      "Acceso inmediato y gratuito",
+      "Email de confirmación automático",
+      "Prueba de todo el sistema",
+      "Sin cargo real",
+      "Ideal para testing"
+    ],
+  },
+  {
     id: 1,
     title: "Entrenamiento Funcional Completo",
     description: "Domina las técnicas de entrenamiento funcional con ejercicios prácticos y rutinas efectivas para todo tipo de atletas.",
