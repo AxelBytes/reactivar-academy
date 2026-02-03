@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
+import ProductFormDialog from "@/components/admin/ProductFormDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -35,8 +36,9 @@ interface Product {
 const Products = () => {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const [products] = useState<Product[]>([
+  const [products, setProducts] = useState<Product[]>([
     {
       id: 1,
       name: "Zapatillas Running Pro",
@@ -111,6 +113,19 @@ const Products = () => {
     },
   ]);
 
+  // Cargar productos del localStorage
+  useEffect(() => {
+    const savedProducts = localStorage.getItem("adminProducts");
+    if (savedProducts) {
+      const parsedProducts = JSON.parse(savedProducts);
+      setProducts([...products, ...parsedProducts]);
+    }
+  }, []);
+
+  const handleSaveProduct = (newProduct: Product) => {
+    setProducts([newProduct, ...products]);
+  };
+
   const filteredProducts = products.filter((product) =>
     product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     product.category.toLowerCase().includes(searchQuery.toLowerCase())
@@ -149,7 +164,7 @@ const Products = () => {
               Gestiona el catálogo de productos
             </p>
           </div>
-          <Button>
+          <Button onClick={() => setIsDialogOpen(true)}>
             <Plus className="w-4 h-4 mr-2" />
             Nuevo Producto
           </Button>
@@ -278,6 +293,13 @@ const Products = () => {
           </Table>
         </div>
       </div>
+
+      {/* Dialog para agregar producto */}
+      <ProductFormDialog
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        onSave={handleSaveProduct}
+      />
     </AdminLayout>
   );
 };

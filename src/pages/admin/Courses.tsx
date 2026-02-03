@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
+import CourseFormDialog from "@/components/admin/CourseFormDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -37,8 +38,9 @@ interface Course {
 const Courses = () => {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const [courses] = useState<Course[]>([
+  const [courses, setCourses] = useState<Course[]>([
     {
       id: 1,
       title: "Entrenamiento Funcional Completo",
@@ -107,6 +109,19 @@ const Courses = () => {
     },
   ]);
 
+  // Cargar cursos del localStorage
+  useEffect(() => {
+    const savedCourses = localStorage.getItem("adminCourses");
+    if (savedCourses) {
+      const parsedCourses = JSON.parse(savedCourses);
+      setCourses([...courses, ...parsedCourses]);
+    }
+  }, []);
+
+  const handleSaveCourse = (newCourse: Course) => {
+    setCourses([newCourse, ...courses]);
+  };
+
   const filteredCourses = courses.filter((course) =>
     course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     course.instructor.toLowerCase().includes(searchQuery.toLowerCase())
@@ -162,7 +177,7 @@ const Courses = () => {
               Gestiona el catálogo de capacitaciones
             </p>
           </div>
-          <Button>
+          <Button onClick={() => setIsDialogOpen(true)}>
             <Plus className="w-4 h-4 mr-2" />
             Nuevo Curso
           </Button>
@@ -292,6 +307,13 @@ const Courses = () => {
           </Table>
         </div>
       </div>
+
+      {/* Dialog para agregar curso */}
+      <CourseFormDialog
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        onSave={handleSaveCourse}
+      />
     </AdminLayout>
   );
 };
