@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import ProductDetailDialog from "@/components/products/ProductDetailDialog";
@@ -233,9 +234,11 @@ const FeaturedProducts = () => {
 
         {/* View All Button */}
         <div className="text-center mt-12">
-          <Button variant="outline" size="lg">
-            Ver Todos los Productos
-            <ArrowRight className="w-5 h-5" />
+          <Button variant="outline" size="lg" asChild>
+            <Link to="/store">
+              Ver Todos los Productos
+              <ArrowRight className="w-5 h-5" />
+            </Link>
           </Button>
         </div>
       </div>

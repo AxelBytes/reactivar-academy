@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import CourseDetailDialog from "@/components/courses/CourseDetailDialog";
@@ -268,9 +269,11 @@ const FeaturedCourses = () => {
 
         {/* View All Button */}
         <div className="text-center mt-12">
-          <Button variant="outline" size="lg">
-            Ver Todas las Capacitaciones
-            <ArrowRight className="w-5 h-5" />
+          <Button variant="outline" size="lg" asChild>
+            <Link to="/courses">
+              Ver Todas las Capacitaciones
+              <ArrowRight className="w-5 h-5" />
+            </Link>
           </Button>
         </div>
       </div>
