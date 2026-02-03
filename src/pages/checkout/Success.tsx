@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle, Package, GraduationCap, Home, ShoppingBag, Loader2 } from "lucide-react";
+import { CheckCircle, Package, GraduationCap, Home, ShoppingBag, Loader2, Mail } from "lucide-react";
 
 const Success = () => {
   const [searchParams] = useSearchParams();
@@ -14,16 +14,66 @@ const Success = () => {
   
   const [isCapturing, setIsCapturing] = useState(false);
   const [captureError, setCaptureError] = useState<string | null>(null);
+  const [emailSent, setEmailSent] = useState(false);
+  const [emailError, setEmailError] = useState<string | null>(null);
 
   useEffect(() => {
     // Capturar pago de PayPal si viene de PayPal
     if (token && payerId) {
       capturePayPalPayment(token);
     } else {
-      // Limpiar el carrito del localStorage (para MercadoPago)
+      // Para MercadoPago, limpiar carrito y enviar email inmediatamente
       localStorage.removeItem("cart");
+      sendCourseEmail(paymentId || merchantOrderId || undefined);
     }
   }, [token, payerId]);
+
+  const sendCourseEmail = async (paymentIdParam?: string) => {
+    try {
+      // Obtener datos de cursos guardados en sessionStorage
+      const purchasedCoursesData = sessionStorage.getItem('purchasedCourses');
+      
+      if (!purchasedCoursesData) {
+        console.log('No hay cursos para enviar email');
+        return;
+      }
+
+      const { courses, userEmail, userName } = JSON.parse(purchasedCoursesData);
+
+      if (!courses || courses.length === 0 || !userEmail) {
+        console.log('Datos insuficientes para enviar email');
+        return;
+      }
+
+      const baseUrl = window.location.origin.replace(/\/$/, '');
+      const response = await fetch(`${baseUrl}/api/email/send-course-email`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userEmail,
+          userName,
+          courses,
+          paymentId: paymentIdParam,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al enviar email');
+      }
+
+      console.log('Email enviado exitosamente');
+      setEmailSent(true);
+      
+      // Limpiar datos de sessionStorage después de enviar el email
+      sessionStorage.removeItem('purchasedCourses');
+      
+    } catch (error) {
+      console.error('Error enviando email:', error);
+      setEmailError('No se pudo enviar el email de confirmación, pero tu pago se procesó correctamente.');
+    }
+  };
 
   const capturePayPalPayment = async (orderId: string) => {
     setIsCapturing(true);
@@ -46,6 +96,9 @@ const Success = () => {
       
       // Limpiar carrito después de captura exitosa
       localStorage.removeItem("cart");
+      
+      // Enviar email con cursos si hay
+      await sendCourseEmail(orderId);
       
     } catch (error) {
       console.error('Error capturando pago:', error);
@@ -140,12 +193,39 @@ const Success = () => {
           </div>
 
           {/* Email Confirmation */}
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-            <p className="text-sm">
-              <strong>Importante:</strong> Te hemos enviado un correo de confirmación con todos los detalles de tu compra.
-              Si no lo encuentras, revisa tu carpeta de spam.
-            </p>
-          </div>
+          {emailSent && (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+              <div className="flex items-start gap-2">
+                <Mail className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="text-sm font-medium text-green-800">
+                    ¡Email enviado exitosamente!
+                  </p>
+                  <p className="text-sm text-green-700 mt-1">
+                    Te hemos enviado un correo con los detalles para acceder a tus capacitaciones.
+                    Si no lo encuentras, revisa tu carpeta de spam.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {emailError && (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <p className="text-sm text-yellow-800">
+                <strong>Nota:</strong> {emailError}
+              </p>
+            </div>
+          )}
+
+          {!emailSent && !emailError && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <p className="text-sm">
+                <strong>Importante:</strong> Te enviaremos un correo de confirmación con todos los detalles de tu compra.
+                Si no lo recibes, contacta con soporte.
+              </p>
+            </div>
+          )}
 
           {/* Action Buttons */}
           {!isCapturing && (

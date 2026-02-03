@@ -107,6 +107,22 @@ const CheckoutDialog = ({ open, onOpenChange }: CheckoutDialogProps) => {
     setIsProcessing(true);
 
     try {
+      // Guardar datos para envío de email posterior
+      const courses = items.filter(item => item.type === 'course');
+      if (courses.length > 0) {
+        sessionStorage.setItem('purchasedCourses', JSON.stringify({
+          courses: courses.map(c => ({
+            id: c.id,
+            title: c.title,
+            instructor: c.instructor,
+            price: c.price,
+          })),
+          userEmail: user?.email || '',
+          userName: user?.name || '',
+          timestamp: Date.now(),
+        }));
+      }
+
       // Siempre usar la URL del sitio actual (sin barra final)
       const baseUrl = window.location.origin.replace(/\/$/, '');
 
@@ -158,6 +174,22 @@ const CheckoutDialog = ({ open, onOpenChange }: CheckoutDialogProps) => {
     setIsProcessing(true);
 
     try {
+      // Guardar datos para envío de email posterior
+      const courses = items.filter(item => item.type === 'course');
+      if (courses.length > 0) {
+        sessionStorage.setItem('purchasedCourses', JSON.stringify({
+          courses: courses.map(c => ({
+            id: c.id,
+            title: c.title,
+            instructor: c.instructor,
+            price: c.price,
+          })),
+          userEmail: user?.email || '',
+          userName: user?.name || '',
+          timestamp: Date.now(),
+        }));
+      }
+
       // Siempre usar la URL del sitio actual (sin barra final)
       const baseUrl = window.location.origin.replace(/\/$/, '');
 

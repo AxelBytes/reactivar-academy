@@ -34,6 +34,10 @@
       "destination": "/api/paypal-capture-order"
     },
     {
+      "source": "/api/email/send-course-email",
+      "destination": "/api/send-course-email"
+    },
+    {
       "source": "/(.*)",
       "destination": "/"
     }
