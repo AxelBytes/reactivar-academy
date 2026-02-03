@@ -21,11 +21,11 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Datos incompletos' });
     }
 
-    // Aquí usaremos Resend para enviar el email
-    const RESEND_API_KEY = process.env.RESEND_API_KEY;
+    // Aquí usaremos Brevo para enviar el email
+    const BREVO_API_KEY = process.env.BREVO_API_KEY;
     
-    if (!RESEND_API_KEY) {
-      console.error('RESEND_API_KEY no configurada');
+    if (!BREVO_API_KEY) {
+      console.error('BREVO_API_KEY no configurada');
       return res.status(500).json({ error: 'Servicio de email no configurado' });
     }
 
@@ -102,34 +102,43 @@ export default async function handler(req, res) {
       </html>
     `;
 
-    // Enviar email usando Resend
-    const response = await fetch('https://api.resend.com/emails', {
+    // Enviar email usando Brevo (antes Sendinblue)
+    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${RESEND_API_KEY}`,
+        'api-key': BREVO_API_KEY,
         'Content-Type': 'application/json',
+        'accept': 'application/json'
       },
       body: JSON.stringify({
-        from: 'REACTIVAR ACADEMY <onboarding@resend.dev>', // Cambia esto por tu dominio verificado
-        to: [userEmail],
+        sender: {
+          name: 'REACTIVAR ACADEMY',
+          email: 'noreply@reactivaracademy.com' // Brevo te permite usar cualquier email hasta verificar dominio
+        },
+        to: [
+          {
+            email: userEmail,
+            name: userName || 'Estudiante'
+          }
+        ],
         subject: '🎓 Acceso a tus Capacitaciones - REACTIVAR ACADEMY',
-        html: emailHTML,
+        htmlContent: emailHTML
       }),
     });
 
     if (!response.ok) {
       const errorData = await response.json();
-      console.error('Error de Resend:', errorData);
+      console.error('Error de Brevo:', errorData);
       throw new Error(`Error al enviar email: ${response.status}`);
     }
 
     const data = await response.json();
-    console.log('Email enviado exitosamente:', data.id);
+    console.log('Email enviado exitosamente via Brevo:', data.messageId);
 
     return res.status(200).json({ 
       success: true, 
-      message: 'Email enviado exitosamente',
-      emailId: data.id 
+      message: 'Email enviado exitosamente via Brevo',
+      emailId: data.messageId 
     });
 
   } catch (error) {
