@@ -235,7 +235,7 @@ const FeaturedProducts = () => {
         {/* View All Button */}
         <div className="text-center mt-12">
           <Button variant="outline" size="lg" asChild>
-            <Link to="/store">
+            <Link to="/tienda">
               Ver Todos los Productos
               <ArrowRight className="w-5 h-5" />
             </Link>

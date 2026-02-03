@@ -270,7 +270,7 @@ const FeaturedCourses = () => {
         {/* View All Button */}
         <div className="text-center mt-12">
           <Button variant="outline" size="lg" asChild>
-            <Link to="/courses">
+            <Link to="/cursos">
               Ver Todas las Capacitaciones
               <ArrowRight className="w-5 h-5" />
             </Link>
