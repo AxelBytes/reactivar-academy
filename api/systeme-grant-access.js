@@ -61,6 +61,7 @@ export default async function handler(req, res) {
 
   const SYSTEME_API_KEY = process.env.SYSTEME_API_KEY;
   const SYSTEME_TAG_ID = process.env.SYSTEME_TAG_ID;
+  const SYSTEME_TAG_NAME = process.env.SYSTEME_TAG_NAME; // Alternativa: usar nombre
 
   // Validación crítica de configuración
   if (!SYSTEME_API_KEY) {
@@ -73,9 +74,14 @@ export default async function handler(req, res) {
     });
   }
 
-  if (!SYSTEME_TAG_ID) {
-    console.warn('⚠️ ADVERTENCIA: SYSTEME_TAG_ID no está configurada');
+  if (!SYSTEME_TAG_ID && !SYSTEME_TAG_NAME) {
+    console.warn('⚠️ ADVERTENCIA: Ni SYSTEME_TAG_ID ni SYSTEME_TAG_NAME están configurados');
     console.warn('📝 El contacto se creará pero no se asignará el tag');
+    console.warn('💡 Configura SYSTEME_TAG_NAME=curso-comprado en .env.local');
+  } else if (SYSTEME_TAG_NAME) {
+    console.log('✅ Usando TAG por NOMBRE:', SYSTEME_TAG_NAME);
+  } else {
+    console.log('✅ Usando TAG por ID:', SYSTEME_TAG_ID);
   }
 
   try {
@@ -98,6 +104,7 @@ export default async function handler(req, res) {
     console.log('👤 Apellido:', lastName || '(no proporcionado)');
     console.log('📚 Cursos:', courses?.length || 0);
     console.log('🏷️ Tag ID configurado:', SYSTEME_TAG_ID || '(no configurado)');
+    console.log('🏷️ Tag NAME configurado:', SYSTEME_TAG_NAME || '(no configurado)');
     console.log('⏰ Timestamp:', new Date().toISOString());
     console.log('-'.repeat(80));
 
@@ -146,10 +153,48 @@ export default async function handler(req, res) {
 
     // 2. ASIGNAR TAG PARA DAR ACCESO AL CURSO (CON REINTENTOS)
     let tagAssigned = false;
+    let resolvedTagId = SYSTEME_TAG_ID;
     
-    if (SYSTEME_TAG_ID) {
-      console.log('📝 PASO 2: Asignando tag de acceso...');
-      console.log('🏷️ Tag ID:', SYSTEME_TAG_ID);
+    // Si no hay TAG_ID pero hay TAG_NAME, buscar el ID por nombre
+    if (!resolvedTagId && SYSTEME_TAG_NAME) {
+      console.log('📝 PASO 2A: Buscando tag por nombre...');
+      console.log('🏷️ Tag NAME:', SYSTEME_TAG_NAME);
+      
+      try {
+        const tagsResponse = await fetchWithRetry(
+          'https://systeme.io/api/v2/tags',
+          {
+            method: 'GET',
+            headers: {
+              'Authorization': SYSTEME_API_KEY,
+              'Content-Type': 'application/json',
+            },
+          },
+          3
+        );
+
+        if (tagsResponse.ok) {
+          const tagsData = await tagsResponse.json();
+          const tag = tagsData.items?.find(t => 
+            t.name.toLowerCase() === SYSTEME_TAG_NAME.toLowerCase()
+          );
+
+          if (tag && tag.id) {
+            resolvedTagId = tag.id;
+            console.log('✅ Tag encontrado por nombre, ID:', resolvedTagId);
+          } else {
+            console.error('❌ Tag no encontrado con nombre:', SYSTEME_TAG_NAME);
+            console.log('📊 Tags disponibles:', tagsData.items?.map(t => t.name).join(', '));
+          }
+        }
+      } catch (error) {
+        console.error('❌ Error buscando tag por nombre:', error.message);
+      }
+    }
+    
+    if (resolvedTagId) {
+      console.log('📝 PASO 2B: Asignando tag de acceso...');
+      console.log('🏷️ Tag ID:', resolvedTagId);
       
       try {
         // Buscar el contacto para obtener su ID
@@ -176,7 +221,7 @@ export default async function handler(req, res) {
             
             // Asignar tag al contacto (con reintentos)
             const tagResponse = await fetchWithRetry(
-              `https://systeme.io/api/v2/contacts/${contact.id}/tags/${SYSTEME_TAG_ID}`,
+              `https://systeme.io/api/v2/contacts/${contact.id}/tags/${resolvedTagId}`,
               {
                 method: 'POST',
                 headers: {
@@ -208,9 +253,9 @@ export default async function handler(req, res) {
         console.log('⚠️ Continuando a pesar del error en tag...');
       }
     } else {
-      console.log('⚠️ SYSTEME_TAG_ID no configurado');
+      console.log('⚠️ No se pudo resolver el Tag ID');
       console.log('📝 El contacto se creará pero NO se asignará tag automáticamente');
-      console.log('💡 Configura SYSTEME_TAG_ID en Vercel para activar el tag');
+      console.log('💡 Configura SYSTEME_TAG_NAME=curso-comprado en .env.local');
     }
 
     // 3. RESULTADO FINAL
