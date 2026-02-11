@@ -18,8 +18,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ImageUpload } from "@/components/ui/image-upload";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Image as ImageIcon, Video } from "lucide-react";
+import { Loader2, Video } from "lucide-react";
 
 interface CourseFormDialogProps {
   open: boolean;
@@ -30,7 +31,6 @@ interface CourseFormDialogProps {
 const CourseFormDialog = ({ open, onOpenChange, onSave }: CourseFormDialogProps) => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -49,16 +49,8 @@ const CourseFormDialog = ({ open, onOpenChange, onSave }: CourseFormDialogProps)
     category: "Capacitaciones",
   });
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-        setFormData({ ...formData, image: reader.result as string });
-      };
-      reader.readAsDataURL(file);
-    }
+  const handleImageChange = (imageUrl: string) => {
+    setFormData({ ...formData, image: imageUrl });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -133,7 +125,6 @@ const CourseFormDialog = ({ open, onOpenChange, onSave }: CourseFormDialogProps)
         instructor: "Diego Machado",
         category: "Capacitaciones",
       });
-      setImagePreview(null);
       onOpenChange(false);
     } catch (error) {
       toast({
@@ -158,39 +149,12 @@ const CourseFormDialog = ({ open, onOpenChange, onSave }: CourseFormDialogProps)
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Imagen de Portada */}
-          <div className="space-y-2">
-            <Label htmlFor="image">
-              Imagen de Portada <span className="text-red-500">*</span>
-            </Label>
-            <div className="flex items-center gap-4">
-              <div className="flex-1">
-                <Input
-                  id="image"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  className="cursor-pointer"
-                />
-                <p className="text-xs text-muted-foreground mt-1">
-                  JPG, PNG o WEBP (Máx. 5MB)
-                </p>
-              </div>
-              {imagePreview && (
-                <div className="w-24 h-24 border rounded-lg overflow-hidden">
-                  <img
-                    src={imagePreview}
-                    alt="Preview"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              )}
-              {!imagePreview && (
-                <div className="w-24 h-24 border rounded-lg flex items-center justify-center bg-muted">
-                  <ImageIcon className="w-8 h-8 text-muted-foreground" />
-                </div>
-              )}
-            </div>
-          </div>
+          <ImageUpload
+            currentImage={formData.image}
+            onImageChange={handleImageChange}
+            label="Imagen de Portada *"
+            folder="courses"
+          />
 
           {/* Video de Presentación */}
           <div className="space-y-2">

@@ -84,11 +84,11 @@ const ProductDetailDialog = ({ product, open, onOpenChange }: ProductDetailDialo
 
           {/* Image if no video */}
           {!product.videoUrl && (
-            <div className="relative aspect-video w-full rounded-lg overflow-hidden">
+            <div className="relative aspect-video w-full rounded-lg overflow-hidden bg-muted">
               <img
                 src={product.image}
                 alt={product.name}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain"
               />
             </div>
           )}

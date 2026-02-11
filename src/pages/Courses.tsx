@@ -388,11 +388,11 @@ const Courses = () => {
                   onClick={() => setSelectedCourse(course)}
                 >
                   {/* Image */}
-                  <div className="relative overflow-hidden aspect-video">
+                  <div className="relative overflow-hidden aspect-video bg-muted">
                     <img
                       src={course.image}
                       alt={course.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
                     />
                     <div className="absolute top-4 left-4">
                       <span className={`px-3 py-1 rounded-full text-xs font-medium ${getLevelColor(course.level)}`}>

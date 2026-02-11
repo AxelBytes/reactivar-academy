@@ -18,8 +18,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ImageUpload } from "@/components/ui/image-upload";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Upload, Image as ImageIcon } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 interface ProductFormDialogProps {
   open: boolean;
@@ -30,7 +31,6 @@ interface ProductFormDialogProps {
 const ProductFormDialog = ({ open, onOpenChange, onSave }: ProductFormDialogProps) => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -45,18 +45,8 @@ const ProductFormDialog = ({ open, onOpenChange, onSave }: ProductFormDialogProp
     features: "",
   });
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      // En producción, aquí subirías la imagen a un servicio (Cloudinary, S3, etc.)
-      // Por ahora, creamos un preview local
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-        setFormData({ ...formData, image: reader.result as string });
-      };
-      reader.readAsDataURL(file);
-    }
+  const handleImageChange = (imageUrl: string) => {
+    setFormData({ ...formData, image: imageUrl });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -116,7 +106,6 @@ const ProductFormDialog = ({ open, onOpenChange, onSave }: ProductFormDialogProp
         videoUrl: "",
         features: "",
       });
-      setImagePreview(null);
       onOpenChange(false);
     } catch (error) {
       toast({
@@ -141,39 +130,12 @@ const ProductFormDialog = ({ open, onOpenChange, onSave }: ProductFormDialogProp
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Imagen */}
-          <div className="space-y-2">
-            <Label htmlFor="image">
-              Imagen del Producto <span className="text-red-500">*</span>
-            </Label>
-            <div className="flex items-center gap-4">
-              <div className="flex-1">
-                <Input
-                  id="image"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  className="cursor-pointer"
-                />
-                <p className="text-xs text-muted-foreground mt-1">
-                  JPG, PNG o WEBP (Máx. 5MB)
-                </p>
-              </div>
-              {imagePreview && (
-                <div className="w-24 h-24 border rounded-lg overflow-hidden">
-                  <img
-                    src={imagePreview}
-                    alt="Preview"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              )}
-              {!imagePreview && (
-                <div className="w-24 h-24 border rounded-lg flex items-center justify-center bg-muted">
-                  <ImageIcon className="w-8 h-8 text-muted-foreground" />
-                </div>
-              )}
-            </div>
-          </div>
+          <ImageUpload
+            currentImage={formData.image}
+            onImageChange={handleImageChange}
+            label="Imagen del Producto *"
+            folder="products"
+          />
 
           {/* Nombre */}
           <div className="space-y-2">

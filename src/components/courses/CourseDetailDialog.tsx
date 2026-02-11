@@ -100,11 +100,11 @@ const CourseDetailDialog = ({ course, open, onOpenChange }: CourseDetailDialogPr
 
           {/* Image if no video */}
           {!course.videoUrl && (
-            <div className="relative aspect-video w-full rounded-lg overflow-hidden">
+            <div className="relative aspect-video w-full rounded-lg overflow-hidden bg-muted">
               <img
                 src={course.image}
                 alt={course.title}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain"
               />
               <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                 <PlayCircle className="w-16 h-16 text-white/80" />
