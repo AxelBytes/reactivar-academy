@@ -69,14 +69,63 @@ export default async function handler(req, res) {
               </ul>
             </div>
 
-            <div style="background: #e8f4f8; padding: 15px; border-radius: 8px; margin: 20px 0;">
-              <h3 style="color: #333; margin-top: 0; font-size: 16px;">📋 Datos del Cliente:</h3>
-              ${userName ? `<p style="margin: 5px 0; font-size: 14px;"><strong>Nombre:</strong> ${userName}</p>` : ''}
-              ${userDni ? `<p style="margin: 5px 0; font-size: 14px;"><strong>DNI:</strong> ${userDni}</p>` : ''}
-              ${userPais ? `<p style="margin: 5px 0; font-size: 14px;"><strong>País:</strong> ${userPais}</p>` : ''}
-              ${userProvincia ? `<p style="margin: 5px 0; font-size: 14px;"><strong>Provincia:</strong> ${userProvincia}</p>` : ''}
-              ${userLocalidad ? `<p style="margin: 5px 0; font-size: 14px;"><strong>Localidad:</strong> ${userLocalidad}</p>` : ''}
-              ${paymentId ? `<p style="margin: 5px 0; font-size: 14px;"><strong>ID de Pago:</strong> ${paymentId}</p>` : ''}
+            <div style="background: #e8f4f8; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #667eea;">
+              <h3 style="color: #667eea; margin-top: 0; font-size: 18px; margin-bottom: 15px;">👤 Datos del Cliente</h3>
+              
+              <table style="width: 100%; border-collapse: collapse;">
+                ${userName ? `
+                <tr>
+                  <td style="padding: 8px 0; font-weight: 600; color: #555; width: 40%;">Nombre Completo:</td>
+                  <td style="padding: 8px 0; color: #333;">${userName}</td>
+                </tr>
+                ` : ''}
+                ${userEmail ? `
+                <tr style="background: #f0f8ff;">
+                  <td style="padding: 8px 10px; font-weight: 600; color: #555;">Email:</td>
+                  <td style="padding: 8px 10px; color: #333;">${userEmail}</td>
+                </tr>
+                ` : ''}
+                ${userDni ? `
+                <tr>
+                  <td style="padding: 8px 0; font-weight: 600; color: #555;">DNI / Documento:</td>
+                  <td style="padding: 8px 0; color: #333;">${userDni}</td>
+                </tr>
+                ` : ''}
+                ${userPais ? `
+                <tr style="background: #f0f8ff;">
+                  <td style="padding: 8px 10px; font-weight: 600; color: #555;">País:</td>
+                  <td style="padding: 8px 10px; color: #333;">${userPais}</td>
+                </tr>
+                ` : ''}
+                ${userProvincia ? `
+                <tr>
+                  <td style="padding: 8px 0; font-weight: 600; color: #555;">Provincia / Estado:</td>
+                  <td style="padding: 8px 0; color: #333;">${userProvincia}</td>
+                </tr>
+                ` : ''}
+                ${userLocalidad ? `
+                <tr style="background: #f0f8ff;">
+                  <td style="padding: 8px 10px; font-weight: 600; color: #555;">Localidad / Ciudad:</td>
+                  <td style="padding: 8px 10px; color: #333;">${userLocalidad}</td>
+                </tr>
+                ` : ''}
+                ${paymentId ? `
+                <tr>
+                  <td style="padding: 8px 0; font-weight: 600; color: #555;">ID de Pago:</td>
+                  <td style="padding: 8px 0; color: #333; font-family: monospace; font-size: 12px;">${paymentId}</td>
+                </tr>
+                ` : ''}
+                <tr style="background: #f0f8ff;">
+                  <td style="padding: 8px 10px; font-weight: 600; color: #555;">Fecha de Compra:</td>
+                  <td style="padding: 8px 10px; color: #333;">${new Date().toLocaleDateString('es-AR', { 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}</td>
+                </tr>
+              </table>
             </div>
 
             <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0;">
