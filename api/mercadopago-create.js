@@ -33,6 +33,20 @@ export default async function handler(req, res) {
 
     const FRONTEND_URL = process.env.VITE_FRONTEND_URL || 'https://reactivar-academy.vercel.app';
 
+    // Guardar datos del payer para pasarlos en external_reference
+    const purchaseData = {
+      items: items.map(i => ({
+        id: i.id,
+        title: i.title || i.name,
+        type: i.type,
+        price: i.price,
+        instructor: i.instructor || 'N/A'
+      })),
+      userEmail: payer?.email || '',
+      userName: payer?.name || '',
+      timestamp: Date.now()
+    };
+
     // Crear preferencia de pago
     const preferenceData = {
       items: items.map(item => ({
@@ -54,7 +68,7 @@ export default async function handler(req, res) {
       },
       auto_return: 'approved',
       statement_descriptor: 'REACTIVAR ACADEMY',
-      external_reference: `ORDER-${Date.now()}`,
+      external_reference: Buffer.from(JSON.stringify(purchaseData)).toString('base64').substring(0, 256),
       payment_methods: {
         installments: 12,
         default_installments: 1

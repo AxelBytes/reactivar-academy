@@ -31,27 +31,50 @@ const Success = () => {
 
   const sendCourseEmail = async (paymentIdParam?: string) => {
     try {
-      // Obtener datos de cursos guardados en localStorage (persiste entre redirecciones)
-      const purchasedCoursesData = localStorage.getItem('purchasedCourses');
+      // Intentar obtener datos de localStorage primero
+      let purchasedCoursesData = localStorage.getItem('purchasedCourses');
+      
+      // Si no hay en localStorage, intentar obtener del external_reference de MercadoPago
+      if (!purchasedCoursesData) {
+        const externalRef = searchParams.get('external_reference');
+        if (externalRef) {
+          try {
+            // Decodificar el base64
+            const decoded = atob(externalRef);
+            purchasedCoursesData = decoded;
+            console.log('✅ Datos obtenidos de external_reference');
+          } catch (e) {
+            console.error('Error decodificando external_reference:', e);
+          }
+        }
+      }
       
       if (!purchasedCoursesData) {
-        console.log('No hay cursos para enviar email');
-        console.log('localStorage purchasedCourses:', purchasedCoursesData);
+        console.log('❌ No hay cursos para enviar email');
+        console.log('localStorage purchasedCourses:', localStorage.getItem('purchasedCourses'));
+        console.log('external_reference:', searchParams.get('external_reference'));
         return;
       }
 
-      const { courses, userEmail, userName, userDni, userProvincia, userLocalidad, userPais } = JSON.parse(purchasedCoursesData);
+      const { courses, userEmail, userName, userDni, userProvincia, userLocalidad, userPais, items } = JSON.parse(purchasedCoursesData);
+      
+      // Usar items si courses no existe (para compatibilidad)
+      const finalCourses = courses || items || [];
 
-      if (!courses || courses.length === 0 || !userEmail) {
-        console.log('Datos insuficientes para enviar email');
-        console.log('Datos:', { courses, userEmail });
+      if (!finalCourses || finalCourses.length === 0 || !userEmail) {
+        console.log('❌ Datos insuficientes para enviar email');
+        console.log('Datos:', { courses: finalCourses, userEmail });
         return;
       }
+      
+      console.log('✅ Datos válidos, enviando email...');
+      console.log('📧 Email destino:', userEmail);
+      console.log('📚 Cursos:', finalCourses.length);
 
       // 1. GUARDAR LA ORDEN EN SUPABASE
       try {
         // Calcular total
-        const total = courses.reduce((sum: number, course: any) => sum + (course.price || 0), 0);
+        const total = finalCourses.reduce((sum: number, course: any) => sum + (course.price || 0), 0);
 
         // Crear la orden
         const { data: orderData, error: orderError } = await supabase
@@ -75,7 +98,7 @@ const Success = () => {
           console.error('Error creando orden:', orderError);
         } else if (orderData) {
           // Crear los items de la orden
-          const orderItems = courses.map((course: any) => ({
+          const orderItems = finalCourses.map((course: any) => ({
             order_id: orderData.id,
             course_id: course.id,
             item_type: 'course',
@@ -113,7 +136,7 @@ const Success = () => {
           userProvincia,
           userLocalidad,
           userPais,
-          courses,
+          courses: finalCourses,
           paymentId: paymentIdParam,
         }),
       });
