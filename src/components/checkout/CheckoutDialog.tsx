@@ -131,25 +131,35 @@ const CheckoutDialog = ({ open, onOpenChange }: CheckoutDialogProps) => {
     setIsProcessing(true);
 
     try {
-      // Guardar datos para envío de email posterior
-      const courses = items.filter(item => item.type === 'course');
-      if (courses.length > 0) {
-        sessionStorage.setItem('purchasedCourses', JSON.stringify({
-          courses: courses.map(c => ({
-            id: c.id,
-            title: c.title,
-            instructor: c.instructor,
-            price: c.price,
-          })),
-          userEmail: user?.email || '',
-          userName: user?.name || '',
-          userDni: user?.dni || '',
-          userProvincia: user?.provincia || '',
-          userLocalidad: user?.localidad || '',
-          userPais: user?.pais || '',
-          timestamp: Date.now(),
-        }));
-      }
+      console.log('🛒 Items en carrito:', items);
+      console.log('👤 Usuario:', user);
+      
+      // Guardar TODOS los items para el email (usar localStorage para persistir)
+      const allItems = items.map(item => ({
+        id: item.id,
+        title: item.title || item.name,
+        type: item.type,
+        price: item.price,
+        instructor: item.instructor || 'N/A',
+      }));
+      
+      const purchaseData = {
+        courses: allItems, // Guardar todo
+        userEmail: user?.email || '',
+        userName: user?.name || '',
+        userDni: user?.dni || '',
+        userProvincia: user?.provincia || '',
+        userLocalidad: user?.localidad || '',
+        userPais: user?.pais || '',
+        timestamp: Date.now(),
+      };
+      
+      console.log('💾 Guardando en localStorage:', purchaseData);
+      localStorage.setItem('purchasedCourses', JSON.stringify(purchaseData));
+      
+      // Verificar que se guardó
+      const saved = localStorage.getItem('purchasedCourses');
+      console.log('✅ Verificación localStorage:', saved ? 'GUARDADO' : 'ERROR');
 
       // Siempre usar la URL del sitio actual (sin barra final)
       const baseUrl = window.location.origin.replace(/\/$/, '');
