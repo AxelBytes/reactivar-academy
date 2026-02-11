@@ -81,6 +81,26 @@ const CheckoutDialog = ({ open, onOpenChange }: CheckoutDialogProps) => {
   const handlePrex = async () => {
     setIsProcessing(true);
 
+    // Guardar datos para envío de email posterior (usar localStorage para persistir)
+    const courses = items.filter(item => item.type === 'course');
+    if (courses.length > 0) {
+      localStorage.setItem('purchasedCourses', JSON.stringify({
+        courses: courses.map(c => ({
+          id: c.id,
+          title: c.title,
+          instructor: c.instructor,
+          price: c.price,
+        })),
+        userEmail: user?.email || '',
+        userName: user?.name || '',
+        userDni: user?.dni || '',
+        userProvincia: user?.provincia || '',
+        userLocalidad: user?.localidad || '',
+        userPais: user?.pais || '',
+        timestamp: Date.now(),
+      }));
+    }
+
     // Simulación de Prex - En producción, aquí integrarías con la API de Prex
     await new Promise((resolve) => setTimeout(resolve, 1500));
 
@@ -98,6 +118,10 @@ const CheckoutDialog = ({ open, onOpenChange }: CheckoutDialogProps) => {
         description: "Tu pedido ha sido procesado correctamente.",
       });
       clearCart();
+      
+      // Redirigir a la página de éxito
+      window.location.href = '/success?payment_id=PREX-' + Date.now() + '&status=approved';
+      
       onOpenChange(false);
       setIsProcessing(false);
     }, 2000);
@@ -178,10 +202,10 @@ const CheckoutDialog = ({ open, onOpenChange }: CheckoutDialogProps) => {
     setIsProcessing(true);
 
     try {
-      // Guardar datos para envío de email posterior
+      // Guardar datos para envío de email posterior (usar localStorage para persistir)
       const courses = items.filter(item => item.type === 'course');
       if (courses.length > 0) {
-        sessionStorage.setItem('purchasedCourses', JSON.stringify({
+        localStorage.setItem('purchasedCourses', JSON.stringify({
           courses: courses.map(c => ({
             id: c.id,
             title: c.title,

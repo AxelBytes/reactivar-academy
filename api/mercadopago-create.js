@@ -48,9 +48,9 @@ export default async function handler(req, res) {
         name: payer?.name || 'Usuario'
       },
       back_urls: {
-        success: `${FRONTEND_URL}/checkout/success`,
-        failure: `${FRONTEND_URL}/checkout/failure`,
-        pending: `${FRONTEND_URL}/checkout/pending`
+        success: `${FRONTEND_URL}/success`,
+        failure: `${FRONTEND_URL}/failure`,
+        pending: `${FRONTEND_URL}/pending`
       },
       auto_return: 'approved',
       statement_descriptor: 'REACTIVAR ACADEMY',

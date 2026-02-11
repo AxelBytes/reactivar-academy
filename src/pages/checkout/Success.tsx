@@ -31,11 +31,12 @@ const Success = () => {
 
   const sendCourseEmail = async (paymentIdParam?: string) => {
     try {
-      // Obtener datos de cursos guardados en sessionStorage
-      const purchasedCoursesData = sessionStorage.getItem('purchasedCourses');
+      // Obtener datos de cursos guardados en localStorage (persiste entre redirecciones)
+      const purchasedCoursesData = localStorage.getItem('purchasedCourses');
       
       if (!purchasedCoursesData) {
         console.log('No hay cursos para enviar email');
+        console.log('localStorage purchasedCourses:', purchasedCoursesData);
         return;
       }
 
@@ -43,6 +44,7 @@ const Success = () => {
 
       if (!courses || courses.length === 0 || !userEmail) {
         console.log('Datos insuficientes para enviar email');
+        console.log('Datos:', { courses, userEmail });
         return;
       }
 
@@ -123,8 +125,8 @@ const Success = () => {
       console.log('✅ Email enviado exitosamente');
       setEmailSent(true);
       
-      // Limpiar datos de sessionStorage después de enviar el email
-      sessionStorage.removeItem('purchasedCourses');
+      // Limpiar datos de localStorage después de enviar el email
+      localStorage.removeItem('purchasedCourses');
       
     } catch (error) {
       console.error('Error enviando email:', error);
