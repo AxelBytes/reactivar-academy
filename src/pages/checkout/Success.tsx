@@ -159,8 +159,43 @@ const Success = () => {
 
       console.log('✅ Email enviado exitosamente');
       setEmailSent(true);
+
+      // 3. OTORGAR ACCESO EN SYSTEME.IO
+      try {
+        console.log('🔑 Otorgando acceso en systeme.io...');
+        
+        // Separar nombre completo en firstName y lastName
+        const nameParts = (userName || '').trim().split(' ');
+        const firstName = nameParts[0] || '';
+        const lastName = nameParts.slice(1).join(' ') || '';
+
+        const systemeResponse = await fetch(`${baseUrl}/api/systeme-grant-access`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: userEmail,
+            firstName: firstName,
+            lastName: lastName,
+            courses: finalCourses,
+          }),
+        });
+
+        if (systemeResponse.ok) {
+          const systemeData = await systemeResponse.json();
+          console.log('✅ Acceso otorgado en systeme.io:', systemeData);
+        } else {
+          const systemeError = await systemeResponse.text();
+          console.error('⚠️ Error otorgando acceso en systeme.io:', systemeError);
+          // No lanzar error, continuar aunque falle systeme.io
+        }
+      } catch (systemeError) {
+        console.error('⚠️ Error al conectar con systeme.io:', systemeError);
+        // No detener el flujo si falla systeme.io
+      }
       
-      // Limpiar datos de localStorage después de enviar el email
+      // Limpiar datos de localStorage después de todo
       localStorage.removeItem('purchasedCourses');
       
     } catch (error) {
