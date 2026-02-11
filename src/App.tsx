@@ -42,6 +42,11 @@ const App = () => (
               <Route path="/checkout/success" element={<CheckoutSuccess />} />
               <Route path="/checkout/failure" element={<CheckoutFailure />} />
               <Route path="/checkout/pending" element={<CheckoutPending />} />
+              
+              {/* Rutas cortas (alias) */}
+              <Route path="/success" element={<CheckoutSuccess />} />
+              <Route path="/failure" element={<CheckoutFailure />} />
+              <Route path="/pending" element={<CheckoutPending />} />
 
               {/* Admin Routes - Protected */}
               <Route
