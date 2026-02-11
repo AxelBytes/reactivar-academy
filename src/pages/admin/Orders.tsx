@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,137 +33,71 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, MoreHorizontal, Eye, Mail, Package, GraduationCap, Calendar, User, CreditCard } from "lucide-react";
+import { Search, MoreHorizontal, Eye, Mail, Package, GraduationCap, Calendar, User, CreditCard, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/lib/supabase";
 
-type OrderStatus = "pending" | "processing" | "completed" | "cancelled";
-type OrderType = "product" | "course";
-
-interface OrderItem {
-  id: number;
-  name: string;
-  type: OrderType;
-  quantity: number;
-  price: number;
-}
+type OrderStatus = "pending" | "processing" | "completed" | "cancelled" | "failed";
 
 interface Order {
-  id: string;
-  customerName: string;
-  customerEmail: string;
-  items: OrderItem[];
+  id: number;
+  user_name: string | null;
+  user_email: string;
+  user_dni: string | null;
+  user_pais: string | null;
+  user_provincia: string | null;
+  user_localidad: string | null;
   total: number;
-  status: OrderStatus;
-  paymentMethod: string;
-  date: string;
-  shippingAddress?: string;
+  status: string;
+  payment_id: string | null;
+  payment_method: string | null;
+  created_at: string;
+  courses: any[] | null;
 }
 
 const Orders = () => {
   const { toast } = useToast();
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
+  const [orders, setOrders] = useState<Order[]>([]);
 
-  const [orders, setOrders] = useState<Order[]>([
-    {
-      id: "ORD-001",
-      customerName: "Juan Pérez",
-      customerEmail: "juan.perez@email.com",
-      items: [
-        { id: 1, name: "Zapatillas Running Pro", type: "product", quantity: 1, price: 180000 },
-        { id: 2, name: "Shaker Pro 750ml", type: "product", quantity: 2, price: 30000 },
-      ],
-      total: 240000,
-      status: "completed",
-      paymentMethod: "Tarjeta de Crédito",
-      date: "2024-01-25",
-      shippingAddress: "Calle Principal 123, Ciudad, CP 12345",
-    },
-    {
-      id: "ORD-002",
-      customerName: "María García",
-      customerEmail: "maria.garcia@email.com",
-      items: [
-        { id: 3, name: "Curso de Nutrición para Atletas", type: "course", quantity: 1, price: 110000 },
-      ],
-      total: 110000,
-      status: "completed",
-      paymentMethod: "Transferencia Bancaria",
-      date: "2024-01-24",
-    },
-    {
-      id: "ORD-003",
-      customerName: "Carlos López",
-      customerEmail: "carlos.lopez@email.com",
-      items: [
-        { id: 4, name: "Set de Mancuernas Ajustables", type: "product", quantity: 1, price: 350000 },
-      ],
-      total: 350000,
-      status: "processing",
-      paymentMethod: "Tarjeta de Débito",
-      date: "2024-01-24",
-      shippingAddress: "Av. Libertador 456, Ciudad, CP 54321",
-    },
-    {
-      id: "ORD-004",
-      customerName: "Ana Martínez",
-      customerEmail: "ana.martinez@email.com",
-      items: [
-        { id: 5, name: "Mat de Yoga Premium", type: "product", quantity: 1, price: 55000 },
-        { id: 6, name: "Banda de Resistencia Kit", type: "product", quantity: 1, price: 42000 },
-      ],
-      total: 97000,
-      status: "pending",
-      paymentMethod: "Mercado Pago",
-      date: "2024-01-23",
-      shippingAddress: "San Martin 789, Ciudad, CP 67890",
-    },
-    {
-      id: "ORD-005",
-      customerName: "Roberto Díaz",
-      customerEmail: "roberto.diaz@email.com",
-      items: [
-        { id: 7, name: "Curso Mentalidad Ganadora", type: "course", quantity: 1, price: 190000 },
-        { id: 8, name: "Curso Entrenamiento Funcional", type: "course", quantity: 1, price: 150000 },
-      ],
-      total: 340000,
-      status: "completed",
-      paymentMethod: "Tarjeta de Crédito",
-      date: "2024-01-23",
-    },
-    {
-      id: "ORD-006",
-      customerName: "Laura Fernández",
-      customerEmail: "laura.fernandez@email.com",
-      items: [
-        { id: 9, name: "Zapatillas CrossFit Elite", type: "product", quantity: 1, price: 195000 },
-      ],
-      total: 195000,
-      status: "cancelled",
-      paymentMethod: "PayPal",
-      date: "2024-01-22",
-      shippingAddress: "Belgrano 321, Ciudad, CP 11111",
-    },
-    {
-      id: "ORD-007",
-      customerName: "Diego Gómez",
-      customerEmail: "diego.gomez@email.com",
-      items: [
-        { id: 10, name: "Guantes de Entrenamiento", type: "product", quantity: 2, price: 38000 },
-        { id: 11, name: "Cuerda de Saltar Profesional", type: "product", quantity: 1, price: 25000 },
-      ],
-      total: 101000,
-      status: "processing",
-      paymentMethod: "Tarjeta de Crédito",
-      date: "2024-01-22",
-      shippingAddress: "9 de Julio 555, Ciudad, CP 22222",
-    },
-  ]);
+  useEffect(() => {
+    loadOrders();
+  }, []);
 
-  const getStatusColor = (status: OrderStatus) => {
-    switch (status) {
+  const loadOrders = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('orders')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error cargando órdenes:', error);
+        toast({
+          title: "Error",
+          description: "No se pudieron cargar las órdenes",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (data) {
+        setOrders(data);
+      }
+    } catch (error) {
+      console.error('Error inesperado:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
       case "completed":
         return "bg-green-100 text-green-700";
       case "processing":
@@ -172,13 +106,15 @@ const Orders = () => {
         return "bg-yellow-100 text-yellow-700";
       case "cancelled":
         return "bg-red-100 text-red-700";
+      case "failed":
+        return "bg-red-100 text-red-700";
       default:
         return "bg-gray-100 text-gray-700";
     }
   };
 
-  const getStatusLabel = (status: OrderStatus) => {
-    switch (status) {
+  const getStatusLabel = (status: string) => {
+    switch (status.toLowerCase()) {
       case "completed":
         return "Completado";
       case "processing":
@@ -187,18 +123,44 @@ const Orders = () => {
         return "Pendiente";
       case "cancelled":
         return "Cancelado";
+      case "failed":
+        return "Fallido";
       default:
         return status;
     }
   };
 
-  const filteredOrders = orders.filter((order) => {
-    const matchesSearch =
-      order.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      order.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      order.customerEmail.toLowerCase().includes(searchQuery.toLowerCase());
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('es-AR', {
+      style: 'currency',
+      currency: 'ARS',
+      minimumFractionDigits: 0,
+    }).format(amount);
+  };
 
-    const matchesStatus = statusFilter === "all" || order.status === statusFilter;
+  const getPaymentMethodLabel = (method: string | null) => {
+    if (!method) return 'No especificado';
+    switch (method.toLowerCase()) {
+      case 'mercadopago':
+        return 'MercadoPago';
+      case 'paypal':
+        return 'PayPal';
+      case 'prex':
+        return 'Prex';
+      default:
+        return method;
+    }
+  };
+
+  const filteredOrders = orders.filter((order) => {
+    const orderId = `ORD-${order.id}`;
+    const matchesSearch =
+      orderId.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (order.user_name?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
+      order.user_email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (order.user_dni?.toLowerCase() || '').includes(searchQuery.toLowerCase());
+
+    const matchesStatus = statusFilter === "all" || order.status.toLowerCase() === statusFilter;
 
     return matchesSearch && matchesStatus;
   });
@@ -208,33 +170,99 @@ const Orders = () => {
     setIsDetailDialogOpen(true);
   };
 
-  const handleStatusChange = (orderId: string, newStatus: OrderStatus) => {
-    setOrders((prevOrders) =>
-      prevOrders.map((order) =>
-        order.id === orderId ? { ...order, status: newStatus } : order
-      )
-    );
+  const handleStatusChange = async (orderId: number, newStatus: string) => {
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .update({ status: newStatus })
+        .eq('id', orderId);
 
-    toast({
-      title: "Estado actualizado",
-      description: `El pedido ${orderId} ha sido actualizado a ${getStatusLabel(newStatus)}.`,
-    });
+      if (error) {
+        console.error('Error actualizando estado:', error);
+        toast({
+          title: "Error",
+          description: "No se pudo actualizar el estado del pedido",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setOrders((prevOrders) =>
+        prevOrders.map((order) =>
+          order.id === orderId ? { ...order, status: newStatus } : order
+        )
+      );
+
+      toast({
+        title: "Estado actualizado",
+        description: `El pedido ORD-${orderId} ha sido actualizado a ${getStatusLabel(newStatus)}.`,
+      });
+    } catch (error) {
+      console.error('Error inesperado:', error);
+    }
   };
 
-  const handleSendEmail = (order: Order) => {
-    // Aquí se conectará con el backend para enviar el correo
-    toast({
-      title: "Correo enviado",
-      description: `Se ha enviado un correo de confirmación a ${order.customerEmail}`,
-    });
+  const handleSendEmail = async (order: Order) => {
+    // Enviar email de confirmación
+    try {
+      const response = await fetch('/api/send-course-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userEmail: order.user_email,
+          userName: order.user_name,
+          userDni: order.user_dni,
+          userPais: order.user_pais,
+          userProvincia: order.user_provincia,
+          userLocalidad: order.user_localidad,
+          courses: order.courses || [],
+          paymentId: order.payment_id,
+        }),
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Correo enviado",
+          description: `Se ha enviado un correo de confirmación a ${order.user_email}`,
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "No se pudo enviar el correo",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Error enviando email:', error);
+      toast({
+        title: "Error",
+        description: "Ocurrió un error al enviar el correo",
+        variant: "destructive",
+      });
+    }
   };
 
   const totalOrders = orders.length;
-  const completedOrders = orders.filter((o) => o.status === "completed").length;
-  const pendingOrders = orders.filter((o) => o.status === "pending").length;
+  const completedOrders = orders.filter((o) => o.status.toLowerCase() === "completed").length;
+  const pendingOrders = orders.filter((o) => o.status.toLowerCase() === "pending").length;
   const totalRevenue = orders
-    .filter((o) => o.status === "completed")
-    .reduce((sum, o) => sum + o.total, 0);
+    .filter((o) => o.status.toLowerCase() === "completed")
+    .reduce((sum, o) => sum + (o.total || 0), 0);
+
+  if (loading) {
+    return (
+      <AdminLayout>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+            <p className="text-muted-foreground">Cargando pedidos...</p>
+          </div>
+        </div>
+      </AdminLayout>
+    );
+  }
 
   return (
     <AdminLayout>
@@ -244,7 +272,7 @@ const Orders = () => {
           <div>
             <h1 className="text-3xl font-bold text-foreground">Pedidos</h1>
             <p className="text-muted-foreground mt-2">
-              Gestiona todas las órdenes de compra
+              Gestiona todas las órdenes de compra (datos en tiempo real)
             </p>
           </div>
         </div>
@@ -291,7 +319,7 @@ const Orders = () => {
           <div className="bg-card border border-border rounded-lg p-4">
             <p className="text-sm text-muted-foreground">Ingresos Totales</p>
             <p className="text-2xl font-bold text-primary">
-              ${(totalRevenue / 1000).toLocaleString("es-AR")}K
+              {formatCurrency(totalRevenue)}
             </p>
           </div>
         </div>
@@ -321,37 +349,36 @@ const Orders = () => {
               ) : (
                 filteredOrders.map((order) => (
                   <TableRow key={order.id}>
-                    <TableCell className="font-medium">{order.id}</TableCell>
+                    <TableCell className="font-medium">ORD-{order.id}</TableCell>
                     <TableCell>
                       <div>
-                        <p className="font-medium">{order.customerName}</p>
-                        <p className="text-xs text-muted-foreground">{order.customerEmail}</p>
+                        <p className="font-medium">{order.user_name || 'Cliente'}</p>
+                        <p className="text-xs text-muted-foreground">{order.user_email}</p>
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <span className="font-medium">{order.items.length}</span>
+                        <span className="font-medium">{order.courses?.length || 0}</span>
                         <div className="flex gap-1">
-                          {order.items.some((item) => item.type === "product") && (
-                            <Package className="w-4 h-4 text-muted-foreground" />
-                          )}
-                          {order.items.some((item) => item.type === "course") && (
-                            <GraduationCap className="w-4 h-4 text-muted-foreground" />
-                          )}
+                          <GraduationCap className="w-4 h-4 text-muted-foreground" />
                         </div>
                       </div>
                     </TableCell>
                     <TableCell className="font-bold">
-                      ${order.total.toLocaleString("es-AR")}
+                      {formatCurrency(order.total || 0)}
                     </TableCell>
-                    <TableCell className="text-sm">{order.paymentMethod}</TableCell>
-                    <TableCell className="text-sm">{order.date}</TableCell>
+                    <TableCell className="text-sm">{getPaymentMethodLabel(order.payment_method)}</TableCell>
+                    <TableCell className="text-sm">
+                      {new Date(order.created_at).toLocaleDateString('es-AR', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric'
+                      })}
+                    </TableCell>
                     <TableCell>
                       <Select
                         value={order.status}
-                        onValueChange={(value) =>
-                          handleStatusChange(order.id, value as OrderStatus)
-                        }
+                        onValueChange={(value) => handleStatusChange(order.id, value)}
                       >
                         <SelectTrigger className="w-[130px]">
                           <Badge className={getStatusColor(order.status)}>
@@ -363,6 +390,7 @@ const Orders = () => {
                           <SelectItem value="processing">En Proceso</SelectItem>
                           <SelectItem value="completed">Completado</SelectItem>
                           <SelectItem value="cancelled">Cancelado</SelectItem>
+                          <SelectItem value="failed">Fallido</SelectItem>
                         </SelectContent>
                       </Select>
                     </TableCell>
@@ -398,7 +426,7 @@ const Orders = () => {
         <Dialog open={isDetailDialogOpen} onOpenChange={setIsDetailDialogOpen}>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Detalles del Pedido {selectedOrder?.id}</DialogTitle>
+              <DialogTitle>Detalles del Pedido ORD-{selectedOrder?.id}</DialogTitle>
               <DialogDescription>
                 Información completa del pedido y estado
               </DialogDescription>
@@ -413,17 +441,43 @@ const Orders = () => {
                       <User className="w-4 h-4" />
                       <span>Cliente</span>
                     </div>
-                    <p className="font-medium">{selectedOrder.customerName}</p>
-                    <p className="text-sm text-muted-foreground">{selectedOrder.customerEmail}</p>
+                    <p className="font-medium">{selectedOrder.user_name || 'No especificado'}</p>
+                    <p className="text-sm text-muted-foreground">{selectedOrder.user_email}</p>
+                    {selectedOrder.user_dni && (
+                      <p className="text-sm text-muted-foreground">DNI: {selectedOrder.user_dni}</p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Calendar className="w-4 h-4" />
                       <span>Fecha</span>
                     </div>
-                    <p className="font-medium">{selectedOrder.date}</p>
+                    <p className="font-medium">
+                      {new Date(selectedOrder.created_at).toLocaleDateString('es-AR', {
+                        day: '2-digit',
+                        month: 'long',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </p>
                   </div>
                 </div>
+
+                {/* Location Info */}
+                {(selectedOrder.user_pais || selectedOrder.user_provincia || selectedOrder.user_localidad) && (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Package className="w-4 h-4" />
+                      <span>Ubicación</span>
+                    </div>
+                    <p className="font-medium">
+                      {[selectedOrder.user_localidad, selectedOrder.user_provincia, selectedOrder.user_pais]
+                        .filter(Boolean)
+                        .join(', ')}
+                    </p>
+                  </div>
+                )}
 
                 {/* Payment Info */}
                 <div className="space-y-2">
@@ -431,49 +485,40 @@ const Orders = () => {
                     <CreditCard className="w-4 h-4" />
                     <span>Método de Pago</span>
                   </div>
-                  <p className="font-medium">{selectedOrder.paymentMethod}</p>
+                  <p className="font-medium">{getPaymentMethodLabel(selectedOrder.payment_method)}</p>
+                  {selectedOrder.payment_id && (
+                    <p className="text-xs text-muted-foreground font-mono">
+                      ID: {selectedOrder.payment_id}
+                    </p>
+                  )}
                 </div>
-
-                {/* Shipping Address */}
-                {selectedOrder.shippingAddress && (
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Package className="w-4 h-4" />
-                      <span>Dirección de Envío</span>
-                    </div>
-                    <p className="font-medium">{selectedOrder.shippingAddress}</p>
-                  </div>
-                )}
 
                 {/* Order Items */}
                 <div className="space-y-3">
-                  <h3 className="font-semibold">Productos/Cursos</h3>
+                  <h3 className="font-semibold">Cursos Adquiridos</h3>
                   <div className="border border-border rounded-lg divide-y divide-border">
-                    {selectedOrder.items.map((item) => (
-                      <div key={item.id} className="p-4 flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          {item.type === "product" ? (
-                            <Package className="w-5 h-5 text-primary" />
-                          ) : (
+                    {(selectedOrder.courses && selectedOrder.courses.length > 0) ? (
+                      selectedOrder.courses.map((course: any, index: number) => (
+                        <div key={index} className="p-4 flex items-center justify-between">
+                          <div className="flex items-center gap-3">
                             <GraduationCap className="w-5 h-5 text-primary" />
-                          )}
-                          <div>
-                            <p className="font-medium">{item.name}</p>
-                            <p className="text-sm text-muted-foreground">
-                              {item.type === "product" ? "Producto" : "Curso"} • Cantidad: {item.quantity}
-                            </p>
+                            <div>
+                              <p className="font-medium">{course.title || 'Curso'}</p>
+                              <p className="text-sm text-muted-foreground">
+                                Curso • Instructor: {course.instructor || 'No especificado'}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-bold">{formatCurrency(course.price || 0)}</p>
                           </div>
                         </div>
-                        <div className="text-right">
-                          <p className="font-bold">${item.price.toLocaleString("es-AR")}</p>
-                          {item.quantity > 1 && (
-                            <p className="text-xs text-muted-foreground">
-                              ${(item.price * item.quantity).toLocaleString("es-AR")} total
-                            </p>
-                          )}
-                        </div>
+                      ))
+                    ) : (
+                      <div className="p-4 text-center text-muted-foreground">
+                        No hay cursos asociados a este pedido
                       </div>
-                    ))}
+                    )}
                   </div>
                 </div>
 
@@ -481,7 +526,7 @@ const Orders = () => {
                 <div className="flex items-center justify-between pt-4 border-t border-border">
                   <span className="text-lg font-semibold">Total</span>
                   <span className="text-2xl font-bold text-primary">
-                    ${selectedOrder.total.toLocaleString("es-AR")}
+                    {formatCurrency(selectedOrder.total || 0)}
                   </span>
                 </div>
 
@@ -500,7 +545,7 @@ const Orders = () => {
                     onClick={() => handleSendEmail(selectedOrder)}
                   >
                     <Mail className="w-4 h-4 mr-2" />
-                    Enviar Email de Confirmación
+                    Reenviar Email de Confirmación
                   </Button>
                 </div>
               </div>
