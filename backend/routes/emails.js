@@ -1,19 +1,9 @@
-// API endpoint para enviar emails cuando se compran cursos
-export default async function handler(req, res) {
-  // CORS headers
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+const express = require('express');
+const router = express.Router();
+require('dotenv').config();
 
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Método no permitido' });
-  }
-
+// Ruta para enviar emails de cursos
+router.post('/send-course-email', async (req, res) => {
   try {
     const { userEmail, userName, courses, paymentId, userDni, userProvincia, userLocalidad, userPais } = req.body;
 
@@ -25,7 +15,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Datos incompletos' });
     }
 
-    // Aquí usaremos Brevo para enviar el email
+    // Obtener API Key de Brevo
     const BREVO_API_KEY = process.env.BREVO_API_KEY;
     
     if (!BREVO_API_KEY) {
@@ -39,7 +29,7 @@ export default async function handler(req, res) {
     const coursesListHTML = courses.map(course => `
       <li style="margin-bottom: 10px;">
         <strong>${course.title}</strong><br>
-        <span style="color: #666;">Instructor: ${course.instructor}</span>
+        <span style="color: #666;">Instructor: ${course.instructor || 'N/A'}</span>
       </li>
     `).join('');
 
@@ -108,7 +98,7 @@ export default async function handler(req, res) {
       </html>
     `;
 
-    // Enviar email usando Brevo (antes Sendinblue)
+    // Enviar email usando Brevo
     console.log('🚀 Enviando email a Brevo API...');
     const response = await fetch('https://api.brevo.com/v3/smtp/email', {
       method: 'POST',
@@ -159,4 +149,6 @@ export default async function handler(req, res) {
       details: error.message 
     });
   }
-}
+});
+
+module.exports = router;

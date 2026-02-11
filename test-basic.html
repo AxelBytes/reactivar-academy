@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Test Básico</title>
+</head>
+<body style="background: #667eea; color: white; font-family: Arial; padding: 50px; font-size: 20px;">
+    
+    <h1>🧪 TEST BÁSICO DE SUPABASE</h1>
+    <p>Si ves este texto, el archivo HTML funciona correctamente.</p>
+    
+    <button onclick="testear()" style="padding: 15px 30px; font-size: 18px; cursor: pointer; background: white; color: #667eea; border: none; border-radius: 8px; margin: 20px 0;">
+        ▶️ HACER TEST
+    </button>
+    
+    <div id="resultado" style="background: white; color: black; padding: 20px; border-radius: 10px; margin-top: 20px; min-height: 100px; font-size: 16px;"></div>
+
+    <script>
+        console.log('✅ Script cargado correctamente');
+        
+        async function testear() {
+            const div = document.getElementById('resultado');
+            div.innerHTML = '🔄 Probando conexión a Supabase...';
+            
+            try {
+                const url = 'https://lhjzxwthuqpqsvqpvsxw.supabase.co/rest/v1/courses?select=*&limit=5';
+                const key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxoanp4d3RodXFwcXN2cXB2c3h3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxNDM0MDAsImV4cCI6MjA4NTcxOTQwMH0.wIbgZgFqvZXB0T-pF01TwHak-m3ZcDFa2LTBOdhim3E';
+                
+                console.log('🚀 Enviando request a:', url);
+                
+                const respuesta = await fetch(url, {
+                    headers: {
+                        'apikey': key,
+                        'Authorization': 'Bearer ' + key
+                    }
+                });
+                
+                console.log('📡 Respuesta status:', respuesta.status);
+                
+                const datos = await respuesta.json();
+                
+                console.log('📦 Datos recibidos:', datos);
+                
+                if (respuesta.ok) {
+                    div.innerHTML = '<h2 style="color: green;">✅ ¡FUNCIONA!</h2>' +
+                        '<p><strong>Status:</strong> ' + respuesta.status + '</p>' +
+                        '<p><strong>Cursos encontrados:</strong> ' + (Array.isArray(datos) ? datos.length : 0) + '</p>' +
+                        '<pre style="background: #f5f5f5; padding: 10px; overflow: auto;">' + JSON.stringify(datos, null, 2) + '</pre>';
+                } else {
+                    div.innerHTML = '<h2 style="color: red;">❌ ERROR</h2>' +
+                        '<p><strong>Status:</strong> ' + respuesta.status + '</p>' +
+                        '<p><strong>Mensaje:</strong> ' + (datos.message || datos.error || 'Error desconocido') + '</p>' +
+                        '<pre style="background: #f5f5f5; padding: 10px; overflow: auto;">' + JSON.stringify(datos, null, 2) + '</pre>';
+                }
+                
+            } catch (error) {
+                console.error('❌ Error:', error);
+                div.innerHTML = '<h2 style="color: red;">❌ ERROR</h2>' +
+                    '<p>' + error.message + '</p>' +
+                    '<p>Revisa la consola (F12) para más detalles.</p>';
+            }
+        }
+        
+        // Auto-ejecutar después de 1 segundo
+        setTimeout(function() {
+            console.log('🔄 Auto-ejecutando test...');
+            testear();
+        }, 1000);
+    </script>
+
+</body>
+</html>

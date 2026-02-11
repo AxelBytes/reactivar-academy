@@ -1,11 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const mercadopago = require('mercadopago');
+// const mercadopago = require('mercadopago');
 
+// TODO: Actualizar a la nueva API de MercadoPago v2.0
 // Configurar MercadoPago con Access Token
-mercadopago.configure({
-  access_token: process.env.MERCADOPAGO_ACCESS_TOKEN
-});
+// mercadopago.configure({
+//   access_token: process.env.MERCADOPAGO_ACCESS_TOKEN
+// });
 
 // Crear preferencia de pago
 router.post('/mercadopago/create-preference', async (req, res) => {

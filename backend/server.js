@@ -35,6 +35,7 @@ app.get('/health', (req, res) => {
 
 // Routes
 app.use('/api/payments', require('./routes/payments'));
+app.use('/api', require('./routes/emails'));
 
 // Error handler
 app.use((err, req, res, next) => {
