@@ -31,28 +31,40 @@ const Success = () => {
 
   const sendCourseEmail = async (paymentIdParam?: string) => {
     try {
+      console.log('🔍 INICIANDO sendCourseEmail');
+      console.log('📋 Payment ID:', paymentIdParam);
+      console.log('📋 Search params:', Object.fromEntries(searchParams.entries()));
+      
       // Intentar obtener datos de localStorage primero
       let purchasedCoursesData = localStorage.getItem('purchasedCourses');
+      console.log('📦 localStorage.purchasedCourses:', purchasedCoursesData);
       
       // Si no hay en localStorage, intentar obtener del external_reference de MercadoPago
       if (!purchasedCoursesData) {
         const externalRef = searchParams.get('external_reference');
+        console.log('🔗 external_reference:', externalRef);
+        
         if (externalRef) {
           try {
             // Decodificar el base64
             const decoded = atob(externalRef);
+            console.log('🔓 Decodificado:', decoded);
             purchasedCoursesData = decoded;
             console.log('✅ Datos obtenidos de external_reference');
           } catch (e) {
-            console.error('Error decodificando external_reference:', e);
+            console.error('❌ Error decodificando external_reference:', e);
           }
         }
+      } else {
+        console.log('✅ Datos obtenidos de localStorage');
       }
       
       if (!purchasedCoursesData) {
-        console.log('❌ No hay cursos para enviar email');
-        console.log('localStorage purchasedCourses:', localStorage.getItem('purchasedCourses'));
-        console.log('external_reference:', searchParams.get('external_reference'));
+        console.log('❌ NO HAY DATOS - No se puede enviar email');
+        console.log('🔍 Todas las fuentes están vacías:');
+        console.log('  - localStorage: null');
+        console.log('  - external_reference: null');
+        console.log('⚠️ PROBLEMA: Los datos no se guardaron antes de MercadoPago');
         return;
       }
 
