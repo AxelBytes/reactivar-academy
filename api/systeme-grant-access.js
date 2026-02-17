@@ -1,6 +1,11 @@
 /**
  * Vercel Serverless Function
- * Otorga acceso a cursos en systeme.io cuando alguien compra
+ * Otorga acceso DIRECTO a productos/cursos en systeme.io cuando alguien compra
+ * 
+ * SISTEMA SIMPLIFICADO SIN TAGS NI WORKFLOWS
+ * - Crea el contacto en systeme.io
+ * - Le da acceso directo a los productos comprados
+ * - Escalable para múltiples cursos sin configuración adicional
  * 
  * SISTEMA CON REINTENTOS Y MANEJO ROBUSTO DE ERRORES
  */
@@ -85,7 +90,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { email, firstName, lastName, courses } = req.body;
+    const { email, firstName, lastName, courses, courseProductIds } = req.body;
 
     // Validaciones exhaustivas
     if (!email || typeof email !== 'string' || !email.includes('@')) {
@@ -97,14 +102,13 @@ export default async function handler(req, res) {
     }
 
     console.log('='.repeat(80));
-    console.log('🚀 INICIANDO INTEGRACIÓN CON SYSTEME.IO');
+    console.log('🚀 INICIANDO INTEGRACIÓN CON SYSTEME.IO - ACCESO DIRECTO A PRODUCTOS');
     console.log('='.repeat(80));
     console.log('📧 Email:', email);
     console.log('👤 Nombre:', firstName || '(no proporcionado)');
     console.log('👤 Apellido:', lastName || '(no proporcionado)');
-    console.log('📚 Cursos:', courses?.length || 0);
-    console.log('🏷️ Tag ID configurado:', SYSTEME_TAG_ID || '(no configurado)');
-    console.log('🏷️ Tag NAME configurado:', SYSTEME_TAG_NAME || '(no configurado)');
+    console.log('📚 Cursos a dar acceso:', courses?.length || 0);
+    console.log('🎯 Product IDs:', courseProductIds || '(no proporcionados)');
     console.log('⏰ Timestamp:', new Date().toISOString());
     console.log('-'.repeat(80));
 
@@ -151,50 +155,24 @@ export default async function handler(req, res) {
       console.log('⚠️ Intentando continuar de todas formas...');
     }
 
-    // 2. ASIGNAR TAG PARA DAR ACCESO AL CURSO (CON REINTENTOS)
-    let tagAssigned = false;
-    let resolvedTagId = SYSTEME_TAG_ID;
+    // 2. DAR ACCESO DIRECTO A PRODUCTOS/CURSOS (CON REINTENTOS)
+    let productsGranted = 0;
+    let totalProducts = 0;
     
-    // Si no hay TAG_ID pero hay TAG_NAME, buscar el ID por nombre
-    if (!resolvedTagId && SYSTEME_TAG_NAME) {
-      console.log('📝 PASO 2A: Buscando tag por nombre...');
-      console.log('🏷️ Tag NAME:', SYSTEME_TAG_NAME);
-      
-      try {
-        const tagsResponse = await fetchWithRetry(
-          'https://systeme.io/api/v2/tags',
-          {
-            method: 'GET',
-            headers: {
-              'Authorization': SYSTEME_API_KEY,
-              'Content-Type': 'application/json',
-            },
-          },
-          3
-        );
-
-        if (tagsResponse.ok) {
-          const tagsData = await tagsResponse.json();
-          const tag = tagsData.items?.find(t => 
-            t.name.toLowerCase() === SYSTEME_TAG_NAME.toLowerCase()
-          );
-
-          if (tag && tag.id) {
-            resolvedTagId = tag.id;
-            console.log('✅ Tag encontrado por nombre, ID:', resolvedTagId);
-          } else {
-            console.error('❌ Tag no encontrado con nombre:', SYSTEME_TAG_NAME);
-            console.log('📊 Tags disponibles:', tagsData.items?.map(t => t.name).join(', '));
-          }
-        }
-      } catch (error) {
-        console.error('❌ Error buscando tag por nombre:', error.message);
-      }
+    // Obtener los product IDs de los cursos comprados
+    const productIds = [];
+    
+    if (courseProductIds && Array.isArray(courseProductIds) && courseProductIds.length > 0) {
+      console.log('✅ Product IDs recibidos:', courseProductIds);
+      productIds.push(...courseProductIds.filter(id => id)); // Filtrar nulls/undefined
     }
     
-    if (resolvedTagId) {
-      console.log('📝 PASO 2B: Asignando tag de acceso...');
-      console.log('🏷️ Tag ID:', resolvedTagId);
+    totalProducts = productIds.length;
+    
+    if (productIds.length > 0) {
+      console.log('📝 PASO 2: Dando acceso directo a productos...');
+      console.log('🎯 Total de productos:', totalProducts);
+      console.log('🎯 Product IDs:', productIds.join(', '));
       
       try {
         // Buscar el contacto para obtener su ID
@@ -217,27 +195,42 @@ export default async function handler(req, res) {
 
           if (contact && contact.id) {
             console.log('✅ Contacto encontrado, ID:', contact.id);
-            console.log('🏷️ Asignando tag al contacto...');
             
-            // Asignar tag al contacto (con reintentos)
-            const tagResponse = await fetchWithRetry(
-              `https://systeme.io/api/v2/contacts/${contact.id}/tags/${resolvedTagId}`,
-              {
-                method: 'POST',
-                headers: {
-                  'Authorization': SYSTEME_API_KEY,
-                  'Content-Type': 'application/json',
-                },
-              },
-              3
-            );
-
-            if (tagResponse.ok || tagResponse.status === 409) {
-              tagAssigned = true;
-              console.log('✅ Tag asignado exitosamente');
+            // Dar acceso a cada producto
+            for (const productId of productIds) {
+              console.log(`🎯 Dando acceso al producto ${productId}...`);
               
-              if (tagResponse.status === 409) {
-                console.log('ℹ️ El tag ya estaba asignado');
+              try {
+                // Endpoint para dar acceso directo a un producto
+                const productResponse = await fetchWithRetry(
+                  `https://systeme.io/api/v2/contacts/${contact.id}/products/${productId}`,
+                  {
+                    method: 'POST',
+                    headers: {
+                      'Authorization': SYSTEME_API_KEY,
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                      fullAccess: true // Dar acceso total al producto
+                    })
+                  },
+                  3
+                );
+
+                if (productResponse.ok || productResponse.status === 409) {
+                  productsGranted++;
+                  console.log(`✅ Acceso al producto ${productId} otorgado exitosamente`);
+                  
+                  if (productResponse.status === 409) {
+                    console.log(`ℹ️ El contacto ya tenía acceso al producto ${productId}`);
+                  }
+                } else {
+                  const errorText = await productResponse.text();
+                  console.error(`❌ Error dando acceso al producto ${productId}:`, productResponse.status, errorText);
+                }
+              } catch (productError) {
+                console.error(`❌ Error dando acceso al producto ${productId}:`, productError.message);
+                // Continuar con el siguiente producto
               }
             }
           } else {
@@ -245,17 +238,17 @@ export default async function handler(req, res) {
             console.log('📊 Respuesta de búsqueda:', JSON.stringify(searchData, null, 2));
           }
         }
-      } catch (tagError) {
-        console.error('❌ ERROR asignando tag:', tagError.message);
-        console.error('📊 Stack:', tagError.stack);
+      } catch (accessError) {
+        console.error('❌ ERROR en proceso de dar acceso a productos:', accessError.message);
+        console.error('📊 Stack:', accessError.stack);
         
         // No lanzar error, solo registrar
-        console.log('⚠️ Continuando a pesar del error en tag...');
+        console.log('⚠️ Continuando a pesar del error...');
       }
     } else {
-      console.log('⚠️ No se pudo resolver el Tag ID');
-      console.log('📝 El contacto se creará pero NO se asignará tag automáticamente');
-      console.log('💡 Configura SYSTEME_TAG_NAME=curso-comprado en .env.local');
+      console.log('⚠️ No hay productos para dar acceso');
+      console.log('📝 El contacto se creará pero NO se dará acceso a productos');
+      console.log('💡 Asegúrate de que los cursos tengan systeme_product_id configurado en Supabase');
     }
 
     // 3. RESULTADO FINAL
@@ -266,21 +259,22 @@ export default async function handler(req, res) {
     console.log('📊 RESULTADO FINAL:');
     console.log('-'.repeat(80));
     console.log('✅ Contacto creado/actualizado:', contactCreated ? 'SÍ' : 'NO');
-    console.log('✅ Tag asignado:', tagAssigned ? 'SÍ' : (SYSTEME_TAG_ID ? 'NO' : 'N/A'));
+    console.log('✅ Acceso a productos otorgado:', `${productsGranted}/${totalProducts}`);
     console.log('⏱️ Duración total:', duration + 'ms');
     console.log('='.repeat(80));
 
     // Si el contacto se creó, considerar éxito
-    // (el tag es opcional si no está configurado)
-    if (contactCreated || !SYSTEME_TAG_ID) {
+    // (los productos son opcionales si no están configurados)
+    if (contactCreated) {
       return res.status(200).json({
         success: true,
         message: 'Acceso otorgado en systeme.io',
         details: {
           email: email,
           contactCreated: contactCreated,
-          tagAssigned: tagAssigned,
-          tagConfigured: !!SYSTEME_TAG_ID,
+          productsGranted: productsGranted,
+          totalProducts: totalProducts,
+          productsConfigured: totalProducts > 0,
           duration: duration + 'ms'
         }
       });

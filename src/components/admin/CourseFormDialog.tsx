@@ -47,6 +47,7 @@ const CourseFormDialog = ({ open, onOpenChange, onSave }: CourseFormDialogProps)
     includes: "",
     instructor: "Diego Machado", // Predeterminado
     category: "Capacitaciones",
+    systemeProductId: "", // ID del producto en systeme.io
   });
 
   const handleImageChange = (imageUrl: string) => {
@@ -101,6 +102,7 @@ const CourseFormDialog = ({ open, onOpenChange, onSave }: CourseFormDialogProps)
         rating: 5.0,
         status: "active",
         is_new: true,
+        systeme_product_id: formData.systemeProductId.trim() || null, // ID de systeme.io
       };
 
       // Enviar al handler de guardado (que guardará en Supabase)
@@ -124,6 +126,7 @@ const CourseFormDialog = ({ open, onOpenChange, onSave }: CourseFormDialogProps)
         includes: "",
         instructor: "Diego Machado",
         category: "Capacitaciones",
+        systemeProductId: "",
       });
       onOpenChange(false);
     } catch (error) {
@@ -304,6 +307,32 @@ const CourseFormDialog = ({ open, onOpenChange, onSave }: CourseFormDialogProps)
                 value={formData.originalPrice}
                 onChange={(e) => setFormData({ ...formData, originalPrice: e.target.value })}
               />
+            </div>
+          </div>
+
+          {/* ID de systeme.io */}
+          <div className="space-y-2 bg-blue-50 dark:bg-blue-950 p-4 rounded-lg border-2 border-blue-200 dark:border-blue-800">
+            <Label htmlFor="systemeProductId" className="text-blue-900 dark:text-blue-100 font-semibold">
+              🎯 ID del Curso en systeme.io (Acceso Automático)
+            </Label>
+            <Input
+              id="systemeProductId"
+              placeholder="Ej: 12345"
+              value={formData.systemeProductId}
+              onChange={(e) => setFormData({ ...formData, systemeProductId: e.target.value })}
+              className="font-mono bg-white dark:bg-gray-900"
+            />
+            <div className="space-y-1 text-xs text-blue-700 dark:text-blue-300">
+              <p className="font-medium">📋 ¿Cómo obtener el ID?</p>
+              <ol className="list-decimal list-inside space-y-1 pl-2">
+                <li>Ve a systeme.io → Productos/Cursos</li>
+                <li>Click en tu curso para editarlo</li>
+                <li>Copia el número de la URL: <code className="bg-blue-100 dark:bg-blue-900 px-1 rounded">https://systeme.io/courses/12345/edit</code></li>
+                <li>Pega ese número aquí: <strong>12345</strong></li>
+              </ol>
+              <p className="mt-2 font-medium text-green-700 dark:text-green-400">
+                ✨ Con este ID, cuando alguien compre el curso, automáticamente recibirá acceso en systeme.io
+              </p>
             </div>
           </div>
 
