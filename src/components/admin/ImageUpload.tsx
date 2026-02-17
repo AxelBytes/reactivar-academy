@@ -65,35 +65,48 @@ export function ImageUpload({
       setOptimizing(false);
       setUploading(true);
 
+      // Convertir blob a base64
+      const reader = new FileReader();
+      const base64Promise = new Promise<string>((resolve, reject) => {
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(optimizedBlob);
+      });
+
+      const base64File = await base64Promise;
+
       // Generar nombre único
       const timestamp = Date.now();
       const fileName = `${timestamp}.jpg`;
-      const filePath = `${folder}/${fileName}`;
 
-      console.log('📤 Subiendo imagen optimizada:', filePath);
+      console.log('📤 Subiendo imagen via API:', `${folder}/${fileName}`);
 
-      // Subir a Supabase Storage
-      const { data, error: uploadError } = await supabase.storage
-        .from('course-images')
-        .upload(filePath, optimizedBlob, {
-          cacheControl: '31536000', // 1 año de cache
-          upsert: false,
-          contentType: 'image/jpeg',
-        });
+      // Subir via API endpoint (usa SERVICE_ROLE_KEY)
+      const baseUrl = import.meta.env.DEV 
+        ? 'http://localhost:8080'
+        : window.location.origin;
 
-      if (uploadError) {
-        console.error('❌ Error subiendo:', uploadError);
-        throw uploadError;
+      const response = await fetch(`${baseUrl}/api/upload-image`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          file: base64File,
+          fileName: fileName,
+          folder: folder,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Error al subir imagen');
       }
 
+      const data = await response.json();
       console.log('✅ Imagen subida:', data);
 
-      // Obtener URL pública
-      const { data: urlData } = supabase.storage
-        .from('course-images')
-        .getPublicUrl(filePath);
-
-      const publicUrl = urlData.publicUrl;
+      const publicUrl = data.url;
       console.log('🌐 URL pública:', publicUrl);
 
       // Notificar al componente padre
