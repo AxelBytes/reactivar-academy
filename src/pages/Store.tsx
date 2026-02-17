@@ -9,6 +9,7 @@ import { ShoppingCart, Heart, Search, Filter, Grid, List, Loader2 } from "lucide
 import { useCart } from "@/contexts/CartContext";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
+import { SEO } from "@/components/SEO";
 import productShoes from "@/assets/product-shoes.jpg";
 import productDumbbells from "@/assets/product-dumbbells.jpg";
 import productYogaMat from "@/assets/product-yoga-mat.jpg";
@@ -317,6 +318,20 @@ const Store = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO 
+        title="Tienda de Productos Deportivos - Reactivar Academy"
+        description="Encuentra productos de fitness y entrenamiento de alta calidad. Calzado deportivo, pesas, accesorios, ropa y suplementos. Envíos a toda Argentina. Pago seguro."
+        keywords={[
+          'productos fitness',
+          'tienda deportiva',
+          'equipamiento fitness',
+          'accesorios gym',
+          'productos entrenamiento',
+          'tienda fitness Argentina',
+          'comprar productos deportivos'
+        ]}
+        type="website"
+      />
       <Header />
       
       <main className="pt-20">

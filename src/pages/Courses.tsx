@@ -9,6 +9,7 @@ import { Star, Clock, Users, Search, Filter, Loader2 } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
+import { SEO } from "@/components/SEO";
 import courseFitness from "@/assets/course-fitness.jpg";
 import courseNutrition from "@/assets/course-nutrition.jpg";
 import courseMental from "@/assets/course-mental.jpg";
@@ -328,6 +329,20 @@ const Courses = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO 
+        title="Cursos de Fitness y Entrenamiento Online - Reactivar Academy"
+        description="Explora nuestro catálogo completo de cursos de fitness y entrenamiento profesional. Aprende con expertos certificados. Certificado incluido. Acceso de por vida."
+        keywords={[
+          'cursos fitness online',
+          'entrenamiento profesional',
+          'capacitación deportiva',
+          'cursos certificados fitness',
+          'entrenamiento online Argentina',
+          'academia fitness',
+          'cursos deportivos'
+        ]}
+        type="website"
+      />
       <Header />
       
       <main className="pt-20">
