@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ImageUpload } from "@/components/ui/image-upload";
+import { ImageUpload } from "@/components/admin/ImageUpload";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 
@@ -130,12 +130,15 @@ const ProductFormDialog = ({ open, onOpenChange, onSave }: ProductFormDialogProp
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Imagen */}
-          <ImageUpload
-            currentImage={formData.image}
-            onImageChange={handleImageChange}
-            label="Imagen del Producto *"
-            folder="products"
-          />
+          <div className="space-y-2">
+            <Label>Imagen del Producto <span className="text-red-500">*</span></Label>
+            <ImageUpload
+              onImageUploaded={handleImageChange}
+              currentImageUrl={formData.image}
+              folder="products"
+              maxSizeMB={10}
+            />
+          </div>
 
           {/* Nombre */}
           <div className="space-y-2">

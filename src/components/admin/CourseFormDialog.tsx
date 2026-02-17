@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ImageUpload } from "@/components/ui/image-upload";
+import { ImageUpload } from "@/components/admin/ImageUpload";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Video } from "lucide-react";
 
@@ -152,12 +152,15 @@ const CourseFormDialog = ({ open, onOpenChange, onSave }: CourseFormDialogProps)
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Imagen de Portada */}
-          <ImageUpload
-            currentImage={formData.image}
-            onImageChange={handleImageChange}
-            label="Imagen de Portada *"
-            folder="courses"
-          />
+          <div className="space-y-2">
+            <Label>Imagen de Portada <span className="text-red-500">*</span></Label>
+            <ImageUpload
+              onImageUploaded={handleImageChange}
+              currentImageUrl={formData.image}
+              folder="courses"
+              maxSizeMB={10}
+            />
+          </div>
 
           {/* Video de Presentación */}
           <div className="space-y-2">
