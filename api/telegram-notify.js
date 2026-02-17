@@ -4,11 +4,20 @@
  * 
  * FEATURES:
  * - Notificaciones de nuevas ventas
+ * - Alertas inteligentes automáticas
  * - Detalles completos del pedido
  * - Información del cliente
  * - Links directos al panel admin
  * - Formato visual profesional
  * - Botones interactivos
+ * 
+ * ALERTAS INTELIGENTES:
+ * - 🎯 Meta diaria alcanzada
+ * - 🏆 Record de ventas batido
+ * - ☕ Primera venta del día
+ * - 👑 Cliente VIP (gasta mucho)
+ * - 🔥 Horario pico de ventas
+ * - 🚀 Producto viral del día
  */
 
 export default async function handler(req, res) {

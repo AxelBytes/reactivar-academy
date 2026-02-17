@@ -227,6 +227,11 @@ const Success = () => {
       try {
         console.log('📱 Enviando notificación Telegram al admin...');
 
+        // Obtener el primer curso/producto para las alertas
+        const firstItem = finalCourses[0];
+        const itemName = firstItem?.title || '';
+
+        // Enviar notificación de venta
         await fetch(`${baseUrl}/api/telegram-notify`, {
           method: 'POST',
           headers: {
@@ -258,7 +263,24 @@ const Success = () => {
           }),
         });
 
-        console.log('✅ Notificación Telegram enviada');
+        console.log('✅ Notificación de venta enviada');
+
+        // Enviar alertas inteligentes adicionales
+        await fetch(`${baseUrl}/api/telegram-smart-alerts`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            orderTotal: finalCourses.reduce((sum: number, course: any) => sum + (course.price || 0), 0),
+            courseName: itemName,
+            productName: itemName,
+            adminUrl: `${baseUrl}/admin`,
+          }),
+        });
+
+        console.log('✅ Alertas inteligentes verificadas');
+
       } catch (telegramError) {
         console.error('⚠️ Error enviando notificación Telegram:', telegramError);
         // No detener el flujo si falla Telegram
