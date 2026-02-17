@@ -2,12 +2,18 @@
  * Webhook de Telegram - Maneja comandos del bot
  * Sistema de reportes financieros profesional
  * 
- * COMANDOS:
+ * COMANDOS BÁSICOS:
  * /dia - Resumen de ventas del día
  * /semana - Resumen de la semana
  * /mes - Resumen del mes
  * /año - Resumen del año
  * /stats - Estadísticas generales
+ * 
+ * COMANDOS AVANZADOS:
+ * /comparar - Comparaciones entre períodos
+ * /objetivos - Progreso de metas configurables
+ * /producto [NOMBRE] - Estadísticas de curso específico
+ * /exportar [periodo] - Exportar datos a CSV
  * /help - Lista de comandos
  */
 
@@ -62,9 +68,11 @@ export default async function handler(req, res) {
 
     const chatId = message.chat.id;
     const text = message.text.toLowerCase().trim();
-    const command = text.split(' ')[0];
+    const commandParts = text.split(' ');
+    const command = commandParts[0];
+    const args = commandParts.slice(1);
 
-    console.log(`📱 Comando recibido: ${command}`);
+    console.log(`📱 Comando recibido: ${command}`, args.length > 0 ? `con args: ${args.join(' ')}` : '');
 
     let responseText = '';
 
@@ -89,6 +97,28 @@ export default async function handler(req, res) {
 
       case '/stats':
         responseText = await generateStatsReport();
+        break;
+
+      case '/comparar':
+        responseText = await generateComparisonReport();
+        break;
+
+      case '/objetivos':
+        responseText = await generateGoalsReport();
+        break;
+
+      case '/producto':
+        const productName = args.join(' ');
+        if (!productName) {
+          responseText = '❌ Por favor especifica el nombre del producto.\n\nEjemplo: `/producto NEWCON REGLAS`';
+        } else {
+          responseText = await generateProductReport(productName);
+        }
+        break;
+
+      case '/exportar':
+        const period = args[0] || 'mes';
+        responseText = await generateCSVExport(period, chatId);
         break;
 
       case '/help':
@@ -458,22 +488,40 @@ function generateHelpMessage() {
 
 ━━━━━━━━━━━━━━━━━━━
 
-📊 *REPORTES DE VENTAS*
+📊 *REPORTES BÁSICOS*
 
-/dia - Reporte del día actual
-/semana - Reporte de la semana
-/mes - Reporte del mes
-/año - Reporte del año completo
+/dia - Resumen del día actual
+/semana - Resumen de la semana
+/mes - Resumen del mes
+/año - Resumen del año completo
 /stats - Estadísticas generales
+
+━━━━━━━━━━━━━━━━━━━
+
+⭐ *COMANDOS AVANZADOS*
+
+/comparar - Comparar períodos
+  📈 Hoy vs ayer, mes vs mes anterior, etc.
+
+/objetivos - Ver progreso de metas
+  🎯 Diarias, semanales, mensuales, anuales
+
+/producto [NOMBRE] - Stats de un curso
+  📦 Ejemplo: \`/producto NEWCON REGLAS\`
+
+/exportar [periodo] - Exportar a CSV
+  📄 Períodos: dia, semana, mes, año
+  💼 Perfecto para contabilidad e impuestos
 
 ━━━━━━━━━━━━━━━━━━━
 
 💡 *TIPS*
 
 • Los reportes se generan en tiempo real
-• Incluyen gráficos y desglose detallado
+• Incluyen gráficos y análisis detallados
 • Formato profesional contable
 • Todos los montos en ARS
+• Edita tus metas en el código
 
 ━━━━━━━━━━━━━━━━━━━
 
@@ -482,7 +530,14 @@ function generateHelpMessage() {
 
 ━━━━━━━━━━━━━━━━━━━
 
-🔔 Recibirás notificaciones automáticas cuando haya nuevas ventas.
+🔔 También recibirás alertas automáticas:
+• 📊 Nueva venta registrada
+• 🎯 Meta diaria alcanzada
+• 🏆 Record de ventas batido
+• 👑 Cliente VIP detectado
+• 🔥 Horario pico de ventas
+• 🚀 Producto viral del día
+• ☕ Primera venta del día
 
 ⏰ ${new Date().toLocaleString('es-AR')}
   `.trim();
@@ -629,4 +684,483 @@ function generateBarChart(data) {
     const bar = '█'.repeat(bars);
     return `${d.day} ${bar} $${Math.round(d.sales/1000)}k`;
   }).join('\n');
+}
+
+// ============================================
+// NUEVOS COMANDOS AVANZADOS
+// ============================================
+
+/**
+ * /comparar - Comparaciones entre períodos
+ */
+async function generateComparisonReport() {
+  try {
+    const now = new Date();
+    
+    // HOY vs AYER
+    const todayStart = new Date(now.setHours(0, 0, 0, 0)).toISOString();
+    const todayEnd = new Date(now.setHours(23, 59, 59, 999)).toISOString();
+    
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStart = new Date(yesterday.setHours(0, 0, 0, 0)).toISOString();
+    const yesterdayEnd = new Date(yesterday.setHours(23, 59, 59, 999)).toISOString();
+    
+    const { data: todayOrders } = await supabase
+      .from('orders')
+      .select('total')
+      .gte('created_at', todayStart)
+      .lte('created_at', todayEnd)
+      .eq('status', 'completed');
+    
+    const { data: yesterdayOrders } = await supabase
+      .from('orders')
+      .select('total')
+      .gte('created_at', yesterdayStart)
+      .lte('created_at', yesterdayEnd)
+      .eq('status', 'completed');
+    
+    const todayTotal = todayOrders?.reduce((sum, o) => sum + o.total, 0) || 0;
+    const yesterdayTotal = yesterdayOrders?.reduce((sum, o) => sum + o.total, 0) || 0;
+    const dayDiff = todayTotal - yesterdayTotal;
+    const dayPercent = yesterdayTotal > 0 ? ((dayDiff / yesterdayTotal) * 100).toFixed(1) : 0;
+    const dayTrend = dayDiff > 0 ? '📈' : dayDiff < 0 ? '📉' : '➡️';
+    
+    // MES ACTUAL vs MES ANTERIOR
+    const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+    const thisMonthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59).toISOString();
+    
+    const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString();
+    const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59).toISOString();
+    
+    const { data: thisMonthOrders } = await supabase
+      .from('orders')
+      .select('total')
+      .gte('created_at', thisMonthStart)
+      .lte('created_at', thisMonthEnd)
+      .eq('status', 'completed');
+    
+    const { data: lastMonthOrders } = await supabase
+      .from('orders')
+      .select('total')
+      .gte('created_at', lastMonthStart)
+      .lte('created_at', lastMonthEnd)
+      .eq('status', 'completed');
+    
+    const thisMonthTotal = thisMonthOrders?.reduce((sum, o) => sum + o.total, 0) || 0;
+    const lastMonthTotal = lastMonthOrders?.reduce((sum, o) => sum + o.total, 0) || 0;
+    const monthDiff = thisMonthTotal - lastMonthTotal;
+    const monthPercent = lastMonthTotal > 0 ? ((monthDiff / lastMonthTotal) * 100).toFixed(1) : 0;
+    const monthTrend = monthDiff > 0 ? '📈' : monthDiff < 0 ? '📉' : '➡️';
+    
+    // SEMANA ACTUAL vs SEMANA ANTERIOR
+    const getWeekStart = (date) => {
+      const d = new Date(date);
+      const day = d.getDay();
+      const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+      return new Date(d.setDate(diff));
+    };
+    
+    const thisWeekStart = getWeekStart(now);
+    thisWeekStart.setHours(0, 0, 0, 0);
+    
+    const lastWeekStart = new Date(thisWeekStart);
+    lastWeekStart.setDate(lastWeekStart.getDate() - 7);
+    
+    const lastWeekEnd = new Date(thisWeekStart);
+    lastWeekEnd.setDate(lastWeekEnd.getDate() - 1);
+    lastWeekEnd.setHours(23, 59, 59, 999);
+    
+    const { data: thisWeekOrders } = await supabase
+      .from('orders')
+      .select('total')
+      .gte('created_at', thisWeekStart.toISOString())
+      .eq('status', 'completed');
+    
+    const { data: lastWeekOrders } = await supabase
+      .from('orders')
+      .select('total')
+      .gte('created_at', lastWeekStart.toISOString())
+      .lte('created_at', lastWeekEnd.toISOString())
+      .eq('status', 'completed');
+    
+    const thisWeekTotal = thisWeekOrders?.reduce((sum, o) => sum + o.total, 0) || 0;
+    const lastWeekTotal = lastWeekOrders?.reduce((sum, o) => sum + o.total, 0) || 0;
+    const weekDiff = thisWeekTotal - lastWeekTotal;
+    const weekPercent = lastWeekTotal > 0 ? ((weekDiff / lastWeekTotal) * 100).toFixed(1) : 0;
+    const weekTrend = weekDiff > 0 ? '📈' : weekDiff < 0 ? '📉' : '➡️';
+
+    return `
+📊 *COMPARACIONES DE PERÍODOS*
+
+━━━━━━━━━━━━━━━━━━━
+
+📅 *HOY vs AYER*
+
+Hoy: $${todayTotal.toLocaleString('es-AR')}
+Ayer: $${yesterdayTotal.toLocaleString('es-AR')}
+Diferencia: ${dayDiff >= 0 ? '+' : ''}$${Math.abs(dayDiff).toLocaleString('es-AR')}
+Variación: ${dayPercent >= 0 ? '+' : ''}${dayPercent}% ${dayTrend}
+
+━━━━━━━━━━━━━━━━━━━
+
+📆 *ESTA SEMANA vs SEMANA PASADA*
+
+Esta semana: $${thisWeekTotal.toLocaleString('es-AR')}
+Semana pasada: $${lastWeekTotal.toLocaleString('es-AR')}
+Diferencia: ${weekDiff >= 0 ? '+' : ''}$${Math.abs(weekDiff).toLocaleString('es-AR')}
+Variación: ${weekPercent >= 0 ? '+' : ''}${weekPercent}% ${weekTrend}
+
+━━━━━━━━━━━━━━━━━━━
+
+📊 *ESTE MES vs MES ANTERIOR*
+
+Este mes: $${thisMonthTotal.toLocaleString('es-AR')}
+Mes anterior: $${lastMonthTotal.toLocaleString('es-AR')}
+Diferencia: ${monthDiff >= 0 ? '+' : ''}$${Math.abs(monthDiff).toLocaleString('es-AR')}
+Variación: ${monthPercent >= 0 ? '+' : ''}${monthPercent}% ${monthTrend}
+
+━━━━━━━━━━━━━━━━━━━
+
+${monthDiff > 0 ? '🚀 ¡Vas creciendo! Sigue así' : monthDiff < 0 ? '💪 Hay que ajustar estrategia' : '➡️ Manteniendo el ritmo'}
+    `.trim();
+
+  } catch (error) {
+    console.error('Error en generateComparisonReport:', error);
+    return '❌ Error generando comparación';
+  }
+}
+
+/**
+ * /objetivos - Sistema de metas configurables
+ */
+async function generateGoalsReport() {
+  try {
+    // METAS CONFIGURABLES (puedes editarlas aquí)
+    const GOALS = {
+      daily: 10000,      // Meta diaria en ARS
+      weekly: 70000,     // Meta semanal en ARS
+      monthly: 300000,   // Meta mensual en ARS
+      yearly: 3600000,   // Meta anual en ARS
+    };
+
+    const now = new Date();
+    
+    // VENTAS DEL DÍA
+    const todayStart = new Date(now.setHours(0, 0, 0, 0)).toISOString();
+    const { data: todayOrders } = await supabase
+      .from('orders')
+      .select('total')
+      .gte('created_at', todayStart)
+      .eq('status', 'completed');
+    
+    const todayTotal = todayOrders?.reduce((sum, o) => sum + o.total, 0) || 0;
+    const dailyPercent = (todayTotal / GOALS.daily * 100).toFixed(1);
+    const dailyRemaining = GOALS.daily - todayTotal;
+    const dailyBar = generateProgressBar(todayTotal, GOALS.daily);
+    
+    // VENTAS DE LA SEMANA
+    const weekStart = getWeekStart(now);
+    weekStart.setHours(0, 0, 0, 0);
+    const { data: weekOrders } = await supabase
+      .from('orders')
+      .select('total')
+      .gte('created_at', weekStart.toISOString())
+      .eq('status', 'completed');
+    
+    const weekTotal = weekOrders?.reduce((sum, o) => sum + o.total, 0) || 0;
+    const weeklyPercent = (weekTotal / GOALS.weekly * 100).toFixed(1);
+    const weeklyRemaining = GOALS.weekly - weekTotal;
+    const weeklyBar = generateProgressBar(weekTotal, GOALS.weekly);
+    
+    // VENTAS DEL MES
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+    const { data: monthOrders } = await supabase
+      .from('orders')
+      .select('total')
+      .gte('created_at', monthStart)
+      .eq('status', 'completed');
+    
+    const monthTotal = monthOrders?.reduce((sum, o) => sum + o.total, 0) || 0;
+    const monthlyPercent = (monthTotal / GOALS.monthly * 100).toFixed(1);
+    const monthlyRemaining = GOALS.monthly - monthTotal;
+    const monthlyBar = generateProgressBar(monthTotal, GOALS.monthly);
+    
+    // VENTAS DEL AÑO
+    const yearStart = new Date(now.getFullYear(), 0, 1).toISOString();
+    const { data: yearOrders } = await supabase
+      .from('orders')
+      .select('total')
+      .gte('created_at', yearStart)
+      .eq('status', 'completed');
+    
+    const yearTotal = yearOrders?.reduce((sum, o) => sum + o.total, 0) || 0;
+    const yearlyPercent = (yearTotal / GOALS.yearly * 100).toFixed(1);
+    const yearlyRemaining = GOALS.yearly - yearTotal;
+    const yearlyBar = generateProgressBar(yearTotal, GOALS.yearly);
+
+    return `
+🎯 *PROGRESO DE OBJETIVOS*
+
+━━━━━━━━━━━━━━━━━━━
+
+📅 *META DIARIA*
+Objetivo: $${GOALS.daily.toLocaleString('es-AR')}
+Actual: $${todayTotal.toLocaleString('es-AR')}
+${dailyBar} ${dailyPercent}%
+${dailyRemaining > 0 ? `Faltan: $${dailyRemaining.toLocaleString('es-AR')}` : `✅ ¡META ALCANZADA! +$${Math.abs(dailyRemaining).toLocaleString('es-AR')}`}
+
+━━━━━━━━━━━━━━━━━━━
+
+📆 *META SEMANAL*
+Objetivo: $${GOALS.weekly.toLocaleString('es-AR')}
+Actual: $${weekTotal.toLocaleString('es-AR')}
+${weeklyBar} ${weeklyPercent}%
+${weeklyRemaining > 0 ? `Faltan: $${weeklyRemaining.toLocaleString('es-AR')}` : `✅ ¡META ALCANZADA! +$${Math.abs(weeklyRemaining).toLocaleString('es-AR')}`}
+
+━━━━━━━━━━━━━━━━━━━
+
+📊 *META MENSUAL*
+Objetivo: $${GOALS.monthly.toLocaleString('es-AR')}
+Actual: $${monthTotal.toLocaleString('es-AR')}
+${monthlyBar} ${monthlyPercent}%
+${monthlyRemaining > 0 ? `Faltan: $${monthlyRemaining.toLocaleString('es-AR')}` : `✅ ¡META ALCANZADA! +$${Math.abs(monthlyRemaining).toLocaleString('es-AR')}`}
+
+━━━━━━━━━━━━━━━━━━━
+
+📈 *META ANUAL*
+Objetivo: $${GOALS.yearly.toLocaleString('es-AR')}
+Actual: $${yearTotal.toLocaleString('es-AR')}
+${yearlyBar} ${yearlyPercent}%
+${yearlyRemaining > 0 ? `Faltan: $${yearlyRemaining.toLocaleString('es-AR')}` : `✅ ¡META ALCANZADA! +$${Math.abs(yearlyRemaining).toLocaleString('es-AR')}`}
+
+━━━━━━━━━━━━━━━━━━━
+
+💡 *Tip:* Edita tus metas en \`api/telegram-webhook.js\` línea 726
+    `.trim();
+
+  } catch (error) {
+    console.error('Error en generateGoalsReport:', error);
+    return '❌ Error generando reporte de objetivos';
+  }
+}
+
+/**
+ * /producto [NOMBRE] - Estadísticas de curso específico
+ */
+async function generateProductReport(productName) {
+  try {
+    // Buscar en order_items (contiene item_name)
+    const { data: items, error } = await supabase
+      .from('order_items')
+      .select('*, orders!inner(*)')
+      .ilike('item_name', `%${productName}%`)
+      .eq('orders.status', 'completed');
+
+    if (error) {
+      console.error('Error obteniendo items:', error);
+      return '❌ Error obteniendo datos del producto';
+    }
+
+    if (!items || items.length === 0) {
+      return `❌ No se encontraron ventas para: *${productName}*\n\n💡 Verifica el nombre del curso.`;
+    }
+
+    // Estadísticas del producto
+    const totalSales = items.reduce((sum, item) => sum + (item.quantity || 1), 0);
+    const totalRevenue = items.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0);
+    const avgPrice = totalRevenue / totalSales;
+    
+    // Agrupar por día
+    const salesByDay = new Map();
+    items.forEach(item => {
+      const date = new Date(item.orders.created_at);
+      const dayKey = date.toLocaleDateString('es-AR');
+      salesByDay.set(dayKey, (salesByDay.get(dayKey) || 0) + (item.quantity || 1));
+    });
+    
+    // Último 7 días
+    const last7Days = Array.from(salesByDay.entries())
+      .sort((a, b) => new Date(b[0]) - new Date(a[0]))
+      .slice(0, 7);
+    
+    // Ventas este mes
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const thisMonthItems = items.filter(item => 
+      new Date(item.orders.created_at) >= monthStart
+    );
+    const thisMonthSales = thisMonthItems.reduce((sum, item) => sum + (item.quantity || 1), 0);
+    const thisMonthRevenue = thisMonthItems.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0);
+
+    // Primer y última venta
+    const sortedByDate = [...items].sort((a, b) => 
+      new Date(a.orders.created_at) - new Date(b.orders.created_at)
+    );
+    const firstSale = sortedByDate[0];
+    const lastSale = sortedByDate[sortedByDate.length - 1];
+
+    return `
+📦 *REPORTE DE PRODUCTO*
+
+*${items[0].item_name}*
+
+━━━━━━━━━━━━━━━━━━━
+
+📊 *ESTADÍSTICAS GENERALES*
+
+Total vendido: ${totalSales} unidades
+Ingresos totales: $${totalRevenue.toLocaleString('es-AR')}
+Precio promedio: $${avgPrice.toLocaleString('es-AR')}
+
+━━━━━━━━━━━━━━━━━━━
+
+📅 *ESTE MES*
+
+Ventas: ${thisMonthSales} unidades
+Ingresos: $${thisMonthRevenue.toLocaleString('es-AR')}
+
+━━━━━━━━━━━━━━━━━━━
+
+📈 *ÚLTIMOS 7 DÍAS*
+
+${last7Days.length > 0 
+  ? last7Days.map(([date, count]) => `${date}: ${count} ventas`).join('\n')
+  : 'Sin ventas recientes'}
+
+━━━━━━━━━━━━━━━━━━━
+
+🕐 *HISTORIAL*
+
+Primera venta: ${new Date(firstSale.orders.created_at).toLocaleDateString('es-AR')}
+Última venta: ${new Date(lastSale.orders.created_at).toLocaleDateString('es-AR')}
+
+━━━━━━━━━━━━━━━━━━━
+
+${totalSales >= 10 ? '🚀 ¡Producto exitoso!' : totalSales >= 5 ? '📈 Buenas ventas' : '💡 Potencial de crecimiento'}
+    `.trim();
+
+  } catch (error) {
+    console.error('Error en generateProductReport:', error);
+    return '❌ Error generando reporte del producto';
+  }
+}
+
+/**
+ * /exportar [periodo] - Exportar a CSV
+ */
+async function generateCSVExport(period, chatId) {
+  try {
+    let startDate;
+    const now = new Date();
+    
+    switch (period.toLowerCase()) {
+      case 'dia':
+      case 'día':
+      case 'hoy':
+        startDate = new Date(now.setHours(0, 0, 0, 0)).toISOString();
+        break;
+      case 'semana':
+        startDate = getWeekStart(now).toISOString();
+        break;
+      case 'año':
+      case 'ano':
+        startDate = new Date(now.getFullYear(), 0, 1).toISOString();
+        break;
+      case 'mes':
+      default:
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+        break;
+    }
+
+    const { data: orders, error } = await supabase
+      .from('orders')
+      .select('*, order_items(*)')
+      .gte('created_at', startDate)
+      .eq('status', 'completed')
+      .order('created_at', { ascending: true });
+
+    if (error) {
+      console.error('Error obteniendo órdenes:', error);
+      return '❌ Error generando CSV';
+    }
+
+    if (!orders || orders.length === 0) {
+      return `❌ No hay datos para exportar del período: *${period}*`;
+    }
+
+    // Generar CSV
+    let csv = 'Fecha,Hora,Cliente,Email,Total,Metodo Pago,Productos,Cantidad,ID Orden\n';
+    
+    orders.forEach(order => {
+      const date = new Date(order.created_at);
+      const dateStr = date.toLocaleDateString('es-AR');
+      const timeStr = date.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+      
+      const items = order.order_items || [];
+      const itemNames = items.map(i => i.item_name).join(' + ');
+      const itemCount = items.reduce((sum, i) => sum + (i.quantity || 1), 0);
+      
+      // Escapar comas en strings
+      const escape = (str) => `"${String(str || '').replace(/"/g, '""')}"`;
+      
+      csv += `${dateStr},${timeStr},${escape(order.customer_name)},${escape(order.customer_email)},${order.total},${order.payment_method},${escape(itemNames)},${itemCount},${order.id}\n`;
+    });
+
+    // Calcular totales
+    const totalSales = orders.reduce((sum, o) => sum + o.total, 0);
+    const totalOrders = orders.length;
+    const avgTicket = totalSales / totalOrders;
+
+    return `
+📊 *EXPORTACIÓN A CSV*
+
+━━━━━━━━━━━━━━━━━━━
+
+📅 Período: *${period}*
+📦 Órdenes: ${totalOrders}
+💰 Total: $${totalSales.toLocaleString('es-AR')}
+📈 Ticket promedio: $${avgTicket.toLocaleString('es-AR')}
+
+━━━━━━━━━━━━━━━━━━━
+
+📄 *DATOS CSV:*
+
+\`\`\`
+${csv}
+\`\`\`
+
+━━━━━━━━━━━━━━━━━━━
+
+💡 *Cómo usar:*
+1. Copia el texto entre \`\`\`
+2. Pégalo en un archivo .txt
+3. Cambia extensión a .csv
+4. Abre con Excel/Google Sheets
+
+🎯 Perfecto para contabilidad e impuestos
+    `.trim();
+
+  } catch (error) {
+    console.error('Error en generateCSVExport:', error);
+    return '❌ Error generando CSV';
+  }
+}
+
+// ============================================
+// HELPERS
+// ============================================
+
+function generateProgressBar(current, goal) {
+  const percent = Math.min(current / goal, 1);
+  const filled = Math.round(percent * 10);
+  const empty = 10 - filled;
+  return '█'.repeat(filled) + '░'.repeat(empty);
+}
+
+function getWeekStart(date) {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+  return new Date(d.setDate(diff));
 }
