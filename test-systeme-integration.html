@@ -200,7 +200,7 @@
 <body>
   <div class="container">
     <h1>🧪 Test: Integración systeme.io</h1>
-    <p class="subtitle">Prueba la integración antes de ir a producción</p>
+    <p class="subtitle">Sistema de Acceso Directo a Productos (SIN tags ni workflows)</p>
 
     <div class="warning-box">
       <strong>⚠️ IMPORTANTE:</strong> Este test enviará una petición REAL a systeme.io. 
@@ -211,11 +211,13 @@
       <strong>📋 Checklist antes de probar:</strong>
       <ul class="checklist">
         <li>SYSTEME_API_KEY configurada en .env.local</li>
-        <li>SYSTEME_TAG_ID configurada en .env.local</li>
-        <li>Tag creado en systeme.io</li>
-        <li>Automatización creada y ACTIVADA en systeme.io</li>
+        <li>Curso con systeme_product_id configurado en Supabase</li>
         <li>Servidor local corriendo (npm run dev)</li>
       </ul>
+      <p style="margin-top: 10px; font-size: 13px; color: #666;">
+        ✨ <strong>Nuevo sistema:</strong> Ya NO necesitas crear tags ni workflows. 
+        Solo copia el ID del producto de systeme.io y pégalo en tu base de datos.
+      </p>
     </div>
 
     <div class="section">
