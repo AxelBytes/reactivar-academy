@@ -364,16 +364,16 @@ Para que aparezcan en el menú de tu bot:
 4. Pega esto:
 
 ```
-dia - 📊 Reporte del dia
-semana - 📅 Reporte de la semana
-mes - 📆 Reporte del mes
-ano - 📈 Reporte del ano
-stats - 💹 Estadisticas generales
-comparar - 📊 Comparar periodos
-objetivos - 🎯 Ver progreso de metas
-producto - 📦 Stats de un curso
-exportar - 📄 Exportar a CSV
-help - ❓ Lista de comandos
+dia - Reporte del dia
+semana - Reporte de la semana
+mes - Reporte del mes
+anio - Reporte del anio
+stats - Estadisticas generales
+comparar - Comparar periodos
+objetivos - Ver progreso de metas
+producto - Stats de un curso
+exportar - Exportar a CSV
+help - Lista de comandos
 ```
 
 ---

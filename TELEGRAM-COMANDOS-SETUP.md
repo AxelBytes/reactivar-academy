@@ -189,16 +189,16 @@ Para que los comandos aparezcan en el menú del bot:
 5. **Envía esta lista:**
 
 ```
-dia - 📊 Reporte del dia
-semana - 📅 Reporte de la semana
-mes - 📆 Reporte del mes
-ano - 📈 Reporte del ano
-stats - 💹 Estadisticas generales
-comparar - 📊 Comparar periodos
-objetivos - 🎯 Ver progreso de metas
-producto - 📦 Stats de un curso
-exportar - 📄 Exportar a CSV
-help - ❓ Lista de comandos
+dia - Reporte del dia
+semana - Reporte de la semana
+mes - Reporte del mes
+anio - Reporte del anio
+stats - Estadisticas generales
+comparar - Comparar periodos
+objetivos - Ver progreso de metas
+producto - Stats de un curso
+exportar - Exportar a CSV
+help - Lista de comandos
 ```
 
 6. ✅ Listo! Los comandos ahora aparecerán cuando escribas `/`
