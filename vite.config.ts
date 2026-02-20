@@ -25,4 +25,34 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    // Minificar y ofuscar código en producción
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: mode === 'production', // Remover console.log en producción
+        drop_debugger: true,
+        pure_funcs: mode === 'production' ? ['console.log', 'console.info'] : []
+      },
+      mangle: {
+        // Ofuscar nombres de variables
+        safari10: true,
+      },
+      format: {
+        comments: false, // Remover comentarios
+      },
+    },
+    // Separar código en chunks para mejor performance
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'ui-vendor': ['lucide-react', '@radix-ui/react-dialog', '@radix-ui/react-toast'],
+          'supabase-vendor': ['@supabase/supabase-js'],
+        },
+      },
+    },
+    // Source maps solo en desarrollo
+    sourcemap: mode !== 'production',
+  },
 }));

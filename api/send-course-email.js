@@ -1,4 +1,7 @@
 // API endpoint para enviar emails cuando se compran cursos
+import { checkRateLimit, getClientIp } from './rate-limiter.js';
+import { isValidEmail, sanitizeString } from './validators.js';
+
 export default async function handler(req, res) {
   // CORS headers
   res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -14,16 +17,32 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Método no permitido' });
   }
 
+  // ⚡ RATE LIMITING - Máximo 5 emails por minuto por IP
+  if (!checkRateLimit(req, res, 5, 60000)) {
+    console.log(`🚫 Rate limit excedido para IP: ${getClientIp(req)}`);
+    return;
+  }
+
   try {
     const { userEmail, userName, courses, paymentId, userDni, userProvincia, userLocalidad, userPais } = req.body;
 
     console.log('📧 Intentando enviar email a:', userEmail);
     console.log('📚 Cursos:', courses?.length || 0);
 
-    if (!userEmail || !courses || courses.length === 0) {
-      console.error('❌ Datos incompletos:', { userEmail, coursesCount: courses?.length });
-      return res.status(400).json({ error: 'Datos incompletos' });
+    // ✅ VALIDACIÓN DE INPUTS
+    if (!userEmail || !isValidEmail(userEmail)) {
+      console.error('❌ Email inválido:', userEmail);
+      return res.status(400).json({ error: 'Email inválido' });
     }
+
+    if (!courses || courses.length === 0) {
+      console.error('❌ Sin cursos');
+      return res.status(400).json({ error: 'Sin cursos para enviar' });
+    }
+
+    // Sanitizar datos
+    const sanitizedEmail = userEmail.toLowerCase().trim();
+    const sanitizedName = userName ? sanitizeString(userName) : 'Cliente';
 
     // Aquí usaremos Brevo para enviar el email
     const BREVO_API_KEY = process.env.BREVO_API_KEY;
