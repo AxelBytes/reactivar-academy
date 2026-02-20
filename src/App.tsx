@@ -15,6 +15,8 @@ import Dashboard from "./pages/admin/Dashboard";
 import AdminProducts from "./pages/admin/Products";
 import AdminCourses from "./pages/admin/Courses";
 import AdminOrders from "./pages/admin/Orders";
+import AdminUsers from "./pages/admin/Users";
+import AdminSettings from "./pages/admin/Settings";
 import CheckoutSuccess from "./pages/checkout/Success";
 import CheckoutFailure from "./pages/checkout/Failure";
 import CheckoutPending from "./pages/checkout/Pending";
@@ -78,6 +80,22 @@ const App = () => (
                 element={
                   <ProtectedRoute requireAdmin>
                     <AdminOrders />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/usuarios"
+                element={
+                  <ProtectedRoute requireAdmin>
+                    <AdminUsers />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/configuracion"
+                element={
+                  <ProtectedRoute requireAdmin>
+                    <AdminSettings />
                   </ProtectedRoute>
                 }
               />
