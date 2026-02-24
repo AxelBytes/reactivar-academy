@@ -71,7 +71,7 @@
       "destination": "/api/send-course-email"
     },
     {
-      "source": "/(.*)",
+      "source": "/((?!sitemap\\.xml|robots\\.txt|googleabf40f54cd54f548\\.html|manifest\\.json|logo\\.svg|icon-.*\\.png).*)",
       "destination": "/"
     }
   ]
