@@ -12,17 +12,22 @@ const Index = () => {
   return (
     <div className="min-h-screen">
       <SEO 
-        title="Reactivar Academy - Cursos de Fitness y Entrenamiento Online"
-        description="Academia de fitness y entrenamiento profesional. Cursos online de alta calidad, productos especializados y programas personalizados. Aprende con los mejores entrenadores de Argentina."
+        title="Reactivar Academy - Capacitaciones de Newcom y Formación Deportiva"
+        description="Plataforma de capacitación para entrenadores y formadores de deportistas Newconeros. Cursos de Newcom, formación deportiva integral por Diego Machado. La mejor herramienta para formadores de Newcom en Argentina."
         keywords={[
-          'cursos de fitness',
-          'entrenamiento online',
-          'academia fitness Argentina',
-          'programas de entrenamiento',
-          'fitness profesional',
-          'entrenador personal',
-          'capacitación deportiva',
-          'cursos online fitness'
+          'newcom',
+          'newcom deporte',
+          'capacitacion newcom',
+          'entrenador newcom',
+          'formador newcom',
+          'deportistas newconeros',
+          'reactivar academy',
+          'diego machado newcom',
+          'newcom argentina',
+          'cursos newcom',
+          'arbitro newcom',
+          'planillero newcom',
+          'formacion deportiva newcom'
         ]}
         type="website"
       />
