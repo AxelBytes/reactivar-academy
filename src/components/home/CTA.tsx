@@ -1,7 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 const CTA = () => {
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
+
   return (
     <section className="py-16 lg:py-24 bg-primary text-primary-foreground relative overflow-hidden">
       {/* Background Pattern */}
@@ -36,6 +41,7 @@ const CTA = () => {
             <Button
               size="xl"
               className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 font-semibold shadow-lg hover:shadow-xl transition-all"
+              onClick={() => navigate(isAuthenticated ? "/cursos" : "/login")}
             >
               Comenzar Ahora
               <ArrowRight className="w-5 h-5" />
@@ -43,14 +49,11 @@ const CTA = () => {
             <Button
               variant="heroOutline"
               size="xl"
+              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
             >
               Ver Catálogo Completo
             </Button>
           </div>
-
-          <p className="text-sm opacity-70 mt-6">
-            Sin compromisos. Cancela cuando quieras.
-          </p>
         </div>
       </div>
     </section>

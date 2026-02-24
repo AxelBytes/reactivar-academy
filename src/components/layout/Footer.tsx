@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Facebook, Instagram, Youtube, Mail, Phone, MapPin } from "lucide-react";
+import { Facebook, Instagram, Youtube, Mail, Phone } from "lucide-react";
 
 const Footer = () => {
   return (
@@ -81,15 +81,11 @@ const Footer = () => {
             <ul className="space-y-3">
               <li className="flex items-center gap-3 text-sm text-secondary-foreground/80">
                 <Mail className="w-4 h-4 text-primary" />
-                <span>info@ReactivarAcademy.com</span>
+                <span>Profedeeducacionfisica22@gmail.com</span>
               </li>
               <li className="flex items-center gap-3 text-sm text-secondary-foreground/80">
                 <Phone className="w-4 h-4 text-primary" />
-                <span>+1 (555) 123-4567</span>
-              </li>
-              <li className="flex items-start gap-3 text-sm text-secondary-foreground/80">
-                <MapPin className="w-4 h-4 text-primary mt-0.5" />
-                <span>123 Sports Avenue, Ciudad Deportiva, CP 12345</span>
+                <span>+54 9 3755 26-7435</span>
               </li>
             </ul>
           </div>

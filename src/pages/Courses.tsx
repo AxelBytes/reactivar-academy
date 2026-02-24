@@ -11,233 +11,6 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
 import { SEO } from "@/components/SEO";
 import courseFitness from "@/assets/course-fitness.jpg";
-import courseNutrition from "@/assets/course-nutrition.jpg";
-import courseMental from "@/assets/course-mental.jpg";
-
-// Cursos de respaldo (fallback) por si no hay conexión a Supabase
-const FALLBACK_COURSES = [
-  {
-    id: 999,
-    title: "🧪 Curso de Prueba GRATIS",
-    description: "Curso gratuito para probar el sistema de emails y pagos - No requiere pago real",
-    instructor: "Diego Machado",
-    price: 0,
-    originalPrice: 50000,
-    image: courseFitness,
-    level: "Básico",
-    duration: "1 hora",
-    lessons: 5,
-    students: 0,
-    rating: 5.0,
-    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-    detailedDescription: "Este es un curso completamente GRATUITO diseñado específicamente para probar el sistema de notificaciones por email y el flujo de compra completo.\n\nAl 'comprar' este curso (sin costo), recibirás un email de confirmación automático con todos los detalles de tu 'compra'. Esto permite verificar que:\n\n✅ El sistema de emails funciona correctamente\n✅ Los datos del cliente se capturan bien\n✅ La integración con Brevo está activa\n✅ El flujo completo de checkout funciona\n\nEs una herramienta de testing esencial antes de lanzar cursos de pago.",
-    topics: [
-      "Introducción al sistema de testing",
-      "Cómo funciona el flujo de compra",
-      "Verificación de emails automáticos",
-      "Prueba de integración completa",
-      "Testing de checkout sin costo"
-    ],
-    includes: [
-      "Acceso inmediato y gratuito",
-      "Email de confirmación automático",
-      "Prueba de todo el sistema",
-      "Sin cargo real",
-      "Ideal para testing"
-    ],
-  },
-  {
-    id: 1,
-    title: "Entrenamiento Funcional Completo",
-    description: "Domina las técnicas de entrenamiento funcional con ejercicios prácticos y rutinas efectivas para todo tipo de atletas.",
-    instructor: "Carlos Mendoza",
-    price: 150000,
-    originalPrice: 250000,
-    image: courseFitness,
-    level: "Intermedio",
-    duration: "12 horas",
-    lessons: 45,
-    students: 2340,
-    rating: 4.9,
-    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-    detailedDescription: "Este curso completo de entrenamiento funcional te enseñará todo lo necesario para dominar ejercicios con peso corporal, movimientos multiarticulares y rutinas de alta intensidad.\n\nAprenderás progresiones desde nivel principiante hasta avanzado, programación de entrenamientos efectivos y cómo adaptar ejercicios según tus objetivos específicos.",
-    topics: [
-      "Fundamentos del entrenamiento funcional",
-      "Técnicas de ejercicios con peso corporal",
-      "Progresiones de movimientos complejos",
-      "Programación de rutinas personalizadas",
-      "Prevención de lesiones",
-      "Nutrición para rendimiento funcional"
-    ],
-    includes: [
-      "45 videos en HD",
-      "Material descargable",
-      "Certificado de finalización",
-      "Acceso de por vida",
-      "Grupo privado de estudiantes",
-      "Actualizaciones gratuitas"
-    ],
-  },
-  {
-    id: 2,
-    title: "Nutrición para Atletas",
-    description: "Aprende a optimizar tu alimentación para maximizar el rendimiento deportivo y acelerar la recuperación.",
-    instructor: "Ana García",
-    price: 110000,
-    image: courseNutrition,
-    level: "Básico",
-    duration: "8 horas",
-    lessons: 32,
-    students: 1856,
-    rating: 4.8,
-    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-    detailedDescription: "Descubre cómo la nutrición correcta puede transformar tu rendimiento deportivo. Este curso te enseña los principios científicos de la nutrición deportiva aplicados a casos reales.\n\nAprenderás a calcular macros, timing de nutrientes, suplementación inteligente y cómo adaptar tu alimentación según tu deporte y objetivos.",
-    topics: [
-      "Macronutrientes y su función en el deporte",
-      "Cálculo de requerimientos calóricos",
-      "Timing de nutrientes pre y post entreno",
-      "Hidratación óptima para atletas",
-      "Suplementación basada en evidencia",
-      "Planes de comidas prácticos"
-    ],
-    includes: [
-      "32 lecciones en video",
-      "Calculadoras de macros",
-      "Recetarios deportivos",
-      "Guías de suplementos",
-      "Certificado profesional",
-      "Soporte del instructor"
-    ],
-  },
-  {
-    id: 3,
-    title: "Mentalidad Ganadora",
-    description: "Desarrolla la fortaleza mental que necesitas para alcanzar tus objetivos deportivos y superar cualquier obstáculo.",
-    instructor: "Roberto Díaz",
-    price: 190000,
-    originalPrice: 300000,
-    image: courseMental,
-    level: "Avanzado",
-    duration: "15 horas",
-    lessons: 52,
-    students: 3120,
-    rating: 4.9,
-    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-    detailedDescription: "La diferencia entre el éxito y el fracaso muchas veces está en la mente. Este curso avanzado te enseña técnicas de psicología deportiva utilizadas por atletas de élite mundial.\n\nAprenderás gestión del estrés competitivo, visualización, manejo de la presión, recuperación mental y cómo desarrollar rutinas mentales ganadoras.",
-    topics: [
-      "Psicología del alto rendimiento",
-      "Técnicas de visualización avanzada",
-      "Gestión de estrés competitivo",
-      "Rutinas mentales pre-competencia",
-      "Recuperación psicológica post-derrota",
-      "Construcción de confianza inquebrantable",
-      "Meditación para atletas",
-      "Manejo de diálogo interno"
-    ],
-    includes: [
-      "52 lecciones magistrales",
-      "Audios de meditación guiada",
-      "Workbooks interactivos",
-      "Sesión 1-1 con el instructor",
-      "Certificación profesional",
-      "Comunidad privada de élite"
-    ],
-  },
-  {
-    id: 4,
-    title: "Preparación Física Integral",
-    description: "Programa completo de acondicionamiento físico para mejorar fuerza, resistencia, velocidad y flexibilidad.",
-    instructor: "Carlos Mendoza",
-    price: 170000,
-    image: courseFitness,
-    level: "Intermedio",
-    duration: "20 horas",
-    lessons: 68,
-    students: 1540,
-    rating: 4.7,
-    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-    detailedDescription: "Programa integral de 12 semanas que cubre todas las cualidades físicas esenciales. Desarrolla fuerza, potencia, resistencia cardiovascular, flexibilidad y movilidad de forma equilibrada.\n\nIdeal para deportistas que buscan una preparación física completa o personas que quieren alcanzar su mejor versión física.",
-    topics: [
-      "Periodización del entrenamiento",
-      "Desarrollo de fuerza máxima",
-      "Entrenamiento de potencia explosiva",
-      "Acondicionamiento cardiovascular",
-      "Movilidad y flexibilidad",
-      "Prevención de lesiones"
-    ],
-    includes: [
-      "68 videos instructivos",
-      "Plan de 12 semanas",
-      "Plantillas de seguimiento",
-      "Certificado de logro",
-      "Foro de estudiantes",
-      "Bonus: Guía de recuperación"
-    ],
-  },
-  {
-    id: 5,
-    title: "Suplementación Deportiva",
-    description: "Guía completa sobre suplementos deportivos: cuáles usar, cuándo y cómo para maximizar resultados.",
-    instructor: "Ana García",
-    price: 95000,
-    originalPrice: 150000,
-    image: courseNutrition,
-    level: "Básico",
-    duration: "6 horas",
-    lessons: 24,
-    students: 980,
-    rating: 4.6,
-    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-    detailedDescription: "Navega el confuso mundo de la suplementación deportiva con información basada 100% en ciencia. Aprende qué suplementos realmente funcionan, cuáles son innecesarios y cómo usarlos de forma segura.\n\nAhorra dinero evitando productos ineficaces e invierte inteligentemente en suplementos que realmente marcan diferencia.",
-    topics: [
-      "Fundamentos de suplementación",
-      "Proteínas: tipos y usos",
-      "Creatina: la ciencia completa",
-      "Pre-entrenos efectivos",
-      "Vitaminas y minerales esenciales",
-      "Suplementos para recuperación"
-    ],
-    includes: [
-      "24 lecciones concisas",
-      "Guía de compra inteligente",
-      "Comparativas de productos",
-      "Calculadora de dosis",
-      "Certificado digital",
-      "Actualizaciones anuales"
-    ],
-  },
-  {
-    id: 6,
-    title: "Gestión del Estrés Competitivo",
-    description: "Técnicas avanzadas para manejar la presión y el estrés en competiciones de alto nivel.",
-    instructor: "Roberto Díaz",
-    price: 140000,
-    image: courseMental,
-    level: "Avanzado",
-    duration: "10 horas",
-    lessons: 38,
-    students: 760,
-    rating: 4.8,
-    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-    detailedDescription: "Curso especializado en manejo de presión competitiva. Aprende las mismas técnicas que utilizan atletas olímpicos para mantener la calma y el foco bajo máxima presión.\n\nDesarrolla protocolos personalizados para tus competiciones y transforma la ansiedad en energía productiva.",
-    topics: [
-      "Fisiología del estrés competitivo",
-      "Técnicas de respiración avanzada",
-      "Anclajes mentales para competencias",
-      "Protocolo pre-competencia personalizado",
-      "Manejo de expectativas externas",
-      "Recuperación mental post-competencia"
-    ],
-    includes: [
-      "38 videos especializados",
-      "Ejercicios prácticos diarios",
-      "Plantillas de protocolos",
-      "Audio de respiración guiada",
-      "Certificación avanzada",
-      "Mentoría mensual grupal"
-    ],
-  },
-];
 
 const getLevelColor = (level: string) => {
   switch (level) {
@@ -253,7 +26,7 @@ const getLevelColor = (level: string) => {
 };
 
 const Courses = () => {
-  const [courses, setCourses] = useState<typeof FALLBACK_COURSES>([]);
+  const [courses, setCourses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const { addCourse, isInCart } = useCart();
   const { toast } = useToast();
@@ -272,12 +45,11 @@ const Courses = () => {
 
         if (error) {
           console.error("Error cargando cursos:", error);
-          setCourses(FALLBACK_COURSES);
+          setCourses([]);
           return;
         }
 
         if (data && data.length > 0) {
-          // Mapear los cursos de Supabase al formato esperado
           const mappedCourses = data.map((course) => ({
             id: course.id,
             title: course.title,
@@ -298,12 +70,11 @@ const Courses = () => {
           }));
           setCourses(mappedCourses);
         } else {
-          // Si no hay cursos en Supabase, usar fallback
-          setCourses(FALLBACK_COURSES);
+          setCourses([]);
         }
       } catch (error) {
         console.error("Error inesperado cargando cursos:", error);
-        setCourses(FALLBACK_COURSES);
+        setCourses([]);
       } finally {
         setLoading(false);
       }

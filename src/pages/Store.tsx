@@ -10,234 +10,12 @@ import { useCart } from "@/contexts/CartContext";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
 import { SEO } from "@/components/SEO";
-import productShoes from "@/assets/product-shoes.jpg";
-import productDumbbells from "@/assets/product-dumbbells.jpg";
-import productYogaMat from "@/assets/product-yoga-mat.jpg";
 import productShaker from "@/assets/product-shaker.jpg";
-
-// Productos de respaldo (fallback) por si no hay conexión a Supabase
-const FALLBACK_PRODUCTS = [
-  {
-    id: 999,
-    name: "🧪 Producto de Prueba",
-    description: "Producto para probar pagos - Precio simbólico",
-    price: 1,
-    originalPrice: 100,
-    image: productShaker,
-    category: "Accesorios",
-    inStock: true,
-    isNew: true,
-    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-    detailedDescription: "Este es un producto de prueba diseñado para validar el sistema de pagos. No es un producto real, sino una herramienta de testing para asegurar que todas las pasarelas de pago funcionen correctamente antes del lanzamiento oficial.",
-    features: [
-      "Precio simbólico de $1 ARS para testing",
-      "Funciona con todas las pasarelas de pago",
-      "Ideal para probar el checkout completo",
-      "No incluye envío real"
-    ],
-  },
-  {
-    id: 997,
-    name: "💵 Test $1 USD",
-    description: "Producto de prueba - Equivale a $1 USD exacto",
-    price: 1450,
-    originalPrice: 2000,
-    image: productShaker,
-    category: "Accesorios",
-    inStock: true,
-    isNew: true,
-    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-    detailedDescription: "Producto especial de prueba calibrado para convertirse exactamente a $1 USD en PayPal. Permite testear la conversión de moneda automática y verificar que los pagos internacionales funcionen correctamente.",
-    features: [
-      "Conversión automática ARS a USD",
-      "Precio equivalente a $1 USD",
-      "Prueba de pagos internacionales",
-      "Testing de tipo de cambio en tiempo real"
-    ],
-  },
-  {
-    id: 998,
-    name: "🎯 Curso Básico de Fitness",
-    description: "Curso completo de entrenamiento - Precio accesible",
-    price: 2000,
-    originalPrice: 3500,
-    image: productDumbbells,
-    category: "Cursos",
-    inStock: true,
-    isNew: true,
-    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-    detailedDescription: "Curso introductorio de fitness diseñado para principiantes. Aprende los fundamentos del entrenamiento físico con rutinas personalizadas, guías de nutrición y seguimiento profesional.",
-    features: [
-      "12 semanas de entrenamiento guiado",
-      "Videos instructivos en HD",
-      "Plan de nutrición personalizado",
-      "Soporte por WhatsApp",
-      "Certificado al finalizar"
-    ],
-  },
-  {
-    id: 1,
-    name: "Zapatillas Running Pro",
-    description: "Zapatillas de alto rendimiento con amortiguación avanzada",
-    price: 180000,
-    originalPrice: 220000,
-    image: productShoes,
-    category: "Calzado",
-    inStock: true,
-    isNew: true,
-    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-    detailedDescription: "Zapatillas profesionales diseñadas para runners exigentes. Tecnología de amortiguación de última generación que reduce el impacto en articulaciones y mejora tu rendimiento en cada kilómetro.",
-    features: [
-      "Amortiguación React Foam de alta densidad",
-      "Suela de carbono para mayor impulso",
-      "Upper transpirable con tecnología Flyknit",
-      "Diseño anatómico para máximo confort",
-      "Peso ultra-ligero: solo 240g",
-      "Ideal para maratones y entrenamientos largos"
-    ],
-  },
-  {
-    id: 2,
-    name: "Set de Mancuernas Ajustables",
-    description: "Mancuernas de 5-25kg con sistema de ajuste rápido",
-    price: 350000,
-    image: productDumbbells,
-    category: "Pesas",
-    inStock: true,
-    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-    detailedDescription: "Set completo de mancuernas ajustables que reemplazan hasta 10 pares de mancuernas tradicionales. Sistema de ajuste rápido para cambiar el peso en segundos, ideal para entrenamientos intensos sin interrupciones.",
-    features: [
-      "Rango de peso: 5kg a 25kg por mancuerna",
-      "Sistema de ajuste rápido en 2 segundos",
-      "Incluye soporte para almacenamiento",
-      "Reemplazan 10 pares de mancuernas",
-      "Ahorra espacio en tu gimnasio casero",
-      "Material de alta durabilidad"
-    ],
-  },
-  {
-    id: 3,
-    name: "Mat de Yoga Premium",
-    description: "Colchoneta antideslizante de alta densidad 6mm",
-    price: 55000,
-    originalPrice: 75000,
-    image: productYogaMat,
-    category: "Accesorios",
-    inStock: true,
-    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-    detailedDescription: "Mat profesional de yoga y pilates fabricado con materiales ecológicos. Superficie antideslizante en ambos lados para máxima estabilidad en tus posturas más desafiantes.",
-    features: [
-      "Grosor de 6mm para máximo confort",
-      "Material TPE ecológico libre de tóxicos",
-      "Superficie antideslizante dual",
-      "Dimensiones: 183cm x 61cm",
-      "Incluye correa de transporte",
-      "Fácil de limpiar y mantener"
-    ],
-  },
-  {
-    id: 4,
-    name: "Shaker Pro 750ml",
-    description: "Botella mezcladora con compartimento para suplementos",
-    price: 30000,
-    image: productShaker,
-    category: "Accesorios",
-    inStock: true,
-    isNew: true,
-    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-    detailedDescription: "Shaker profesional con sistema de mezclado superior. Diseñado para preparar batidos perfectos sin grumos. Incluye compartimentos separados para llevar tus suplementos organizados.",
-    features: [
-      "Capacidad de 750ml",
-      "Sistema de bola mezcladora incluido",
-      "Compartimento para suplementos",
-      "Libre de BPA",
-      "Tapa a rosca anti-derrames",
-      "Marcas de medición en ml y oz"
-    ],
-  },
-  {
-    id: 5,
-    name: "Cuerda de Saltar Profesional",
-    description: "Cuerda ajustable con rodamientos de alta velocidad",
-    price: 25000,
-    image: productShaker,
-    category: "Accesorios",
-    inStock: true,
-    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-    detailedDescription: "Cuerda profesional para saltar diseñada para CrossFit, boxing y entrenamientos de alta intensidad. Rodamientos de 360° para rotación ultra-suave.",
-    features: [
-      "Rodamientos de alta velocidad 360°",
-      "Cable de acero recubierto en PVC",
-      "Mangos ergonómicos con grip antideslizante",
-      "Longitud ajustable (2.4m a 3m)",
-      "Peso ideal para doble saltos",
-      "Contador digital integrado (opcional)"
-    ],
-  },
-  {
-    id: 6,
-    name: "Banda de Resistencia Kit",
-    description: "Set de 5 bandas con diferentes niveles de resistencia",
-    price: 42000,
-    originalPrice: 55000,
-    image: productYogaMat,
-    category: "Accesorios",
-    inStock: true,
-    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-    detailedDescription: "Kit completo de bandas elásticas para entrenamiento de resistencia. Perfecto para fortalecer todo el cuerpo sin necesidad de pesas. Incluye guía de ejercicios ilustrada.",
-    features: [
-      "5 niveles de resistencia (5-30 lbs)",
-      "Material de látex natural de alta calidad",
-      "Incluye anclas para puerta y manijas",
-      "Correas para tobillos incluidas",
-      "Bolsa de transporte",
-      "Guía de ejercicios PDF"
-    ],
-  },
-  {
-    id: 7,
-    name: "Guantes de Entrenamiento",
-    description: "Guantes con protección palmar y muñequera ajustable",
-    price: 38000,
-    image: productDumbbells,
-    category: "Accesorios",
-    inStock: true,
-    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-    detailedDescription: "Guantes profesionales para gimnasio con protección palmar reforzada. Diseño ergonómico que brinda máximo soporte y protección durante levantamiento de pesas.",
-    features: [
-      "Protección palmar acolchada",
-      "Muñequera ajustable de 30cm",
-      "Material transpirable",
-      "Sistema de agarre antideslizante",
-      "Dedos cortados para mejor sensibilidad",
-      "Cierre con velcro de alta resistencia"
-    ],
-  },
-  {
-    id: 8,
-    name: "Zapatillas CrossFit Elite",
-    description: "Diseño para entrenamientos de alta intensidad",
-    price: 195000,
-    image: productShoes,
-    category: "Calzado",
-    inStock: false,
-    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-    detailedDescription: "Zapatillas especializadas para CrossFit y entrenamientos funcionales. Diseño versátil que combina estabilidad para levantamientos con flexibilidad para movimientos dinámicos.",
-    features: [
-      "Suela plana para mayor estabilidad",
-      "Refuerzo lateral para movimientos laterales",
-      "Upper resistente al desgaste",
-      "Amortiguación en talón para saltos",
-      "Sistema de atadura segura",
-      "Ideal para WODs y entrenamientos HIIT"
-    ],
-  },
-];
 
 const categories = ["Todos", "Calzado", "Pesas", "Accesorios", "Ropa", "Nutrición"];
 
 const Store = () => {
-  const [products, setProducts] = useState<typeof FALLBACK_PRODUCTS>([]);
+  const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const { addProduct, isInCart } = useCart();
   const { toast } = useToast();
@@ -256,12 +34,11 @@ const Store = () => {
 
         if (error) {
           console.error("Error cargando productos:", error);
-          setProducts(FALLBACK_PRODUCTS);
+          setProducts([]);
           return;
         }
 
         if (data && data.length > 0) {
-          // Mapear los productos de Supabase al formato esperado
           const mappedProducts = data.map((product) => ({
             id: product.id,
             name: product.name,
@@ -278,12 +55,11 @@ const Store = () => {
           }));
           setProducts(mappedProducts);
         } else {
-          // Si no hay productos en Supabase, usar fallback
-          setProducts(FALLBACK_PRODUCTS);
+          setProducts([]);
         }
       } catch (error) {
         console.error("Error inesperado cargando productos:", error);
-        setProducts(FALLBACK_PRODUCTS);
+        setProducts([]);
       } finally {
         setLoading(false);
       }
