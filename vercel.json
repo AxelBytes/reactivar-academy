@@ -7,6 +7,13 @@
   },
   "headers": [
     {
+      "source": "/sitemap.xml",
+      "headers": [
+        { "key": "Content-Type", "value": "application/xml" },
+        { "key": "Cache-Control", "value": "public, max-age=86400" }
+      ]
+    },
+    {
       "source": "/(.*)",
       "headers": [
         {
@@ -71,7 +78,15 @@
       "destination": "/api/send-course-email"
     },
     {
-      "source": "/((?!sitemap\\.xml|robots\\.txt|googleabf40f54cd54f548\\.html|manifest\\.json|logo\\.svg|icon-.*\\.png).*)",
+      "source": "/sitemap.xml",
+      "destination": "/sitemap.xml"
+    },
+    {
+      "source": "/robots.txt",
+      "destination": "/robots.txt"
+    },
+    {
+      "source": "/(.*)",
       "destination": "/"
     }
   ]
