@@ -37,22 +37,12 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
-// Usuario admin para acceso al panel de administración
-const ADMIN_USER = {
-  email: "Profedeeducacionfisica22@gmail.com",
-  password: "Dm1991",
-  name: "Diego Machado",
-  role: "admin" as const,
-};
-
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(() => {
-    // Recuperar sesión guardada al iniciar
     const savedUser = localStorage.getItem("auth_user");
     return savedUser ? JSON.parse(savedUser) : null;
   });
 
-  // Guardar usuario en localStorage cuando cambie
   useEffect(() => {
     if (user) {
       localStorage.setItem("auth_user", JSON.stringify(user));
@@ -66,48 +56,30 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     password: string
   ): Promise<{ success: boolean; error?: string }> => {
     try {
-      // Verificar si es el usuario admin hardcodeado
-      if (email === ADMIN_USER.email && password === ADMIN_USER.password) {
-        const adminUser: User = {
-          id: "admin",
-          email: ADMIN_USER.email,
-          name: ADMIN_USER.name,
-          role: "admin",
-          avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Admin",
-        };
-        setUser(adminUser);
-        return { success: true };
+      const baseUrl = import.meta.env.DEV ? 'http://localhost:8080' : window.location.origin;
+
+      const response = await fetch(`${baseUrl}/api/auth-login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (!data.success) {
+        return { success: false, error: data.error || "Credenciales incorrectas" };
       }
 
-      // Buscar usuario en Supabase
-      const { data: users, error } = await supabase
-        .from("users")
-        .select("*")
-        .eq("email", email)
-        .single();
-
-      if (error || !users) {
-        return { success: false, error: "Credenciales incorrectas" };
-      }
-
-      // Verificar contraseña
-      const passwordMatch = await bcrypt.compare(password, users.password_hash);
-      
-      if (!passwordMatch) {
-        return { success: false, error: "Credenciales incorrectas" };
-      }
-
-      // Login exitoso
       const loggedUser: User = {
-        id: users.id,
-        email: users.email,
-        name: users.name || "Usuario",
-        dni: users.dni || undefined,
-        provincia: users.provincia || undefined,
-        localidad: users.localidad || undefined,
-        pais: users.pais || undefined,
-        role: users.role,
-        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${users.name}`,
+        id: data.user.id,
+        email: data.user.email,
+        name: data.user.name || "Usuario",
+        dni: data.user.dni || undefined,
+        provincia: data.user.provincia || undefined,
+        localidad: data.user.localidad || undefined,
+        pais: data.user.pais || undefined,
+        role: data.user.role,
+        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${data.user.name}`,
       };
 
       setUser(loggedUser);
