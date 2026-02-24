@@ -231,8 +231,8 @@ const Success = () => {
         const firstItem = finalCourses[0];
         const itemName = firstItem?.title || '';
 
-        // Enviar notificación de venta
-        await fetch(`${baseUrl}/api/telegram-notify`, {
+        // Enviar notificación de venta + alertas inteligentes (endpoint unificado)
+        await fetch(`${baseUrl}/api/telegram`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -263,23 +263,7 @@ const Success = () => {
           }),
         });
 
-        console.log('✅ Notificación de venta enviada');
-
-        // Enviar alertas inteligentes adicionales
-        await fetch(`${baseUrl}/api/telegram-smart-alerts`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            orderTotal: finalCourses.reduce((sum: number, course: any) => sum + (course.price || 0), 0),
-            courseName: itemName,
-            productName: itemName,
-            adminUrl: `${baseUrl}/admin`,
-          }),
-        });
-
-        console.log('✅ Alertas inteligentes verificadas');
+        console.log('✅ Notificación y alertas inteligentes enviadas');
 
       } catch (telegramError) {
         console.error('⚠️ Error enviando notificación Telegram:', telegramError);

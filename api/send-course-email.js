@@ -1,6 +1,6 @@
 // API endpoint para enviar emails cuando se compran cursos
-import { checkRateLimit, getClientIp } from './rate-limiter.js';
-import { isValidEmail, sanitizeString } from './validators.js';
+import { checkRateLimit, getClientIp } from './_utils/rate-limiter.js';
+import { isValidEmail, sanitizeString } from './_utils/validators.js';
 
 export default async function handler(req, res) {
   // CORS headers
