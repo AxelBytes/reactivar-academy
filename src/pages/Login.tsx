@@ -467,16 +467,6 @@ const Login = () => {
                     </div>
                   </div>
 
-                  {/* Demo Credentials Info */}
-                  <div className="rounded-lg bg-primary/10 p-3 text-sm space-y-1">
-                    <p className="font-medium text-foreground">Credenciales de prueba:</p>
-                    <p className="text-muted-foreground">
-                      <strong>Admin:</strong> admin@reactivar.com / admin123
-                    </p>
-                    <p className="text-muted-foreground">
-                      <strong>Usuario:</strong> usuario@test.com / user123
-                    </p>
-                  </div>
                 </CardContent>
                 <CardFooter className="flex flex-col gap-2">
                   <Button type="submit" className="w-full" disabled={isLoading}>
