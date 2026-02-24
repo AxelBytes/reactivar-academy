@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Facebook, Instagram, Twitter, Youtube, Mail, Phone, MapPin } from "lucide-react";
+import { Facebook, Instagram, Youtube, Mail, Phone, MapPin } from "lucide-react";
 
 const Footer = () => {
   return (
@@ -19,16 +19,13 @@ const Footer = () => {
               Aprende de los mejores y equípate para el éxito.
             </p>
             <div className="flex items-center gap-4">
-              <a href="#" className="text-secondary-foreground/60 hover:text-primary transition-colors">
+              <a href="https://www.facebook.com/share/1887vTePKg/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" className="text-secondary-foreground/60 hover:text-primary transition-colors">
                 <Facebook className="w-5 h-5" />
               </a>
-              <a href="#" className="text-secondary-foreground/60 hover:text-primary transition-colors">
+              <a href="https://www.instagram.com/machado_reactivar_newcom?igsh=MTBveGN0dnVjb2M3cg%3D%3D&utm_source=qr" target="_blank" rel="noopener noreferrer" className="text-secondary-foreground/60 hover:text-primary transition-colors">
                 <Instagram className="w-5 h-5" />
               </a>
-              <a href="#" className="text-secondary-foreground/60 hover:text-primary transition-colors">
-                <Twitter className="w-5 h-5" />
-              </a>
-              <a href="#" className="text-secondary-foreground/60 hover:text-primary transition-colors">
+              <a href="https://youtube.com/@reactivarnewcommachado?si=NSfWbIPY9pwNW48A" target="_blank" rel="noopener noreferrer" className="text-secondary-foreground/60 hover:text-primary transition-colors">
                 <Youtube className="w-5 h-5" />
               </a>
             </div>
@@ -61,10 +58,10 @@ const Footer = () => {
             <h4 className="font-semibold text-lg mb-4">Categorías</h4>
             <ul className="space-y-3">
               {[
-                "Entrenamiento Funcional",
-                "Nutrición Deportiva",
-                "Psicología Deportiva",
-                "Preparación Física",
+                "Entrenador/a de NEWCOM",
+                "Formador/a de NEWCOM",
+                "Árbitros de NEWCOM",
+                "Planillero/a de NEWCOM",
               ].map((category) => (
                 <li key={category}>
                   <a
