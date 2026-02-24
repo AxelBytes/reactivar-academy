@@ -37,11 +37,11 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
-// Usuario admin hardcodeado para acceso siempre disponible
+// Usuario admin para acceso al panel de administración
 const ADMIN_USER = {
-  email: "admin@reactivar.com",
-  password: "admin123",
-  name: "Administrador",
+  email: "Profedeeducacionfisica22@gmail.com",
+  password: "Dm1991",
+  name: "Diego Machado",
   role: "admin" as const,
 };
 
