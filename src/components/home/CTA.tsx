@@ -19,12 +19,17 @@ const CTA = () => {
           </div>
 
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6">
-            ¿Listo para Transformar tu Rendimiento?
+            ¿Listo para formarte como entrenador/formador de deportistas Newconeros?
           </h2>
 
-          <p className="text-lg md:text-xl opacity-90 mb-8 leading-relaxed">
-            Únete a más de 10,000 deportistas que ya están mejorando con nuestras 
-            capacitaciones. Comienza hoy y obtén un 20% de descuento en tu primera compra.
+          <p className="text-lg md:text-xl opacity-90 mb-4 leading-relaxed">
+            Unite a mis alumnos que encontraron en esta plataforma una herramienta que los ha ayudado a superarse y guiar a sus estudiantes a fortalecer sus bases e iniciar una carrera deportiva que no tiene techo.
+          </p>
+          <p className="text-lg md:text-xl opacity-90 mb-4 leading-relaxed">
+            Como digo siempre el NEWCOM llegó para dar un claro objetivo de vida a las personas adultas y debemos de saber cómo fortalecerlos en todas sus bases para que esta carrera deportiva no termine jamás!
+          </p>
+          <p className="text-lg md:text-xl opacity-90 mb-8 leading-relaxed font-semibold">
+            Somos nosotros los entrenadores los encargados de que eso suceda, nos vemos adentro!
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">

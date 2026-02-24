@@ -23,13 +23,12 @@ const Hero = () => {
           </span>
           
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-secondary-foreground leading-tight mb-6">
-            Transforma tu
-            <span className="text-primary block mt-2">Rendimiento Deportivo</span>
+            Crea tu mejor versión como
+            <span className="text-primary block mt-2">Entrenador/formador de deportistas Newconeros.</span>
           </h1>
           
           <p className="text-lg md:text-xl text-secondary-foreground/80 mb-8 leading-relaxed">
-            Accede a capacitaciones profesionales en video, material descargable y 
-            equipamiento deportivo de alta calidad. Todo en un solo lugar.
+            Accede a capacitaciones en video y materiales específicos del deporte; todo el paso a paso para fortalecer las bases integrales de tus practicantes y crear deportistas Newconeros que perduran en el tiempo evitando todo tipo de lesiones y frustraciones en el proceso.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4">

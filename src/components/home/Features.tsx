@@ -19,12 +19,12 @@ const features = [
   {
     icon: Shield,
     title: "Acceso de por Vida",
-    description: "Compra una vez y accede al contenido para siempre, sin límites.",
+    description: "Compra una vez y accede al contenido para siempre, sin límites. (Luego de cruzar los 4 meses de capacitación tendrás la opción de continuar con el acceso a esta herramienta que es la plataforma Reactivar; la misma se actualiza continuamente y podrás mantenerla de por vida abonando una suscripción mensual mínima.)",
   },
   {
     icon: Headphones,
-    title: "Soporte 24/7",
-    description: "Nuestro equipo está disponible para resolver todas tus dudas.",
+    title: "Soporte Semanal",
+    description: "Nuestro equipo está disponible para resolver todas tus dudas. Durante todo el cursado e incluso al finalizar si seguís con la suscripción tendrás acceso a una videoconferencia semanal para evacuar todo tipo de dudas!",
   },
   {
     icon: Zap,
@@ -47,6 +47,11 @@ const Features = () => {
           </h2>
           <p className="text-secondary-foreground/70">
             Una plataforma completa diseñada para tu desarrollo deportivo integral
+          </p>
+          <p className="text-secondary-foreground/60 text-sm mt-2">
+            Una plataforma diseñada para tu desarrollo integral como entrenador/formador en el deporte Newcom.
+            <br />
+            La mejor herramienta que existe en la actualidad para los formadores de deportistas Newconeros.
           </p>
         </div>
 
