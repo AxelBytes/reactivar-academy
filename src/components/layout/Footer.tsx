@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Facebook, Instagram, Youtube, Mail, Phone } from "lucide-react";
+import lionelDevLogo from "@/assets/lioneldev-logo.png";
 
 const Footer = () => {
   return (
@@ -105,6 +106,18 @@ const Footer = () => {
                 Política de Privacidad
               </a>
             </div>
+          </div>
+        </div>
+
+        {/* Developer Credit */}
+        <div className="mt-6 pt-4 border-t border-secondary-foreground/5">
+          <div className="flex flex-col items-center gap-2">
+            <p className="text-xs text-secondary-foreground/40">Desarrollado por</p>
+            <img
+              src={lionelDevLogo}
+              alt="Lionel.Dev - Premium Web & Software Development"
+              className="h-8 object-contain opacity-60 hover:opacity-100 transition-opacity"
+            />
           </div>
         </div>
       </div>
