@@ -111,12 +111,12 @@ const Footer = () => {
 
         {/* Developer Credit */}
         <div className="mt-6 pt-4 border-t border-secondary-foreground/5">
-          <div className="flex flex-col items-center gap-2">
-            <p className="text-xs text-secondary-foreground/40">Desarrollado por</p>
+          <div className="flex flex-col items-center gap-3">
+            <p className="text-sm text-secondary-foreground/50 font-medium tracking-wide">Desarrollado por</p>
             <img
               src={lionelDevLogo}
               alt="Lionel.Dev - Premium Web & Software Development"
-              className="h-8 object-contain opacity-60 hover:opacity-100 transition-opacity"
+              className="h-12 md:h-14 object-contain brightness-110 hover:brightness-125 transition-all duration-300"
             />
           </div>
         </div>
