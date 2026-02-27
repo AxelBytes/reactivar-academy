@@ -110,13 +110,13 @@ const Footer = () => {
         </div>
 
         {/* Developer Credit */}
-        <div className="mt-6 pt-4 border-t border-secondary-foreground/5">
-          <div className="flex flex-col items-center gap-3">
-            <p className="text-sm text-secondary-foreground/50 font-medium tracking-wide">Desarrollado por</p>
+        <div className="mt-8 pt-6 border-t border-secondary-foreground/5">
+          <div className="flex flex-col items-center gap-4">
+            <p className="text-base text-secondary-foreground/60 font-medium tracking-wide">Desarrollado por</p>
             <img
               src={lionelDevLogo}
               alt="Lionel.Dev - Premium Web & Software Development"
-              className="h-12 md:h-14 object-contain brightness-110 hover:brightness-125 transition-all duration-300"
+              className="h-20 md:h-24 object-contain brightness-125 hover:brightness-150 transition-all duration-300"
             />
           </div>
         </div>
