@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -22,34 +22,73 @@ import { ImageUpload } from "@/components/admin/ImageUpload";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Video } from "lucide-react";
 
+const SYSTEME_BASE_URL = "https://profedeeducacionfisica22.systeme.io/school/course/";
+
+function extractSlugFromAccessUrl(url: string | null | undefined): string {
+  if (!url) return "";
+  if (url.startsWith(SYSTEME_BASE_URL)) {
+    return url.replace(SYSTEME_BASE_URL, "");
+  }
+  return url;
+}
+
+const emptyForm = {
+  title: "",
+  description: "",
+  detailedDescription: "",
+  price: "",
+  originalPrice: "",
+  level: "",
+  duration: "",
+  lessons: "",
+  image: "",
+  videoUrl: "",
+  topics: "",
+  includes: "",
+  instructor: "Diego Machado",
+  category: "Capacitaciones",
+  systemeProductId: "",
+  accessUrl: "",
+};
+
 interface CourseFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSave?: (course: any) => void;
+  editingCourse?: any;
 }
 
-const CourseFormDialog = ({ open, onOpenChange, onSave }: CourseFormDialogProps) => {
+const CourseFormDialog = ({ open, onOpenChange, onSave, editingCourse }: CourseFormDialogProps) => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const isEditing = !!editingCourse;
 
-  const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    detailedDescription: "",
-    price: "",
-    originalPrice: "",
-    level: "",
-    duration: "",
-    lessons: "",
-    image: "",
-    videoUrl: "",
-    topics: "",
-    includes: "",
-    instructor: "Diego Machado", // Predeterminado
-    category: "Capacitaciones",
-    systemeProductId: "", // ID del producto en systeme.io
-    accessUrl: "", // URL de acceso al curso para alumnos
-  });
+  const [formData, setFormData] = useState({ ...emptyForm });
+
+  useEffect(() => {
+    if (editingCourse) {
+      setFormData({
+        title: editingCourse.title || "",
+        description: editingCourse.description || "",
+        detailedDescription: editingCourse.detailed_description || "",
+        price: editingCourse.price?.toString() || "",
+        originalPrice: editingCourse.original_price?.toString() || "",
+        level: editingCourse.level || "",
+        duration: editingCourse.duration || "",
+        lessons: editingCourse.lessons?.toString() || "",
+        image: editingCourse.image_url || "",
+        videoUrl: editingCourse.video_url || "",
+        topics: Array.isArray(editingCourse.topics) ? editingCourse.topics.join("\n") : "",
+        includes: Array.isArray(editingCourse.includes) ? editingCourse.includes.join("\n") : "",
+        instructor: editingCourse.instructor || "Diego Machado",
+        category: editingCourse.category || "Capacitaciones",
+        systemeProductId: editingCourse.systeme_product_id || "",
+        accessUrl: extractSlugFromAccessUrl(editingCourse.access_url),
+      });
+    } else {
+      setFormData({ ...emptyForm });
+    }
+  }, [editingCourse, open]);
 
   const handleImageChange = (imageUrl: string) => {
     setFormData({ ...formData, image: imageUrl });
@@ -60,7 +99,6 @@ const CourseFormDialog = ({ open, onOpenChange, onSave }: CourseFormDialogProps)
     setIsLoading(true);
 
     try {
-      // Validaciones
       if (!formData.title || !formData.description || !formData.price || !formData.level || !formData.duration) {
         toast({
           title: "Error",
@@ -71,20 +109,17 @@ const CourseFormDialog = ({ open, onOpenChange, onSave }: CourseFormDialogProps)
         return;
       }
 
-      // Convertir topics de texto a array
       const topicsArray = formData.topics
         .split("\n")
         .filter(t => t.trim() !== "")
         .map(t => t.trim());
 
-      // Convertir includes de texto a array
       const includesArray = formData.includes
         .split("\n")
         .filter(i => i.trim() !== "")
         .map(i => i.trim());
 
-      // Crear objeto del curso para Supabase
-      const newCourse = {
+      const courseData: any = {
         title: formData.title,
         description: formData.description,
         detailed_description: formData.detailedDescription || null,
@@ -99,45 +134,29 @@ const CourseFormDialog = ({ open, onOpenChange, onSave }: CourseFormDialogProps)
         includes: includesArray.length > 0 ? includesArray : null,
         instructor: formData.instructor,
         category: formData.category,
-        students: 0,
-        rating: 5.0,
-        status: "active",
-        is_new: true,
         systeme_product_id: formData.systemeProductId.trim() || null,
         access_url: formData.accessUrl.trim()
-          ? `https://profedeeducacionfisica22.systeme.io/school/course/${formData.accessUrl.trim()}`
+          ? `${SYSTEME_BASE_URL}${formData.accessUrl.trim()}`
           : null,
       };
 
-      // Enviar al handler de guardado (que guardará en Supabase)
-      if (onSave) {
-        await onSave(newCourse);
+      if (!isEditing) {
+        courseData.students = 0;
+        courseData.rating = 5.0;
+        courseData.status = "active";
+        courseData.is_new = true;
       }
 
-      // Resetear formulario
-      setFormData({
-        title: "",
-        description: "",
-        detailedDescription: "",
-        price: "",
-        originalPrice: "",
-        level: "",
-        duration: "",
-        lessons: "",
-        image: "",
-        videoUrl: "",
-        topics: "",
-        includes: "",
-        instructor: "Diego Machado",
-        category: "Capacitaciones",
-        systemeProductId: "",
-        accessUrl: "",
-      });
+      if (onSave) {
+        await onSave(courseData);
+      }
+
+      setFormData({ ...emptyForm });
       onOpenChange(false);
     } catch (error) {
       toast({
         title: "Error",
-        description: "Hubo un error al crear el curso",
+        description: `Hubo un error al ${isEditing ? 'actualizar' : 'crear'} el curso`,
         variant: "destructive",
       });
     } finally {
@@ -149,9 +168,13 @@ const CourseFormDialog = ({ open, onOpenChange, onSave }: CourseFormDialogProps)
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Nueva Capacitación</DialogTitle>
+          <DialogTitle>
+            {isEditing ? `Editando: ${editingCourse.title}` : "Nueva Capacitación"}
+          </DialogTitle>
           <DialogDescription>
-            Completa el formulario para agregar una nueva capacitación
+            {isEditing
+              ? "Modifica los campos que necesites y guarda los cambios"
+              : "Completa el formulario para agregar una nueva capacitación"}
           </DialogDescription>
         </DialogHeader>
 
@@ -418,7 +441,7 @@ const CourseFormDialog = ({ open, onOpenChange, onSave }: CourseFormDialogProps)
             </Button>
             <Button type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              Crear Curso
+              {isEditing ? "Guardar Cambios" : "Crear Curso"}
             </Button>
           </DialogFooter>
         </form>

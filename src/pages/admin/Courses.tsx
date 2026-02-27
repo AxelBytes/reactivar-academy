@@ -27,19 +27,32 @@ import { supabase } from "@/lib/supabase";
 interface Course {
   id: number;
   title: string;
+  description: string;
+  detailed_description?: string;
   instructor: string;
   price: number;
+  original_price?: number;
   students: number;
   rating: number;
   level: "Básico" | "Intermedio" | "Avanzado";
   duration: string;
+  lessons?: number;
+  image_url?: string;
+  video_url?: string;
+  topics?: string[];
+  includes?: string[];
+  category?: string;
   status: "active" | "draft";
+  systeme_product_id?: string;
+  access_url?: string;
+  is_new?: boolean;
 }
 
 const Courses = () => {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingCourse, setEditingCourse] = useState<Course | null>(null);
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -76,31 +89,60 @@ const Courses = () => {
     }
   };
 
-  const handleSaveCourse = async (newCourse: any) => {
+  const handleSaveCourse = async (courseData: any) => {
     try {
-      const { data, error } = await supabase
-        .from("courses")
-        .insert([newCourse])
-        .select()
-        .single();
+      if (editingCourse) {
+        const { data, error } = await supabase
+          .from("courses")
+          .update(courseData)
+          .eq("id", editingCourse.id)
+          .select()
+          .single();
 
-      if (error) {
-        console.error("Error guardando curso:", error);
-        toast({
-          title: "Error",
-          description: "No se pudo guardar el curso",
-          variant: "destructive",
-        });
-        return;
-      }
+        if (error) {
+          console.error("Error actualizando curso:", error);
+          toast({
+            title: "Error",
+            description: "No se pudo actualizar el curso",
+            variant: "destructive",
+          });
+          return;
+        }
 
-      if (data) {
-        setCourses([data, ...courses]);
-        toast({
-          title: "¡Curso creado!",
-          description: `${data.title} ha sido agregado exitosamente`,
-        });
-        setIsDialogOpen(false);
+        if (data) {
+          setCourses(courses.map(c => c.id === editingCourse.id ? data : c));
+          toast({
+            title: "Curso actualizado",
+            description: `${data.title} ha sido actualizado exitosamente`,
+          });
+          setEditingCourse(null);
+          setIsDialogOpen(false);
+        }
+      } else {
+        const { data, error } = await supabase
+          .from("courses")
+          .insert([courseData])
+          .select()
+          .single();
+
+        if (error) {
+          console.error("Error guardando curso:", error);
+          toast({
+            title: "Error",
+            description: "No se pudo guardar el curso",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        if (data) {
+          setCourses([data, ...courses]);
+          toast({
+            title: "Curso creado",
+            description: `${data.title} ha sido agregado exitosamente`,
+          });
+          setIsDialogOpen(false);
+        }
       }
     } catch (error) {
       console.error("Error inesperado guardando curso:", error);
@@ -113,10 +155,8 @@ const Courses = () => {
   );
 
   const handleEdit = (course: Course) => {
-    toast({
-      title: "Editar curso",
-      description: `Editando: ${course.title} (próximamente)`,
-    });
+    setEditingCourse(course);
+    setIsDialogOpen(true);
   };
 
   const handleDelete = async (course: Course) => {
@@ -182,7 +222,7 @@ const Courses = () => {
               Gestiona el catálogo de capacitaciones
             </p>
           </div>
-          <Button onClick={() => setIsDialogOpen(true)}>
+          <Button onClick={() => { setEditingCourse(null); setIsDialogOpen(true); }}>
             <Plus className="w-4 h-4 mr-2" />
             Nuevo Curso
           </Button>
@@ -322,11 +362,14 @@ const Courses = () => {
         </div>
       </div>
 
-      {/* Dialog para agregar curso */}
       <CourseFormDialog
         open={isDialogOpen}
-        onOpenChange={setIsDialogOpen}
+        onOpenChange={(open) => {
+          setIsDialogOpen(open);
+          if (!open) setEditingCourse(null);
+        }}
         onSave={handleSaveCourse}
+        editingCourse={editingCourse}
       />
     </AdminLayout>
   );
