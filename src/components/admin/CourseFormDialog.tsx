@@ -48,6 +48,7 @@ const CourseFormDialog = ({ open, onOpenChange, onSave }: CourseFormDialogProps)
     instructor: "Diego Machado", // Predeterminado
     category: "Capacitaciones",
     systemeProductId: "", // ID del producto en systeme.io
+    accessUrl: "", // URL de acceso al curso para alumnos
   });
 
   const handleImageChange = (imageUrl: string) => {
@@ -102,7 +103,8 @@ const CourseFormDialog = ({ open, onOpenChange, onSave }: CourseFormDialogProps)
         rating: 5.0,
         status: "active",
         is_new: true,
-        systeme_product_id: formData.systemeProductId.trim() || null, // ID de systeme.io
+        systeme_product_id: formData.systemeProductId.trim() || null,
+        access_url: formData.accessUrl.trim() || null,
       };
 
       // Enviar al handler de guardado (que guardará en Supabase)
@@ -127,6 +129,7 @@ const CourseFormDialog = ({ open, onOpenChange, onSave }: CourseFormDialogProps)
         instructor: "Diego Machado",
         category: "Capacitaciones",
         systemeProductId: "",
+        accessUrl: "",
       });
       onOpenChange(false);
     } catch (error) {
@@ -336,6 +339,25 @@ const CourseFormDialog = ({ open, onOpenChange, onSave }: CourseFormDialogProps)
               <p className="mt-2 font-medium text-green-700 dark:text-green-400">
                 ✨ Con este ID, cuando alguien compre el curso, automáticamente recibirá acceso en systeme.io
               </p>
+            </div>
+          </div>
+
+          {/* URL de Acceso al Curso */}
+          <div className="space-y-2 bg-green-50 dark:bg-green-950 p-4 rounded-lg border-2 border-green-200 dark:border-green-800">
+            <Label htmlFor="accessUrl" className="text-green-900 dark:text-green-100 font-semibold">
+              Link de Acceso al Curso (para alumnos)
+            </Label>
+            <Input
+              id="accessUrl"
+              type="url"
+              placeholder="https://profedeeducacionfisica22.systeme.io/school/course/nombre-del-curso"
+              value={formData.accessUrl}
+              onChange={(e) => setFormData({ ...formData, accessUrl: e.target.value })}
+              className="font-mono bg-white dark:bg-gray-900"
+            />
+            <div className="space-y-1 text-xs text-green-700 dark:text-green-300">
+              <p>Este link se incluye en el email que recibe el alumno después de comprar.</p>
+              <p className="font-medium">Formato: https://profedeeducacionfisica22.systeme.io/school/course/nombre-del-curso</p>
             </div>
           </div>
 

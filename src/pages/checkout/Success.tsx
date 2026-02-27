@@ -134,8 +134,29 @@ const Success = () => {
         // Continuar con el email aunque falle la BD
       }
 
-      // 2. ENVIAR EMAIL DE CONFIRMACIÓN
+      // 2. OBTENER URLs DE ACCESO DE LOS CURSOS
       const baseUrl = window.location.origin.replace(/\/$/, '');
+      let coursesWithAccess = finalCourses;
+      try {
+        const courseIds = finalCourses.map((c: any) => c.id).filter((id: any) => id);
+        if (courseIds.length > 0) {
+          const { data: accessData } = await supabase
+            .from('courses')
+            .select('id, access_url')
+            .in('id', courseIds);
+          
+          if (accessData) {
+            coursesWithAccess = finalCourses.map((course: any) => {
+              const found = accessData.find((a: any) => a.id === course.id);
+              return { ...course, accessUrl: found?.access_url || null };
+            });
+          }
+        }
+      } catch (accessErr) {
+        console.error('Error obteniendo URLs de acceso:', accessErr);
+      }
+
+      // 3. ENVIAR EMAIL DE CONFIRMACIÓN
       const response = await fetch(`${baseUrl}/api/send-course-email`, {
         method: 'POST',
         headers: {
@@ -148,7 +169,7 @@ const Success = () => {
           userProvincia,
           userLocalidad,
           userPais,
-          courses: finalCourses,
+          courses: coursesWithAccess,
           paymentId: paymentIdParam,
         }),
       });

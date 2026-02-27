@@ -55,10 +55,19 @@ export default async function handler(req, res) {
     console.log('✅ BREVO_API_KEY encontrada');
 
     // Construir el HTML del email
+    const hasAccessLinks = courses.some(c => c.accessUrl);
+    
     const coursesListHTML = courses.map(course => `
-      <li style="margin-bottom: 10px;">
-        <strong>${course.title}</strong><br>
+      <li style="margin-bottom: 15px; padding: 12px; background: #f8f9fa; border-radius: 8px;">
+        <strong style="font-size: 16px;">${course.title}</strong><br>
         <span style="color: #666;">Instructor: ${course.instructor}</span>
+        ${course.accessUrl ? `
+          <br><br>
+          <a href="${course.accessUrl}" 
+             style="display: inline-block; background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 14px;">
+            Acceder al Curso
+          </a>
+        ` : ''}
       </li>
     `).join('');
 
@@ -147,20 +156,33 @@ export default async function handler(req, res) {
               </table>
             </div>
 
+            ${hasAccessLinks ? `
+            <div style="background: #d4edda; border-left: 4px solid #28a745; padding: 15px; margin: 20px 0;">
+              <h3 style="color: #155724; margin-top: 0;">🚀 Accede a tus Cursos Ahora</h3>
+              <p style="margin: 5px 0; color: #155724;">
+                Usa los botones <strong>"Acceder al Curso"</strong> de arriba para ingresar directamente a tus capacitaciones.
+              </p>
+              <p style="margin: 5px 0; color: #155724; font-size: 14px;">
+                Si tienes algún problema con el acceso, escríbenos a 
+                <a href="mailto:Profedeeducacionfisica22@gmail.com" style="color: #667eea;">Profedeeducacionfisica22@gmail.com</a>
+              </p>
+            </div>
+            ` : `
             <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0;">
               <h3 style="color: #856404; margin-top: 0;">📧 Próximos Pasos</h3>
               <p style="margin: 5px 0; color: #856404;">
                 <strong>Para acceder a tus cursos, por favor envía un correo a:</strong>
               </p>
               <p style="margin: 10px 0;">
-                <a href="mailto:soporte@reactivar.com" style="color: #667eea; text-decoration: none; font-weight: bold; font-size: 16px;">
-                  📩 soporte@reactivar.com
+                <a href="mailto:Profedeeducacionfisica22@gmail.com" style="color: #667eea; text-decoration: none; font-weight: bold; font-size: 16px;">
+                  📩 Profedeeducacionfisica22@gmail.com
                 </a>
               </p>
               <p style="margin: 5px 0; color: #856404; font-size: 14px;">
                 Incluye este email de confirmación y te enviaremos los enlaces de acceso en menos de 24 horas.
               </p>
             </div>
+            `}
 
             <div style="margin-top: 30px; padding-top: 20px; border-top: 2px solid #ddd;">
               <p style="text-align: center; color: #666; font-size: 14px;">
