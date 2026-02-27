@@ -104,7 +104,9 @@ const CourseFormDialog = ({ open, onOpenChange, onSave }: CourseFormDialogProps)
         status: "active",
         is_new: true,
         systeme_product_id: formData.systemeProductId.trim() || null,
-        access_url: formData.accessUrl.trim() || null,
+        access_url: formData.accessUrl.trim()
+          ? `https://profedeeducacionfisica22.systeme.io/school/course/${formData.accessUrl.trim()}`
+          : null,
       };
 
       // Enviar al handler de guardado (que guardará en Supabase)
@@ -345,19 +347,33 @@ const CourseFormDialog = ({ open, onOpenChange, onSave }: CourseFormDialogProps)
           {/* URL de Acceso al Curso */}
           <div className="space-y-2 bg-green-50 dark:bg-green-950 p-4 rounded-lg border-2 border-green-200 dark:border-green-800">
             <Label htmlFor="accessUrl" className="text-green-900 dark:text-green-100 font-semibold">
-              Link de Acceso al Curso (para alumnos)
+              Slug del Curso en systeme.io (para link de acceso)
             </Label>
-            <Input
-              id="accessUrl"
-              type="url"
-              placeholder="https://profedeeducacionfisica22.systeme.io/school/course/nombre-del-curso"
-              value={formData.accessUrl}
-              onChange={(e) => setFormData({ ...formData, accessUrl: e.target.value })}
-              className="font-mono bg-white dark:bg-gray-900"
-            />
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-green-700 dark:text-green-300 whitespace-nowrap font-mono">
+                .systeme.io/school/course/
+              </span>
+              <Input
+                id="accessUrl"
+                placeholder="reactivar"
+                value={formData.accessUrl}
+                onChange={(e) => setFormData({ ...formData, accessUrl: e.target.value.toLowerCase().trim() })}
+                className="font-mono bg-white dark:bg-gray-900"
+              />
+            </div>
+            {formData.accessUrl && (
+              <p className="text-xs text-green-600 dark:text-green-400 font-mono break-all">
+                URL final: https://profedeeducacionfisica22.systeme.io/school/course/{formData.accessUrl}
+              </p>
+            )}
             <div className="space-y-1 text-xs text-green-700 dark:text-green-300">
-              <p>Este link se incluye en el email que recibe el alumno después de comprar.</p>
-              <p className="font-medium">Formato: https://profedeeducacionfisica22.systeme.io/school/course/nombre-del-curso</p>
+              <p className="font-medium">Como encontrar el slug sin registrarte como alumno:</p>
+              <ol className="list-decimal list-inside space-y-1 pl-2">
+                <li>Anda a systeme.io → tu curso → <strong>Paginas del curso</strong></li>
+                <li>Mira la URL de la pagina de acceso/registro del curso</li>
+                <li>El slug es la ultima parte de la URL (ej: <strong>reactivar</strong>)</li>
+              </ol>
+              <p className="mt-1">Para tu curso actual el slug es: <code className="bg-green-100 dark:bg-green-900 px-1 rounded font-bold">reactivar</code></p>
             </div>
           </div>
 
