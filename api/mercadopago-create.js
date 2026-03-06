@@ -57,10 +57,10 @@ export default async function handler(req, res) {
         unit_price: parseFloat(item.price),
         currency_id: 'ARS'
       })),
-      payer: {
-        email: payer?.email || 'test@test.com',
-        name: payer?.name || 'Usuario'
-      },
+      payer: payer?.email ? {
+        email: payer.email,
+        name: payer?.name || 'Cliente'
+      } : undefined,
       back_urls: {
         success: `${FRONTEND_URL}/success`,
         failure: `${FRONTEND_URL}/failure`,
@@ -89,9 +89,11 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error('Error creating preference:', error);
+    console.error('Error details:', JSON.stringify(error, null, 2));
     res.status(500).json({ 
       error: 'Error creating payment preference',
-      message: error.message
+      message: error.message,
+      cause: error.cause || null
     });
   }
 }

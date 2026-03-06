@@ -171,16 +171,16 @@ const CheckoutDialog = ({ open, onOpenChange }: CheckoutDialogProps) => {
         },
         body: JSON.stringify({
           items: items.map(item => ({
-            id: item.id,
+            id: item.id?.toString() || '1',
             name: item.type === 'product' ? item.name : item.title,
             title: item.type === 'product' ? item.name : item.title,
-            quantity: item.quantity,
-            price: item.price,
+            quantity: parseInt(String(item.quantity)) || 1,
+            price: parseFloat(String(item.price)) || 0,
             type: item.type,
           })),
           payer: {
-            email: user?.email || 'test@test.com',
-            name: user?.name || 'Usuario',
+            email: user?.email || '',
+            name: user?.name || '',
           },
         }),
       });
