@@ -76,8 +76,10 @@ export default async function handler(req, res) {
         pending: `${FRONTEND_URL}/pending`
       },
       auto_return: 'approved',
+      notification_url: `${FRONTEND_URL}/api/payments/mercadopago/webhook`,
       statement_descriptor: 'REACTIVAR ACADEMY',
-      external_reference: Buffer.from(JSON.stringify(purchaseData)).toString('base64').substring(0, 256),
+      external_reference: `order-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`,
+      metadata: purchaseData,
       payment_methods: {
         installments: 12,
         default_installments: 1
