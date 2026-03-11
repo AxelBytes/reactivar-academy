@@ -98,7 +98,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { email, firstName, lastName, courses, courseProductIds } = req.body;
+    const { email, firstName, lastName, courses } = req.body;
 
     // Validaciones exhaustivas
     if (!email || typeof email !== 'string' || !email.includes('@')) {
@@ -110,13 +110,12 @@ export default async function handler(req, res) {
     }
 
     console.log('='.repeat(80));
-    console.log('🚀 INICIANDO INTEGRACIÓN CON SYSTEME.IO - ACCESO DIRECTO A PRODUCTOS');
+    console.log('🚀 INICIANDO INTEGRACIÓN CON SYSTEME.IO - SISTEMA DE TAGS');
     console.log('='.repeat(80));
     console.log('📧 Email:', email);
     console.log('👤 Nombre:', firstName || '(no proporcionado)');
     console.log('👤 Apellido:', lastName || '(no proporcionado)');
-    console.log('📚 Cursos a dar acceso:', courses?.length || 0);
-    console.log('🎯 Product IDs:', courseProductIds || '(no proporcionados)');
+    console.log('📚 Cursos comprados:', courses?.length || 0);
     console.log('⏰ Timestamp:', new Date().toISOString());
     console.log('-'.repeat(80));
 

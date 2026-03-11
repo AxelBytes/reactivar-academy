@@ -181,32 +181,9 @@ const Success = () => {
       console.log('✅ Email enviado exitosamente');
       setEmailSent(true);
 
-      // 3. OTORGAR ACCESO DIRECTO EN SYSTEME.IO
+      // 3. ASIGNAR TAG EN SYSTEME.IO PARA ACTIVAR AUTOMATIZACIÓN
       try {
-        console.log('🔑 Otorgando acceso directo a productos en systeme.io...');
-        
-        // Obtener los systeme_product_id de cada curso desde Supabase
-        const courseIds = finalCourses.map((course: any) => course.id).filter((id: any) => id);
-        let courseProductIds: string[] = [];
-        
-        if (courseIds.length > 0) {
-          console.log('📚 Obteniendo Product IDs de systeme.io para cursos:', courseIds);
-          
-          const { data: coursesData, error: coursesError } = await supabase
-            .from('courses')
-            .select('id, systeme_product_id')
-            .in('id', courseIds);
-          
-          if (coursesError) {
-            console.error('⚠️ Error obteniendo Product IDs de cursos:', coursesError);
-          } else if (coursesData) {
-            courseProductIds = coursesData
-              .map((c: any) => c.systeme_product_id)
-              .filter((id: string) => id); // Filtrar nulls
-            
-            console.log('🎯 Product IDs obtenidos:', courseProductIds);
-          }
-        }
+        console.log('🔑 Creando contacto y asignando tag en systeme.io...');
         
         // Separar nombre completo en firstName y lastName
         const nameParts = (userName || '').trim().split(' ');
@@ -223,20 +200,20 @@ const Success = () => {
             firstName: firstName,
             lastName: lastName,
             courses: finalCourses,
-            courseProductIds: courseProductIds, // Enviar los Product IDs específicos de cada curso
           }),
         });
 
         if (systemeResponse.ok) {
           const systemeData = await systemeResponse.json();
-          console.log('✅ Acceso otorgado en systeme.io:', systemeData);
+          console.log('✅ Contacto registrado y tag asignado en systeme.io:', systemeData);
           
           if (systemeData.details) {
-            console.log(`📊 Productos otorgados: ${systemeData.details.productsGranted}/${systemeData.details.totalProducts}`);
+            console.log(`📊 Tag asignado: ${systemeData.details.tagAssigned ? 'SÍ' : 'NO'}`);
+            console.log(`💡 ${systemeData.details.note}`);
           }
         } else {
           const systemeError = await systemeResponse.text();
-          console.error('⚠️ Error otorgando acceso en systeme.io:', systemeError);
+          console.error('⚠️ Error creando contacto en systeme.io:', systemeError);
           // No lanzar error, continuar aunque falle systeme.io
         }
       } catch (systemeError) {
