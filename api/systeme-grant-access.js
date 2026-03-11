@@ -1,11 +1,15 @@
 /**
  * Vercel Serverless Function
- * Otorga acceso DIRECTO a productos/cursos en systeme.io cuando alguien compra
+ * Otorga acceso a cursos en systeme.io cuando alguien compra
  * 
- * SISTEMA SIMPLIFICADO SIN TAGS NI WORKFLOWS
+ * SISTEMA CON TAGS Y AUTOMATIZACIONES
  * - Crea el contacto en systeme.io
- * - Le da acceso directo a los productos comprados
- * - Escalable para múltiples cursos sin configuración adicional
+ * - Asigna un tag de "comprador" al contacto
+ * - La automatización en systeme.io inscribe al contacto en el curso
+ * 
+ * IMPORTANTE: Debes configurar en systeme.io:
+ * 1. Crear un tag llamado "curso-comprado" (o el nombre que configures)
+ * 2. Crear una automatización: "Cuando tag asignado" -> "Inscribir en curso"
  * 
  * SISTEMA CON REINTENTOS Y MANEJO ROBUSTO DE ERRORES
  */
@@ -81,7 +85,7 @@ export default async function handler(req, res) {
 
   // Log para confirmar que la API key está presente (sin mostrar el valor completo)
   console.log('🔑 SYSTEME_API_KEY configurada:', SYSTEME_API_KEY.substring(0, 8) + '...' + SYSTEME_API_KEY.substring(SYSTEME_API_KEY.length - 4));
-  console.log('🔐 Formato de autenticación: Bearer Token');
+  console.log('🔐 Formato de autenticación: Authorization header (API key directa)');
 
   if (!SYSTEME_TAG_ID && !SYSTEME_TAG_NAME) {
     console.warn('⚠️ ADVERTENCIA: Ni SYSTEME_TAG_ID ni SYSTEME_TAG_NAME están configurados');
@@ -126,7 +130,7 @@ export default async function handler(req, res) {
         {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${SYSTEME_API_KEY}`,
+            'Authorization': SYSTEME_API_KEY,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
@@ -159,100 +163,86 @@ export default async function handler(req, res) {
       console.log('⚠️ Intentando continuar de todas formas...');
     }
 
-    // 2. DAR ACCESO DIRECTO A PRODUCTOS/CURSOS (CON REINTENTOS)
-    let productsGranted = 0;
-    let totalProducts = 0;
+    // 2. ASIGNAR TAG AL CONTACTO PARA ACTIVAR AUTOMATIZACIÓN
+    let tagAssigned = false;
     
-    // Obtener los product IDs de los cursos comprados
-    const productIds = [];
+    // Buscar el contacto para obtener su ID
+    console.log('📝 PASO 2: Buscando contacto y asignando tag...');
     
-    if (courseProductIds && Array.isArray(courseProductIds) && courseProductIds.length > 0) {
-      console.log('✅ Product IDs recibidos:', courseProductIds);
-      productIds.push(...courseProductIds.filter(id => id)); // Filtrar nulls/undefined
-    }
-    
-    totalProducts = productIds.length;
-    
-    if (productIds.length > 0) {
-      console.log('📝 PASO 2: Dando acceso directo a productos...');
-      console.log('🎯 Total de productos:', totalProducts);
-      console.log('🎯 Product IDs:', productIds.join(', '));
-      
-      try {
-        // Buscar el contacto para obtener su ID
-        console.log('🔍 Buscando contacto por email...');
-        const searchResponse = await fetchWithRetry(
-          `https://systeme.io/api/v2/contacts?email=${encodeURIComponent(email.trim().toLowerCase())}`,
-          {
-            method: 'GET',
-            headers: {
-              'Authorization': `Bearer ${SYSTEME_API_KEY}`,
-              'Content-Type': 'application/json',
-            },
+    try {
+      console.log('🔍 Buscando contacto por email...');
+      const searchResponse = await fetchWithRetry(
+        `https://systeme.io/api/v2/contacts?email=${encodeURIComponent(email.trim().toLowerCase())}`,
+        {
+          method: 'GET',
+          headers: {
+            'Authorization': SYSTEME_API_KEY,
+            'Content-Type': 'application/json',
           },
-          3
-        );
+        },
+        3
+      );
 
-        if (searchResponse.ok) {
-          const searchData = await searchResponse.json();
-          const contact = searchData.items?.[0];
+      if (searchResponse.ok) {
+        const searchData = await searchResponse.json();
+        const contact = searchData.items?.[0];
 
-          if (contact && contact.id) {
-            console.log('✅ Contacto encontrado, ID:', contact.id);
+        if (contact && contact.id) {
+          console.log('✅ Contacto encontrado, ID:', contact.id);
+          
+          // Asignar tag "curso-comprado" si está configurado
+          const tagToAssign = SYSTEME_TAG_ID || SYSTEME_TAG_NAME;
+          
+          if (tagToAssign) {
+            console.log(`🏷️ Asignando tag "${tagToAssign}" al contacto...`);
             
-            // Dar acceso a cada producto
-            for (const productId of productIds) {
-              console.log(`🎯 Dando acceso al producto ${productId}...`);
-              
-              try {
-                // Endpoint para dar acceso directo a un producto
-                const productResponse = await fetchWithRetry(
-                  `https://systeme.io/api/v2/contacts/${contact.id}/products/${productId}`,
-                  {
-                    method: 'POST',
-                    headers: {
-                      'Authorization': `Bearer ${SYSTEME_API_KEY}`,
-                      'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                      fullAccess: true // Dar acceso total al producto
-                    })
+            try {
+              // Endpoint para asignar tag a un contacto
+              const tagResponse = await fetchWithRetry(
+                `https://systeme.io/api/v2/contacts/${contact.id}/tags`,
+                {
+                  method: 'POST',
+                  headers: {
+                    'Authorization': SYSTEME_API_KEY,
+                    'Content-Type': 'application/json',
                   },
-                  3
-                );
+                  body: JSON.stringify({
+                    tagId: SYSTEME_TAG_ID ? parseInt(SYSTEME_TAG_ID) : undefined,
+                    tagName: SYSTEME_TAG_NAME || undefined
+                  })
+                },
+                3
+              );
 
-                if (productResponse.ok || productResponse.status === 409) {
-                  productsGranted++;
-                  console.log(`✅ Acceso al producto ${productId} otorgado exitosamente`);
-                  
-                  if (productResponse.status === 409) {
-                    console.log(`ℹ️ El contacto ya tenía acceso al producto ${productId}`);
-                  }
-                } else {
-                  const errorText = await productResponse.text();
-                  console.error(`❌ Error dando acceso al producto ${productId}:`, productResponse.status, errorText);
+              if (tagResponse.ok || tagResponse.status === 409) {
+                tagAssigned = true;
+                console.log(`✅ Tag asignado exitosamente`);
+                console.log('🎓 La automatización en systeme.io debería inscribir al estudiante automáticamente');
+                
+                if (tagResponse.status === 409) {
+                  console.log(`ℹ️ El contacto ya tenía este tag`);
                 }
-              } catch (productError) {
-                console.error(`❌ Error dando acceso al producto ${productId}:`, productError.message);
-                // Continuar con el siguiente producto
+              } else {
+                const errorText = await tagResponse.text();
+                console.error(`❌ Error asignando tag:`, tagResponse.status, errorText);
               }
+            } catch (tagError) {
+              console.error('❌ Error asignando tag:', tagError.message);
             }
           } else {
-            console.error('❌ No se encontró el contacto en la búsqueda');
-            console.log('📊 Respuesta de búsqueda:', JSON.stringify(searchData, null, 2));
+            console.log('⚠️ No hay tag configurado para asignar');
+            console.log('📝 Configura SYSTEME_TAG_ID o SYSTEME_TAG_NAME en Vercel');
+            console.log('💡 Y crea una automatización en systeme.io para inscribir automáticamente');
           }
+        } else {
+          console.error('❌ No se encontró el contacto en la búsqueda');
+          console.log('📊 Respuesta de búsqueda:', JSON.stringify(searchData, null, 2));
         }
-      } catch (accessError) {
-        console.error('❌ ERROR en proceso de dar acceso a productos:', accessError.message);
-        console.error('📊 Stack:', accessError.stack);
-        
-        // No lanzar error, solo registrar
-        console.log('⚠️ Continuando a pesar del error...');
       }
-    } else {
-      console.log('⚠️ No hay productos para dar acceso');
-      console.log('📝 El contacto se creará pero NO se dará acceso a productos');
-      console.log('💡 Asegúrate de que los cursos tengan systeme_product_id configurado en Supabase');
+    } catch (accessError) {
+      console.error('❌ ERROR en proceso de asignar tag:', accessError.message);
+      console.error('📊 Stack:', accessError.stack);
+      console.log('⚠️ Continuando a pesar del error...');
     }
 
     // 3. RESULTADO FINAL
@@ -263,22 +253,22 @@ export default async function handler(req, res) {
     console.log('📊 RESULTADO FINAL:');
     console.log('-'.repeat(80));
     console.log('✅ Contacto creado/actualizado:', contactCreated ? 'SÍ' : 'NO');
-    console.log('✅ Acceso a productos otorgado:', `${productsGranted}/${totalProducts}`);
+    console.log('✅ Tag asignado:', tagAssigned ? 'SÍ' : 'NO');
     console.log('⏱️ Duración total:', duration + 'ms');
     console.log('='.repeat(80));
 
     // Si el contacto se creó, considerar éxito
-    // (los productos son opcionales si no están configurados)
     if (contactCreated) {
       return res.status(200).json({
         success: true,
-        message: 'Acceso otorgado en systeme.io',
+        message: 'Contacto registrado en systeme.io',
         details: {
           email: email,
           contactCreated: contactCreated,
-          productsGranted: productsGranted,
-          totalProducts: totalProducts,
-          productsConfigured: totalProducts > 0,
+          tagAssigned: tagAssigned,
+          note: tagAssigned 
+            ? 'La automatización en systeme.io debería dar acceso al curso automáticamente' 
+            : 'Configura SYSTEME_TAG_ID y una automatización en systeme.io para dar acceso automático',
           duration: duration + 'ms'
         }
       });
