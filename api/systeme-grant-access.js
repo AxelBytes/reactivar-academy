@@ -79,6 +79,10 @@ export default async function handler(req, res) {
     });
   }
 
+  // Log para confirmar que la API key está presente (sin mostrar el valor completo)
+  console.log('🔑 SYSTEME_API_KEY configurada:', SYSTEME_API_KEY.substring(0, 8) + '...' + SYSTEME_API_KEY.substring(SYSTEME_API_KEY.length - 4));
+  console.log('🔐 Formato de autenticación: Bearer Token');
+
   if (!SYSTEME_TAG_ID && !SYSTEME_TAG_NAME) {
     console.warn('⚠️ ADVERTENCIA: Ni SYSTEME_TAG_ID ni SYSTEME_TAG_NAME están configurados');
     console.warn('📝 El contacto se creará pero no se asignará el tag');
@@ -122,7 +126,7 @@ export default async function handler(req, res) {
         {
           method: 'POST',
           headers: {
-            'Authorization': SYSTEME_API_KEY,
+            'Authorization': `Bearer ${SYSTEME_API_KEY}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
@@ -182,7 +186,7 @@ export default async function handler(req, res) {
           {
             method: 'GET',
             headers: {
-              'Authorization': SYSTEME_API_KEY,
+              'Authorization': `Bearer ${SYSTEME_API_KEY}`,
               'Content-Type': 'application/json',
             },
           },
@@ -207,7 +211,7 @@ export default async function handler(req, res) {
                   {
                     method: 'POST',
                     headers: {
-                      'Authorization': SYSTEME_API_KEY,
+                      'Authorization': `Bearer ${SYSTEME_API_KEY}`,
                       'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
