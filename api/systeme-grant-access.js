@@ -85,7 +85,7 @@ export default async function handler(req, res) {
 
   // Log para confirmar que la API key está presente (sin mostrar el valor completo)
   console.log('🔑 SYSTEME_API_KEY configurada:', SYSTEME_API_KEY.substring(0, 8) + '...' + SYSTEME_API_KEY.substring(SYSTEME_API_KEY.length - 4));
-  console.log('🔐 Formato de autenticación: Authorization header (API key directa)');
+  console.log('🔐 Formato de autenticación: X-API-KEY header');
 
   if (!SYSTEME_TAG_ID && !SYSTEME_TAG_NAME) {
     console.warn('⚠️ ADVERTENCIA: Ni SYSTEME_TAG_ID ni SYSTEME_TAG_NAME están configurados');
@@ -125,11 +125,11 @@ export default async function handler(req, res) {
     let contactCreated = false;
     try {
       const contactResponse = await fetchWithRetry(
-        'https://systeme.io/api/v2/contacts',
+        'https://api.systeme.io/api/contacts',
         {
           method: 'POST',
           headers: {
-            'Authorization': SYSTEME_API_KEY,
+            'X-API-KEY': SYSTEME_API_KEY,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
@@ -171,11 +171,11 @@ export default async function handler(req, res) {
     try {
       console.log('🔍 Buscando contacto por email...');
       const searchResponse = await fetchWithRetry(
-        `https://systeme.io/api/v2/contacts?email=${encodeURIComponent(email.trim().toLowerCase())}`,
+        `https://api.systeme.io/api/contacts?email=${encodeURIComponent(email.trim().toLowerCase())}`,
         {
           method: 'GET',
           headers: {
-            'Authorization': SYSTEME_API_KEY,
+            'X-API-KEY': SYSTEME_API_KEY,
             'Content-Type': 'application/json',
           },
         },
@@ -198,11 +198,11 @@ export default async function handler(req, res) {
             try {
               // Endpoint para asignar tag a un contacto
               const tagResponse = await fetchWithRetry(
-                `https://systeme.io/api/v2/contacts/${contact.id}/tags`,
+                `https://api.systeme.io/api/contacts/${contact.id}/tags`,
                 {
                   method: 'POST',
                   headers: {
-                    'Authorization': SYSTEME_API_KEY,
+                    'X-API-KEY': SYSTEME_API_KEY,
                     'Content-Type': 'application/json',
                   },
                   body: JSON.stringify({
