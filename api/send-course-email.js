@@ -198,8 +198,32 @@ export default async function handler(req, res) {
       </html>
     `;
 
+    // Adjuntar PDFs si hay productos digitales
+    const pdfAttachments = courses
+      .filter(c => c.pdfUrl)
+      .map(c => ({
+        url: c.pdfUrl,
+        name: `${(c.title || c.name || 'material').replace(/[^a-zA-Z0-9]/g, '_')}.pdf`,
+      }));
+
+    if (pdfAttachments.length > 0) {
+      console.log(`📎 Adjuntando ${pdfAttachments.length} PDF(s) al email`);
+    }
+
     // Enviar email usando Brevo (antes Sendinblue)
     console.log('🚀 Enviando email a Brevo API...');
+
+    const emailPayload = {
+      sender: {
+        name: 'REACTIVAR ACADEMY',
+        email: 'newcomreactivar22@gmail.com'
+      },
+      to: [{ email: userEmail, name: userName || 'Estudiante' }],
+      subject: '🎓 Acceso a tus Capacitaciones - REACTIVAR ACADEMY',
+      htmlContent: emailHTML,
+      ...(pdfAttachments.length > 0 && { attachment: pdfAttachments }),
+    };
+
     const response = await fetch('https://api.brevo.com/v3/smtp/email', {
       method: 'POST',
       headers: {
@@ -207,20 +231,7 @@ export default async function handler(req, res) {
         'Content-Type': 'application/json',
         'accept': 'application/json'
       },
-      body: JSON.stringify({
-        sender: {
-          name: 'REACTIVAR ACADEMY',
-          email: 'newcomreactivar22@gmail.com' // Email verificado en Brevo
-        },
-        to: [
-          {
-            email: userEmail,
-            name: userName || 'Estudiante'
-          }
-        ],
-        subject: '🎓 Acceso a tus Capacitaciones - REACTIVAR ACADEMY',
-        htmlContent: emailHTML
-      }),
+      body: JSON.stringify(emailPayload),
     });
 
     console.log('📡 Respuesta de Brevo - Status:', response.status);

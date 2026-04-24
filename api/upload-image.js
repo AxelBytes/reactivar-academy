@@ -39,21 +39,26 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Faltan datos: file y fileName son requeridos' });
     }
 
-    console.log('📤 Subiendo imagen via API:', `${folder}/${fileName}`);
+    // Detectar si es PDF o imagen
+    const isPdf = file.startsWith('data:application/pdf') || fileName.toLowerCase().endsWith('.pdf');
+    const contentType = isPdf ? 'application/pdf' : 'image/jpeg';
+    const base64Data = isPdf
+      ? file.replace(/^data:application\/pdf;base64,/, '')
+      : file.replace(/^data:image\/\w+;base64,/, '');
 
-    // Convertir base64 a buffer
-    const base64Data = file.replace(/^data:image\/\w+;base64,/, '');
+    console.log(`📤 Subiendo ${isPdf ? 'PDF' : 'imagen'} via API:`, `${folder}/${fileName}`);
+
     const buffer = Buffer.from(base64Data, 'base64');
 
     // Subir a Supabase Storage
     const filePath = `${folder}/${fileName}`;
-    
+
     const { data, error } = await supabase.storage
       .from('course-images')
       .upload(filePath, buffer, {
-        contentType: 'image/jpeg',
+        contentType,
         cacheControl: '31536000',
-        upsert: false,
+        upsert: true,
       });
 
     if (error) {
@@ -61,7 +66,7 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: error.message });
     }
 
-    console.log('✅ Imagen subida:', data);
+    console.log(`✅ ${isPdf ? 'PDF' : 'Imagen'} subido:`, data);
 
     // Obtener URL pública
     const { data: urlData } = supabase.storage

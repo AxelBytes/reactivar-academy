@@ -136,26 +136,38 @@ const Success = () => {
         // Continuar con el email aunque falle la BD
       }
 
-      // 2. OBTENER URLs DE ACCESO DE LOS CURSOS
+      // 2. OBTENER URLs DE ACCESO Y PDFs
       const baseUrl = window.location.origin.replace(/\/$/, '');
       let coursesWithAccess = finalCourses;
       try {
-        const courseIds = finalCourses.map((c: any) => c.id).filter((id: any) => id);
-        if (courseIds.length > 0) {
+        const itemIds = finalCourses.map((c: any) => c.id).filter((id: any) => id);
+        if (itemIds.length > 0) {
+          // Buscar en cursos (access_url)
           const { data: accessData } = await supabase
             .from('courses')
             .select('id, access_url')
-            .in('id', courseIds);
-          
-          if (accessData) {
+            .in('id', itemIds);
+
+          // Buscar en productos (pdf_url)
+          const { data: productData } = await supabase
+            .from('products')
+            .select('id, pdf_url')
+            .in('id', itemIds);
+
+          if (accessData || productData) {
             coursesWithAccess = finalCourses.map((course: any) => {
-              const found = accessData.find((a: any) => a.id === course.id);
-              return { ...course, accessUrl: found?.access_url || null };
+              const foundCourse = accessData?.find((a: any) => String(a.id) === String(course.id));
+              const foundProduct = productData?.find((p: any) => String(p.id) === String(course.id));
+              return {
+                ...course,
+                accessUrl: foundCourse?.access_url || null,
+                pdfUrl: foundProduct?.pdf_url || null,
+              };
             });
           }
         }
       } catch (accessErr) {
-        console.error('Error obteniendo URLs de acceso:', accessErr);
+        console.error('Error obteniendo URLs de acceso/PDF:', accessErr);
       }
 
       // 3. ENVIAR EMAIL DE CONFIRMACIÓN

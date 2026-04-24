@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ImageUpload } from "@/components/admin/ImageUpload";
+import { PdfUpload } from "@/components/admin/PdfUpload";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 
@@ -43,11 +44,18 @@ const ProductFormDialog = ({ open, onOpenChange, onSave }: ProductFormDialogProp
     image: "",
     videoUrl: "",
     features: "",
+    pdfUrl: "",
   });
 
   const handleImageChange = (imageUrl: string) => {
     setFormData({ ...formData, image: imageUrl });
   };
+
+  const handlePdfChange = (pdfUrl: string) => {
+    setFormData({ ...formData, pdfUrl });
+  };
+
+  const isDigital = formData.category === "Digital";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,6 +91,7 @@ const ProductFormDialog = ({ open, onOpenChange, onSave }: ProductFormDialogProp
         image_url: formData.image || null,
         video_url: formData.videoUrl || null,
         features: featuresArray.length > 0 ? featuresArray : null,
+        pdf_url: formData.pdfUrl || null,
         status: "active",
         is_new: true,
         sales: 0,
@@ -105,6 +114,7 @@ const ProductFormDialog = ({ open, onOpenChange, onSave }: ProductFormDialogProp
         image: "",
         videoUrl: "",
         features: "",
+        pdfUrl: "",
       });
       onOpenChange(false);
     } catch (error) {
@@ -194,6 +204,7 @@ const ProductFormDialog = ({ open, onOpenChange, onSave }: ProductFormDialogProp
                 <SelectValue placeholder="Selecciona una categoría" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="Digital">📄 Producto Digital (PDF)</SelectItem>
                 <SelectItem value="Calzado">Calzado</SelectItem>
                 <SelectItem value="Pesas">Pesas</SelectItem>
                 <SelectItem value="Accesorios">Accesorios</SelectItem>
@@ -260,6 +271,23 @@ const ProductFormDialog = ({ open, onOpenChange, onSave }: ProductFormDialogProp
               URL de YouTube (formato embed). Aparecerá en el modal de detalles.
             </p>
           </div>
+
+          {/* PDF - Solo para productos digitales */}
+          {isDigital && (
+            <div className="space-y-2 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <Label className="text-blue-800 font-semibold">
+                📄 Archivo PDF del Producto <span className="text-red-500">*</span>
+              </Label>
+              <p className="text-xs text-blue-600">
+                Este PDF se enviará automáticamente al email del comprador después de la compra.
+              </p>
+              <PdfUpload
+                onPdfUploaded={handlePdfChange}
+                currentPdfUrl={formData.pdfUrl}
+                folder="pdfs"
+              />
+            </div>
+          )}
 
           {/* Características */}
           <div className="space-y-2">
