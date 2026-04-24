@@ -12,6 +12,7 @@ const Success = () => {
   const merchantOrderId = searchParams.get("merchant_order_id");
   const token = searchParams.get("token"); // PayPal order ID
   const payerId = searchParams.get("PayerID"); // PayPal payer ID
+  const gateway = searchParams.get("gateway"); // Para identificar la pasarela (ualabis, etc.)
   
   const [isCapturing, setIsCapturing] = useState(false);
   const [captureError, setCaptureError] = useState<string | null>(null);
@@ -23,9 +24,10 @@ const Success = () => {
     if (token && payerId) {
       capturePayPalPayment(token);
     } else {
-      // Para MercadoPago, limpiar carrito y enviar email inmediatamente
+      // Para MercadoPago, Ualá Bis y otros, limpiar carrito y enviar email
       localStorage.removeItem("cart");
-      sendCourseEmail(paymentId || merchantOrderId || undefined);
+      const refId = paymentId || merchantOrderId || searchParams.get("uuid") || undefined;
+      sendCourseEmail(refId);
     }
   }, [token, payerId]);
 
@@ -101,7 +103,7 @@ const Success = () => {
             total: total,
             status: 'completed',
             payment_id: paymentIdParam || null,
-            payment_method: paymentIdParam?.includes('PAYID') ? 'paypal' : 'mercadopago',
+            payment_method: paymentIdParam?.includes('PAYID') ? 'paypal' : gateway === 'ualabis' ? 'ualabis' : 'mercadopago',
           })
           .select()
           .single();
@@ -240,7 +242,7 @@ const Success = () => {
             orderData: {
               orderId: paymentIdParam || 'N/A',
               total: finalCourses.reduce((sum: number, course: any) => sum + (course.price || 0), 0),
-              paymentMethod: paymentIdParam?.includes('PAYID') ? 'paypal' : 'mercadopago',
+              paymentMethod: paymentIdParam?.includes('PAYID') ? 'paypal' : gateway === 'ualabis' ? 'ualabis' : 'mercadopago',
               paymentId: paymentIdParam || 'N/A',
               status: 'completed',
               items: finalCourses.map((course: any) => ({

@@ -29,7 +29,7 @@ import mercadopagoLogo from "@/assets/mercadopago-logo.png";
 import prexLogo from "@/assets/prex-logo.png";
 import paypalLogo from "@/assets/paypal-logo.png";
 
-type PaymentMethod = "mercadopago" | "prex" | "paypal";
+type PaymentMethod = "mercadopago" | "prex" | "paypal" | "ualabis";
 
 interface CheckoutDialogProps {
   open: boolean;
@@ -275,6 +275,74 @@ const CheckoutDialog = ({ open, onOpenChange }: CheckoutDialogProps) => {
     }
   };
 
+  const handleUalaBis = async () => {
+    setIsProcessing(true);
+
+    try {
+      const allItems = items.map(item => ({
+        id: item.id,
+        title: item.title || item.name,
+        type: item.type,
+        price: item.price,
+        instructor: item.instructor || 'N/A',
+      }));
+
+      const purchaseData = {
+        courses: allItems,
+        userEmail: user?.email || '',
+        userName: user?.name || '',
+        userDni: user?.dni || '',
+        userProvincia: user?.provincia || '',
+        userLocalidad: user?.localidad || '',
+        userPais: user?.pais || '',
+        timestamp: Date.now(),
+      };
+
+      localStorage.setItem('purchasedCourses', JSON.stringify(purchaseData));
+
+      const baseUrl = window.location.origin.replace(/\/$/, '');
+
+      const response = await fetch(`${baseUrl}/api/payments/ualabis/create-order`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: items.map(item => ({
+            id: item.id?.toString() || '1',
+            name: item.type === 'product' ? item.name : item.title,
+            title: item.type === 'product' ? item.name : item.title,
+            quantity: parseInt(String(item.quantity)) || 1,
+            price: parseFloat(String(item.price)) || 0,
+            type: item.type,
+          })),
+          payer: {
+            email: user?.email || '',
+            name: user?.name || '',
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al crear la orden de Ualá Bis');
+      }
+
+      const data = await response.json();
+
+      if (data.checkout_link) {
+        window.location.href = data.checkout_link;
+      } else {
+        throw new Error('No se recibió el link de pago de Ualá Bis');
+      }
+    } catch (error) {
+      console.error('Error Ualá Bis:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo iniciar el pago con Ualá Bis. Intenta nuevamente.",
+        variant: "destructive",
+      });
+      setIsProcessing(false);
+    }
+  };
+
   const handlePayment = async () => {
     if (paymentMethod === "mercadopago") {
       await handleMercadoPago();
@@ -282,6 +350,8 @@ const CheckoutDialog = ({ open, onOpenChange }: CheckoutDialogProps) => {
       await handlePrex();
     } else if (paymentMethod === "paypal") {
       await handlePayPal();
+    } else if (paymentMethod === "ualabis") {
+      await handleUalaBis();
     }
   };
 
@@ -380,6 +450,23 @@ const CheckoutDialog = ({ open, onOpenChange }: CheckoutDialogProps) => {
                     <ShieldCheck className="w-5 h-5 text-green-600" />
                   </Label>
                 </div>
+
+                {/* Ualá Bis */}
+                <div className="flex items-center space-x-3 border border-border rounded-lg p-4 hover:bg-accent/50 transition-colors cursor-pointer">
+                  <RadioGroupItem value="ualabis" id="ualabis" />
+                  <Label htmlFor="ualabis" className="flex items-center gap-3 flex-1 cursor-pointer">
+                    <div className="w-14 h-14 rounded-lg bg-[#8B5CF6]/10 flex items-center justify-center border border-border">
+                      <span className="text-[#8B5CF6] font-bold text-xs text-center leading-tight">Ualá<br/>Bis</span>
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-semibold">Ualá Bis</p>
+                      <p className="text-sm text-muted-foreground">
+                        Tarjeta de crédito o débito
+                      </p>
+                    </div>
+                    <ShieldCheck className="w-5 h-5 text-green-600" />
+                  </Label>
+                </div>
               </div>
 
               {/* Pago Internacional */}
@@ -455,6 +542,8 @@ const CheckoutDialog = ({ open, onOpenChange }: CheckoutDialogProps) => {
                 ? "Procesar con Prex"
                 : paymentMethod === "paypal"
                 ? "Procesar con PayPal"
+                : paymentMethod === "ualabis"
+                ? "Procesar con Ualá Bis"
                 : `Pagar $${getTotal().toLocaleString("es-AR")}`}
             </Button>
           </div>
