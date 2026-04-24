@@ -47,11 +47,21 @@ export default async function handler(req, res) {
   const UALABIS_CLIENT_ID = process.env.UALABIS_CLIENT_ID;
   const UALABIS_CLIENT_SECRET_ID = process.env.UALABIS_CLIENT_SECRET_ID;
 
+  // Diagnóstico de variables de entorno
+  console.log('🔍 UALABIS_USERNAME:', UALABIS_USERNAME ? `"${UALABIS_USERNAME}"` : '❌ NO CONFIGURADA');
+  console.log('🔍 UALABIS_CLIENT_ID:', UALABIS_CLIENT_ID ? UALABIS_CLIENT_ID.substring(0, 8) + '...' : '❌ NO CONFIGURADA');
+  console.log('🔍 UALABIS_CLIENT_SECRET_ID:', UALABIS_CLIENT_SECRET_ID ? UALABIS_CLIENT_SECRET_ID.substring(0, 8) + '...' : '❌ NO CONFIGURADA');
+
   if (!UALABIS_USERNAME || !UALABIS_CLIENT_ID || !UALABIS_CLIENT_SECRET_ID) {
     console.error('❌ Credenciales de Ualá Bis no configuradas');
     return res.status(500).json({
       error: 'Ualá Bis no configurado',
       detail: 'Faltan UALABIS_USERNAME, UALABIS_CLIENT_ID o UALABIS_CLIENT_SECRET_ID',
+      missing: {
+        UALABIS_USERNAME: !UALABIS_USERNAME,
+        UALABIS_CLIENT_ID: !UALABIS_CLIENT_ID,
+        UALABIS_CLIENT_SECRET_ID: !UALABIS_CLIENT_SECRET_ID,
+      }
     });
   }
 
@@ -83,6 +93,13 @@ export default async function handler(req, res) {
 
     // 1. Obtener token de acceso
     console.log('🔑 Obteniendo token de acceso Ualá Bis...');
+    console.log('📤 Enviando a:', UALABIS_AUTH_URL);
+    console.log('📤 Payload auth:', JSON.stringify({
+      username: UALABIS_USERNAME,
+      client_id: UALABIS_CLIENT_ID?.substring(0, 8) + '...',
+      client_secret_id: UALABIS_CLIENT_SECRET_ID?.substring(0, 8) + '...',
+      grant_type: 'client_credentials',
+    }));
     const accessToken = await getUalaBisToken(UALABIS_USERNAME, UALABIS_CLIENT_ID, UALABIS_CLIENT_SECRET_ID);
     console.log('✅ Token obtenido correctamente');
 
