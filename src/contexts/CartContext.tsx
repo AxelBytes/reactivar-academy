@@ -1,6 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
-// Tipos para productos y cursos
 export interface CartProduct {
   id: number;
   name: string;
@@ -21,133 +20,93 @@ export interface CartCourse {
   quantity: number;
 }
 
-export type CartItem = CartProduct | CartCourse;
+export interface CartSaas {
+  id: number;
+  name: string;
+  price: number;
+  image: string;
+  type: "saas";
+  quantity: 1;
+  subscriptionMonths: number;
+}
+
+export type CartItem = CartProduct | CartCourse | CartSaas;
+export type CartItemType = "product" | "course" | "saas";
 
 interface CartContextType {
   items: CartItem[];
   addProduct: (product: Omit<CartProduct, "quantity" | "type">) => void;
-  addCourse: (course: Omit<CartCourse, "quantity" | "type">) => void;
-  removeItem: (id: number, type: "product" | "course") => void;
-  updateQuantity: (id: number, type: "product" | "course", quantity: number) => void;
-  clearCart: () => void;
-  getTotal: () => number;
+  addCourse:  (course:  Omit<CartCourse,  "quantity" | "type">) => void;
+  addSaas:    (plan:    Omit<CartSaas,    "quantity" | "type">) => void;
+  removeItem:     (id: number, type: CartItemType) => void;
+  updateQuantity: (id: number, type: CartItemType, quantity: number) => void;
+  clearCart:  () => void;
+  getTotal:   () => number;
   getItemCount: () => number;
-  isInCart: (id: number, type: "product" | "course") => boolean;
+  isInCart:   (id: number, type: CartItemType) => boolean;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const useCart = () => {
   const context = useContext(CartContext);
-  if (!context) {
-    throw new Error("useCart debe ser usado dentro de un CartProvider");
-  }
+  if (!context) throw new Error("useCart debe ser usado dentro de un CartProvider");
   return context;
 };
 
-interface CartProviderProps {
-  children: ReactNode;
-}
-
-export const CartProvider = ({ children }: CartProviderProps) => {
+export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [items, setItems] = useState<CartItem[]>(() => {
-    // Cargar carrito desde localStorage al iniciar
-    const savedCart = localStorage.getItem("cart");
-    return savedCart ? JSON.parse(savedCart) : [];
+    const saved = localStorage.getItem("cart");
+    return saved ? JSON.parse(saved) : [];
   });
 
-  // Guardar carrito en localStorage cuando cambie
   useEffect(() => {
     localStorage.setItem("cart", JSON.stringify(items));
   }, [items]);
 
   const addProduct = (product: Omit<CartProduct, "quantity" | "type">) => {
-    setItems((currentItems) => {
-      const existingItem = currentItems.find(
-        (item) => item.id === product.id && item.type === "product"
-      );
-
-      if (existingItem) {
-        // Si ya existe, incrementar cantidad
-        return currentItems.map((item) =>
-          item.id === product.id && item.type === "product"
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
-      }
-
-      // Si no existe, agregar nuevo producto
-      return [...currentItems, { ...product, type: "product" as const, quantity: 1 }];
+    setItems(cur => {
+      const existing = cur.find(i => i.id === product.id && i.type === "product");
+      if (existing) return cur.map(i => i.id === product.id && i.type === "product" ? { ...i, quantity: i.quantity + 1 } : i);
+      return [...cur, { ...product, type: "product" as const, quantity: 1 }];
     });
   };
 
   const addCourse = (course: Omit<CartCourse, "quantity" | "type">) => {
-    setItems((currentItems) => {
-      const existingItem = currentItems.find(
-        (item) => item.id === course.id && item.type === "course"
-      );
-
-      if (existingItem) {
-        // Los cursos no se duplican, solo se mantiene uno
-        return currentItems;
-      }
-
-      // Agregar curso (cantidad siempre es 1 para cursos)
-      return [...currentItems, { ...course, type: "course" as const, quantity: 1 }];
+    setItems(cur => {
+      if (cur.find(i => i.id === course.id && i.type === "course")) return cur;
+      return [...cur, { ...course, type: "course" as const, quantity: 1 }];
     });
   };
 
-  const removeItem = (id: number, type: "product" | "course") => {
-    setItems((currentItems) =>
-      currentItems.filter((item) => !(item.id === id && item.type === type))
-    );
+  const addSaas = (plan: Omit<CartSaas, "quantity" | "type">) => {
+    setItems(cur => {
+      // Reemplazar cualquier plan SaaS anterior (solo 1 plan a la vez)
+      const withoutSaas = cur.filter(i => i.type !== "saas");
+      return [...withoutSaas, { ...plan, type: "saas" as const, quantity: 1 }];
+    });
   };
 
-  const updateQuantity = (id: number, type: "product" | "course", quantity: number) => {
-    if (quantity <= 0) {
-      removeItem(id, type);
-      return;
-    }
-
-    setItems((currentItems) =>
-      currentItems.map((item) =>
-        item.id === id && item.type === type
-          ? { ...item, quantity }
-          : item
-      )
-    );
+  const removeItem = (id: number, type: CartItemType) => {
+    setItems(cur => cur.filter(i => !(i.id === id && i.type === type)));
   };
 
-  const clearCart = () => {
-    setItems([]);
+  const updateQuantity = (id: number, type: CartItemType, quantity: number) => {
+    if (quantity <= 0) { removeItem(id, type); return; }
+    setItems(cur => cur.map(i => i.id === id && i.type === type ? { ...i, quantity } : i));
   };
 
-  const getTotal = () => {
-    return items.reduce((total, item) => {
-      const price = item.type === "product" ? item.price : item.price;
-      return total + price * item.quantity;
-    }, 0);
-  };
+  const clearCart = () => setItems([]);
 
-  const getItemCount = () => {
-    return items.reduce((count, item) => count + item.quantity, 0);
-  };
+  const getTotal = () => items.reduce((t, i) => t + i.price * i.quantity, 0);
 
-  const isInCart = (id: number, type: "product" | "course") => {
-    return items.some((item) => item.id === id && item.type === type);
-  };
+  const getItemCount = () => items.reduce((c, i) => c + i.quantity, 0);
 
-  const value: CartContextType = {
-    items,
-    addProduct,
-    addCourse,
-    removeItem,
-    updateQuantity,
-    clearCart,
-    getTotal,
-    getItemCount,
-    isInCart,
-  };
+  const isInCart = (id: number, type: CartItemType) => items.some(i => i.id === id && i.type === type);
 
-  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
+  return (
+    <CartContext.Provider value={{ items, addProduct, addCourse, addSaas, removeItem, updateQuantity, clearCart, getTotal, getItemCount, isInCart }}>
+      {children}
+    </CartContext.Provider>
+  );
 };

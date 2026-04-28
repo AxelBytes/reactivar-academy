@@ -3,7 +3,7 @@ import { useCart } from "@/contexts/CartContext";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Minus, Plus, Trash2, ShoppingBag } from "lucide-react";
+import { Minus, Plus, Trash2, ShoppingBag, KeyRound } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import CheckoutDialog from "@/components/checkout/CheckoutDialog";
 
@@ -29,7 +29,7 @@ const Cart = ({ onClose }: CartProps) => {
     setIsCheckoutOpen(true);
   };
 
-  const handleRemoveItem = (id: number, type: "product" | "course", name: string) => {
+  const handleRemoveItem = (id: number, type: "product" | "course" | "saas", name: string) => {
     removeItem(id, type);
     toast({
       title: "Producto eliminado",
@@ -58,19 +58,21 @@ const Cart = ({ onClose }: CartProps) => {
       <ScrollArea className="flex-1 pr-4">
         <div className="space-y-4 py-4">
           {items.map((item) => {
-            const itemName = item.type === "product" ? item.name : item.title;
+            const itemName  = item.type === "saas" ? item.name : item.type === "product" ? item.name : item.title;
             const itemImage = item.image;
             const itemPrice = item.price;
 
             return (
               <div key={`${item.type}-${item.id}`} className="flex gap-4">
-                {/* Image */}
-                <div className="w-20 h-20 rounded-lg overflow-hidden bg-accent/20 flex-shrink-0">
-                  <img
-                    src={itemImage}
-                    alt={itemName}
-                    className="w-full h-full object-cover"
-                  />
+                {/* Image / Icon */}
+                <div className="w-20 h-20 rounded-lg overflow-hidden bg-accent/20 flex-shrink-0 flex items-center justify-center">
+                  {item.type === "saas" ? (
+                    <KeyRound className="w-8 h-8 text-primary" />
+                  ) : itemImage ? (
+                    <img src={itemImage} alt={itemName} className="w-full h-full object-cover" />
+                  ) : (
+                    <KeyRound className="w-8 h-8 text-muted-foreground" />
+                  )}
                 </div>
 
                 {/* Info */}
@@ -79,7 +81,11 @@ const Cart = ({ onClose }: CartProps) => {
                     {itemName}
                   </h4>
                   <p className="text-xs text-muted-foreground mt-1">
-                    {item.type === "product" ? item.category : `Curso - ${item.instructor}`}
+                    {item.type === "saas"
+                      ? `🔑 Suscripción ${item.subscriptionMonths} mes${item.subscriptionMonths > 1 ? "es" : ""}`
+                      : item.type === "product"
+                      ? item.category
+                      : `Curso - ${item.instructor}`}
                   </p>
                   <div className="flex items-center gap-2 mt-2">
                     <span className="font-bold text-foreground">
@@ -104,7 +110,7 @@ const Cart = ({ onClose }: CartProps) => {
                     <Trash2 className="w-4 h-4" />
                   </Button>
 
-                  {/* Quantity Controls (only for products) */}
+                  {/* Quantity Controls (only for products, not saas or courses) */}
                   {item.type === "product" && (
                     <div className="flex items-center gap-1 border border-border rounded-md">
                       <Button

@@ -182,22 +182,28 @@ const Success = () => {
       }
 
       // 2b. ACTIVAR CLAVE DE SUSCRIPCIÓN AUTOMÁTICAMENTE
-      if (subscriptionProducts.length > 0) {
-        for (const subProd of subscriptionProducts) {
+      // Detectar suscripciones desde localStorage (tipo saas) Y desde Supabase (categoria Suscripcion)
+      const saasItems = finalCourses
+        .filter((item: any) => item.type === 'saas' && item.subscriptionMonths > 0)
+        .map((item: any) => ({ name: item.title || item.name, months: item.subscriptionMonths }));
+
+      const allSubscriptions = [...saasItems, ...subscriptionProducts];
+
+      if (allSubscriptions.length > 0) {
+        for (const sub of allSubscriptions) {
           try {
-            console.log(`🔑 Activando suscripción "${subProd.name}" (${subProd.months} meses) para ${userEmail}`);
+            console.log(`🔑 Activando suscripción "${sub.name}" (${sub.months} meses) para ${userEmail}`);
             const disponible = await obtenerClaveDisponible();
-            const resultado = await activarClave({
+            const resultado  = await activarClave({
               clave:  disponible.clave,
               nombre: userName || userEmail,
               email:  userEmail,
-              meses:  subProd.months,
+              meses:  sub.months,
             });
             console.log(`✅ Clave activada: ${resultado.clave} · Vence: ${resultado.vencimiento}`);
             setSubscriptionKey(resultado.clave);
           } catch (subErr: any) {
             console.error('⚠️ Error activando suscripción automáticamente:', subErr.message);
-            // No cortar el flujo aunque falle
           }
         }
       }

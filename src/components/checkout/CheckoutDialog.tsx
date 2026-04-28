@@ -23,6 +23,7 @@ import {
   ShieldCheck,
   Package,
   GraduationCap,
+  KeyRound,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import mercadopagoLogo from "@/assets/mercadopago-logo.png";
@@ -76,7 +77,8 @@ const CheckoutDialog = ({ open, onOpenChange }: CheckoutDialogProps) => {
   });
 
   const hasProducts = items.some((item) => item.type === "product");
-  const hasCourses = items.some((item) => item.type === "course");
+  const hasCourses  = items.some((item) => item.type === "course");
+  const hasSaas     = items.some((item) => item.type === "saas");
 
   const handlePrex = async () => {
     setIsProcessing(true);
@@ -136,15 +138,16 @@ const CheckoutDialog = ({ open, onOpenChange }: CheckoutDialogProps) => {
       
       // Guardar TODOS los items para el email (usar localStorage para persistir)
       const allItems = items.map(item => ({
-        id: item.id,
-        title: item.title || item.name,
-        type: item.type,
+        id:    item.id,
+        title: item.type === 'saas' ? item.name : item.type === 'product' ? item.name : item.title,
+        type:  item.type,
         price: item.price,
-        instructor: item.instructor || 'N/A',
+        instructor: item.type === 'course' ? item.instructor : 'N/A',
+        subscriptionMonths: item.type === 'saas' ? item.subscriptionMonths : 0,
       }));
       
       const purchaseData = {
-        courses: allItems, // Guardar todo
+        courses: allItems,
         userEmail: user?.email || '',
         userName: user?.name || '',
         userDni: user?.dni || '',
@@ -170,17 +173,20 @@ const CheckoutDialog = ({ open, onOpenChange }: CheckoutDialogProps) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          items: items.map(item => ({
-            id: item.id?.toString() || '1',
-            name: item.type === 'product' ? item.name : item.title,
-            title: item.type === 'product' ? item.name : item.title,
-            quantity: parseInt(String(item.quantity)) || 1,
-            price: parseFloat(String(item.price)) || 0,
-            type: item.type,
-          })),
+          items: items.map(item => {
+            const n = item.type === 'saas' ? item.name : item.type === 'product' ? item.name : item.title;
+            return {
+              id:       item.id?.toString() || '1',
+              name:     n,
+              title:    n,
+              quantity: parseInt(String(item.quantity)) || 1,
+              price:    parseFloat(String(item.price)) || 0,
+              type:     item.type,
+            };
+          }),
           payer: {
             email: user?.email || '',
-            name: user?.name || '',
+            name:  user?.name  || '',
           },
         }),
       });
@@ -280,21 +286,22 @@ const CheckoutDialog = ({ open, onOpenChange }: CheckoutDialogProps) => {
 
     try {
       const allItems = items.map(item => ({
-        id: item.id,
-        title: item.title || item.name,
-        type: item.type,
+        id:    item.id,
+        title: item.type === 'saas' ? item.name : item.type === 'product' ? item.name : item.title,
+        type:  item.type,
         price: item.price,
-        instructor: item.instructor || 'N/A',
+        instructor: item.type === 'course' ? item.instructor : 'N/A',
+        subscriptionMonths: item.type === 'saas' ? item.subscriptionMonths : 0,
       }));
 
       const purchaseData = {
         courses: allItems,
         userEmail: user?.email || '',
-        userName: user?.name || '',
-        userDni: user?.dni || '',
+        userName:  user?.name  || '',
+        userDni:   user?.dni   || '',
         userProvincia: user?.provincia || '',
         userLocalidad: user?.localidad || '',
-        userPais: user?.pais || '',
+        userPais:      user?.pais      || '',
         timestamp: Date.now(),
       };
 
@@ -306,17 +313,20 @@ const CheckoutDialog = ({ open, onOpenChange }: CheckoutDialogProps) => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          items: items.map(item => ({
-            id: item.id?.toString() || '1',
-            name: item.type === 'product' ? item.name : item.title,
-            title: item.type === 'product' ? item.name : item.title,
-            quantity: parseInt(String(item.quantity)) || 1,
-            price: parseFloat(String(item.price)) || 0,
-            type: item.type,
-          })),
+          items: items.map(item => {
+            const n = item.type === 'saas' ? item.name : item.type === 'product' ? item.name : item.title;
+            return {
+              id:       item.id?.toString() || '1',
+              name:     n,
+              title:    n,
+              quantity: parseInt(String(item.quantity)) || 1,
+              price:    parseFloat(String(item.price))  || 0,
+              type:     item.type,
+            };
+          }),
           payer: {
             email: user?.email || '',
-            name: user?.name || '',
+            name:  user?.name  || '',
           },
         }),
       });
@@ -373,12 +383,14 @@ const CheckoutDialog = ({ open, onOpenChange }: CheckoutDialogProps) => {
             </h3>
             <div className="space-y-2">
               {items.map((item) => {
-                const itemName = item.type === "product" ? item.name : item.title;
+                const itemName = item.type === "saas" ? item.name : item.type === "product" ? item.name : item.title;
                 return (
                   <div key={`${item.type}-${item.id}`} className="flex items-center justify-between text-sm">
                     <div className="flex items-center gap-2">
                       {item.type === "product" ? (
                         <Package className="w-4 h-4 text-primary" />
+                      ) : item.type === "saas" ? (
+                        <KeyRound className="w-4 h-4 text-primary" />
                       ) : (
                         <GraduationCap className="w-4 h-4 text-primary" />
                       )}
@@ -514,6 +526,17 @@ const CheckoutDialog = ({ open, onOpenChange }: CheckoutDialogProps) => {
               <GraduationCap className="w-4 h-4" />
               <AlertDescription>
                 Tendrás acceso inmediato a tus cursos después de completar la compra.
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {/* Información de suscripción SaaS */}
+          {hasSaas && (
+            <Alert className="border-yellow-300 bg-yellow-50">
+              <KeyRound className="w-4 h-4 text-yellow-700" />
+              <AlertDescription className="text-yellow-800">
+                Tu clave de acceso al Buscador de Reglamento se activará automáticamente
+                y te llegará por email al completar la compra.
               </AlertDescription>
             </Alert>
           )}
