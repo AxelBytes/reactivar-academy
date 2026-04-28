@@ -45,6 +45,7 @@ const ProductFormDialog = ({ open, onOpenChange, onSave }: ProductFormDialogProp
     videoUrl: "",
     features: "",
     pdfUrl: "",
+    subscriptionMonths: "1",
   });
 
   const handleImageChange = (imageUrl: string) => {
@@ -55,7 +56,8 @@ const ProductFormDialog = ({ open, onOpenChange, onSave }: ProductFormDialogProp
     setFormData({ ...formData, pdfUrl });
   };
 
-  const isDigital = formData.category === "Digital";
+  const isDigital       = formData.category === "Digital";
+  const isSuscripcion   = formData.category === "Suscripcion";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,6 +94,7 @@ const ProductFormDialog = ({ open, onOpenChange, onSave }: ProductFormDialogProp
         video_url: formData.videoUrl || null,
         features: featuresArray.length > 0 ? featuresArray : null,
         pdf_url: formData.pdfUrl || null,
+        subscription_months: isSuscripcion ? parseInt(formData.subscriptionMonths) : 0,
         status: "active",
         is_new: true,
         sales: 0,
@@ -115,6 +118,7 @@ const ProductFormDialog = ({ open, onOpenChange, onSave }: ProductFormDialogProp
         videoUrl: "",
         features: "",
         pdfUrl: "",
+        subscriptionMonths: "1",
       });
       onOpenChange(false);
     } catch (error) {
@@ -204,6 +208,7 @@ const ProductFormDialog = ({ open, onOpenChange, onSave }: ProductFormDialogProp
                 <SelectValue placeholder="Selecciona una categoría" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="Suscripcion">🔑 Suscripción (clave de acceso)</SelectItem>
                 <SelectItem value="Digital">📄 Producto Digital (PDF)</SelectItem>
                 <SelectItem value="Calzado">Calzado</SelectItem>
                 <SelectItem value="Pesas">Pesas</SelectItem>
@@ -271,6 +276,33 @@ const ProductFormDialog = ({ open, onOpenChange, onSave }: ProductFormDialogProp
               URL de YouTube (formato embed). Aparecerá en el modal de detalles.
             </p>
           </div>
+
+          {/* Meses - Solo para suscripciones */}
+          {isSuscripcion && (
+            <div className="space-y-2 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <Label className="text-yellow-800 font-semibold">
+                🔑 Duración de la suscripción
+              </Label>
+              <p className="text-xs text-yellow-700">
+                Al comprar este producto, se asignará automáticamente una clave de acceso
+                con la duración seleccionada. El cliente la recibirá por email.
+              </p>
+              <Select
+                value={formData.subscriptionMonths}
+                onValueChange={(v) => setFormData({ ...formData, subscriptionMonths: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">1 mes</SelectItem>
+                  <SelectItem value="3">3 meses</SelectItem>
+                  <SelectItem value="6">6 meses</SelectItem>
+                  <SelectItem value="12">12 meses (1 año)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           {/* PDF - Solo para productos digitales */}
           {isDigital && (

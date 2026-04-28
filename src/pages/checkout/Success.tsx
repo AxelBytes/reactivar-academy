@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle, Package, GraduationCap, Home, ShoppingBag, Loader2, Mail } from "lucide-react";
+import { CheckCircle, Package, GraduationCap, Home, ShoppingBag, Loader2, Mail, KeyRound } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { obtenerClaveDisponible, activarClave } from "@/services/suscripciones";
 
 const Success = () => {
   const [searchParams] = useSearchParams();
@@ -18,6 +19,7 @@ const Success = () => {
   const [captureError, setCaptureError] = useState<string | null>(null);
   const [emailSent, setEmailSent] = useState(false);
   const [emailError, setEmailError] = useState<string | null>(null);
+  const [subscriptionKey, setSubscriptionKey] = useState<string | null>(null);
 
   useEffect(() => {
     // Capturar pago de PayPal si viene de PayPal
@@ -136,9 +138,11 @@ const Success = () => {
         // Continuar con el email aunque falle la BD
       }
 
-      // 2. OBTENER URLs DE ACCESO Y PDFs
+      // 2. OBTENER URLs DE ACCESO, PDFs Y DATOS DE SUSCRIPCIÓN
       const baseUrl = window.location.origin.replace(/\/$/, '');
       let coursesWithAccess = finalCourses;
+      let subscriptionProducts: Array<{ name: string; months: number }> = [];
+
       try {
         const itemIds = finalCourses.map((c: any) => c.id).filter((id: any) => id);
         if (itemIds.length > 0) {
@@ -148,10 +152,10 @@ const Success = () => {
             .select('id, access_url')
             .in('id', itemIds);
 
-          // Buscar en productos (pdf_url)
+          // Buscar en productos (pdf_url + subscription_months)
           const { data: productData } = await supabase
             .from('products')
-            .select('id, pdf_url')
+            .select('id, pdf_url, subscription_months, name, category')
             .in('id', itemIds);
 
           if (accessData || productData) {
@@ -164,10 +168,38 @@ const Success = () => {
                 pdfUrl: foundProduct?.pdf_url || null,
               };
             });
+
+            // Detectar productos de suscripción
+            if (productData) {
+              subscriptionProducts = productData
+                .filter((p: any) => p.category === 'Suscripcion' && p.subscription_months > 0)
+                .map((p: any) => ({ name: p.name, months: p.subscription_months }));
+            }
           }
         }
       } catch (accessErr) {
         console.error('Error obteniendo URLs de acceso/PDF:', accessErr);
+      }
+
+      // 2b. ACTIVAR CLAVE DE SUSCRIPCIÓN AUTOMÁTICAMENTE
+      if (subscriptionProducts.length > 0) {
+        for (const subProd of subscriptionProducts) {
+          try {
+            console.log(`🔑 Activando suscripción "${subProd.name}" (${subProd.months} meses) para ${userEmail}`);
+            const disponible = await obtenerClaveDisponible();
+            const resultado = await activarClave({
+              clave:  disponible.clave,
+              nombre: userName || userEmail,
+              email:  userEmail,
+              meses:  subProd.months,
+            });
+            console.log(`✅ Clave activada: ${resultado.clave} · Vence: ${resultado.vencimiento}`);
+            setSubscriptionKey(resultado.clave);
+          } catch (subErr: any) {
+            console.error('⚠️ Error activando suscripción automáticamente:', subErr.message);
+            // No cortar el flujo aunque falle
+          }
+        }
       }
 
       // 3. ENVIAR EMAIL DE CONFIRMACIÓN
@@ -407,6 +439,29 @@ const Success = () => {
               </div>
             </div>
           </div>
+
+          {/* Clave de suscripción activada */}
+          {subscriptionKey && (
+            <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-4">
+              <div className="flex items-start gap-2">
+                <KeyRound className="w-5 h-5 text-yellow-700 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="text-sm font-medium text-yellow-900">
+                    ¡Tu clave de acceso fue activada!
+                  </p>
+                  <p className="text-xs text-yellow-700 mt-1">
+                    Tu clave de acceso al Buscador de Reglamento:
+                  </p>
+                  <p className="mt-2 font-mono text-lg font-bold text-yellow-900 bg-yellow-100 rounded px-3 py-1 inline-block">
+                    {subscriptionKey}
+                  </p>
+                  <p className="text-xs text-yellow-700 mt-2">
+                    También la recibirás por email junto con el link de acceso.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Email Confirmation */}
           {emailSent && (
