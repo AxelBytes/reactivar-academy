@@ -27,9 +27,17 @@ import { supabase } from "@/lib/supabase";
 interface Product {
   id: number;
   name: string;
+  description: string;
+  detailed_description?: string | null;
   category: string;
   price: number;
+  original_price?: number | null;
   stock: number;
+  image_url?: string | null;
+  video_url?: string | null;
+  features?: string[] | null;
+  pdf_url?: string | null;
+  subscription_months?: number;
   status: "active" | "inactive";
   sales: number;
 }
@@ -38,6 +46,7 @@ const Products = () => {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -74,34 +83,47 @@ const Products = () => {
     }
   };
 
-  const handleSaveProduct = async (newProduct: any) => {
+  const handleSaveProduct = async (productPayload: any) => {
     try {
-      const { data, error } = await supabase
-        .from("products")
-        .insert([newProduct])
-        .select()
-        .single();
+      const { id, ...fields } = productPayload;
 
-      if (error) {
-        console.error("Error guardando producto:", error);
-        toast({
-          title: "Error",
-          description: "No se pudo guardar el producto",
-          variant: "destructive",
-        });
-        return;
+      if (id) {
+        // EDITAR producto existente
+        const { data, error } = await supabase
+          .from("products")
+          .update(fields)
+          .eq("id", id)
+          .select()
+          .single();
+
+        if (error) {
+          toast({ title: "Error", description: "No se pudo actualizar el producto", variant: "destructive" });
+          return;
+        }
+
+        setProducts(prev => prev.map(p => p.id === id ? { ...p, ...data } : p));
+        toast({ title: "✅ Producto actualizado", description: `${data.name} fue editado correctamente.` });
+        setEditingProduct(null);
+      } else {
+        // CREAR nuevo producto
+        const { data, error } = await supabase
+          .from("products")
+          .insert([fields])
+          .select()
+          .single();
+
+        if (error) {
+          toast({ title: "Error", description: "No se pudo crear el producto", variant: "destructive" });
+          return;
+        }
+
+        setProducts(prev => [data, ...prev]);
+        toast({ title: "✅ Producto creado", description: `${data.name} fue agregado exitosamente.` });
       }
 
-      if (data) {
-        setProducts([data, ...products]);
-        toast({
-          title: "¡Producto creado!",
-          description: `${data.name} ha sido agregado exitosamente`,
-        });
-        setIsDialogOpen(false);
-      }
-    } catch (error) {
-      console.error("Error inesperado guardando producto:", error);
+      setIsDialogOpen(false);
+    } catch (err) {
+      console.error("Error guardando producto:", err);
     }
   };
 
@@ -111,10 +133,8 @@ const Products = () => {
   );
 
   const handleEdit = (product: Product) => {
-    toast({
-      title: "Editar producto",
-      description: `Editando: ${product.name} (próximamente)`,
-    });
+    setEditingProduct(product);
+    setIsDialogOpen(true);
   };
 
   const handleDelete = async (product: Product) => {
@@ -163,7 +183,7 @@ const Products = () => {
               Gestiona el catálogo de productos
             </p>
           </div>
-          <Button onClick={() => setIsDialogOpen(true)}>
+          <Button onClick={() => { setEditingProduct(null); setIsDialogOpen(true); }}>
             <Plus className="w-4 h-4 mr-2" />
             Nuevo Producto
           </Button>
@@ -302,11 +322,14 @@ const Products = () => {
         </div>
       </div>
 
-      {/* Dialog para agregar producto */}
       <ProductFormDialog
         open={isDialogOpen}
-        onOpenChange={setIsDialogOpen}
+        onOpenChange={(open) => {
+          setIsDialogOpen(open);
+          if (!open) setEditingProduct(null);
+        }}
         onSave={handleSaveProduct}
+        editProduct={editingProduct}
       />
     </AdminLayout>
   );

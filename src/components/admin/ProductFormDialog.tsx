@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -23,113 +23,138 @@ import { PdfUpload } from "@/components/admin/PdfUpload";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 
+export interface ProductData {
+  id?: number;
+  name: string;
+  description: string;
+  detailed_description?: string | null;
+  price: number;
+  original_price?: number | null;
+  category: string;
+  stock: number;
+  image_url?: string | null;
+  video_url?: string | null;
+  features?: string[] | null;
+  pdf_url?: string | null;
+  subscription_months?: number;
+  status?: string;
+  is_new?: boolean;
+  sales?: number;
+}
+
 interface ProductFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSave?: (product: any) => void;
+  editProduct?: ProductData | null;
 }
 
-const ProductFormDialog = ({ open, onOpenChange, onSave }: ProductFormDialogProps) => {
+const EMPTY_FORM = {
+  name: "",
+  description: "",
+  detailedDescription: "",
+  price: "",
+  originalPrice: "",
+  category: "",
+  stock: "",
+  image: "",
+  videoUrl: "",
+  features: "",
+  pdfUrl: "",
+  subscriptionMonths: "1",
+};
+
+const ProductFormDialog = ({ open, onOpenChange, onSave, editProduct }: ProductFormDialogProps) => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [formData, setFormData] = useState(EMPTY_FORM);
 
-  const [formData, setFormData] = useState({
-    name: "",
-    description: "",
-    detailedDescription: "",
-    price: "",
-    originalPrice: "",
-    category: "",
-    stock: "",
-    image: "",
-    videoUrl: "",
-    features: "",
-    pdfUrl: "",
-    subscriptionMonths: "1",
-  });
+  const isEditing = !!editProduct;
 
-  const handleImageChange = (imageUrl: string) => {
-    setFormData({ ...formData, image: imageUrl });
-  };
+  // Pre-rellenar el formulario cuando se abre en modo edición
+  useEffect(() => {
+    if (open) {
+      if (editProduct) {
+        setFormData({
+          name:                editProduct.name                      || "",
+          description:         editProduct.description               || "",
+          detailedDescription: editProduct.detailed_description      || "",
+          price:               editProduct.price?.toString()         || "",
+          originalPrice:       editProduct.original_price?.toString() || "",
+          category:            editProduct.category                  || "",
+          stock:               editProduct.stock?.toString()         || "",
+          image:               editProduct.image_url                 || "",
+          videoUrl:            editProduct.video_url                 || "",
+          features:            editProduct.features?.join("\n")      || "",
+          pdfUrl:              editProduct.pdf_url                   || "",
+          subscriptionMonths:  editProduct.subscription_months?.toString() || "1",
+        });
+      } else {
+        setFormData(EMPTY_FORM);
+      }
+    }
+  }, [open, editProduct]);
 
-  const handlePdfChange = (pdfUrl: string) => {
-    setFormData({ ...formData, pdfUrl });
-  };
+  const handleImageChange = (imageUrl: string) => setFormData(f => ({ ...f, image: imageUrl }));
+  const handlePdfChange   = (pdfUrl: string)   => setFormData(f => ({ ...f, pdfUrl }));
 
-  const isDigital       = formData.category === "Digital";
-  const isSuscripcion   = formData.category === "Suscripcion";
+  const isDigital     = formData.category === "Digital";
+  const isSuscripcion = formData.category === "Suscripcion";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      // Validaciones
       if (!formData.name || !formData.description || !formData.price || !formData.category) {
         toast({
           title: "Error",
-          description: "Por favor completa todos los campos obligatorios",
+          description: "Por favor completá todos los campos obligatorios",
           variant: "destructive",
         });
         setIsLoading(false);
         return;
       }
 
-      // Convertir features de texto a array
       const featuresArray = formData.features
         .split("\n")
         .filter(f => f.trim() !== "")
         .map(f => f.trim());
 
-      // Crear objeto del producto para Supabase
-      const newProduct: Record<string, any> = {
-        name: formData.name,
-        description: formData.description,
+      const productPayload: Record<string, any> = {
+        name:                 formData.name,
+        description:          formData.description,
         detailed_description: formData.detailedDescription || null,
-        price: parseInt(formData.price),
-        original_price: formData.originalPrice ? parseInt(formData.originalPrice) : null,
-        category: formData.category,
-        stock: parseInt(formData.stock) || 0,
-        image_url: formData.image || null,
-        video_url: formData.videoUrl || null,
-        features: featuresArray.length > 0 ? featuresArray : null,
-        pdf_url: formData.pdfUrl || null,
-        status: "active",
-        is_new: true,
-        sales: 0,
+        price:                parseInt(formData.price),
+        original_price:       formData.originalPrice ? parseInt(formData.originalPrice) : null,
+        category:             formData.category,
+        stock:                parseInt(formData.stock) || 0,
+        image_url:            formData.image || null,
+        video_url:            formData.videoUrl || null,
+        features:             featuresArray.length > 0 ? featuresArray : null,
+        pdf_url:              formData.pdfUrl || null,
+        status:               "active",
       };
 
-      // Solo incluir subscription_months si la categoría es Suscripcion
-      // (requiere que la columna exista en Supabase: ALTER TABLE products ADD COLUMN IF NOT EXISTS subscription_months integer DEFAULT 0)
+      if (!isEditing) {
+        productPayload.is_new = true;
+        productPayload.sales  = 0;
+      }
+
       if (isSuscripcion) {
-        newProduct.subscription_months = parseInt(formData.subscriptionMonths);
+        productPayload.subscription_months = parseInt(formData.subscriptionMonths);
       }
 
-      // Enviar al handler de guardado (que guardará en Supabase)
       if (onSave) {
-        await onSave(newProduct);
+        await onSave({ ...productPayload, id: editProduct?.id });
       }
 
-      // Resetear formulario
-      setFormData({
-        name: "",
-        description: "",
-        detailedDescription: "",
-        price: "",
-        originalPrice: "",
-        category: "",
-        stock: "",
-        image: "",
-        videoUrl: "",
-        features: "",
-        pdfUrl: "",
-        subscriptionMonths: "1",
-      });
+      setFormData(EMPTY_FORM);
       onOpenChange(false);
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
-        description: "Hubo un error al crear el producto",
+        description: `Hubo un error al ${isEditing ? "editar" : "crear"} el producto`,
         variant: "destructive",
       });
     } finally {
@@ -141,16 +166,18 @@ const ProductFormDialog = ({ open, onOpenChange, onSave }: ProductFormDialogProp
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Nuevo Producto</DialogTitle>
+          <DialogTitle>{isEditing ? `Editar: ${editProduct?.name}` : "Nuevo Producto"}</DialogTitle>
           <DialogDescription>
-            Completa el formulario para agregar un nuevo producto a la tienda
+            {isEditing
+              ? "Modificá los campos que querés actualizar"
+              : "Completá el formulario para agregar un nuevo producto a la tienda"}
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Imagen */}
           <div className="space-y-2">
-            <Label>Imagen del Producto <span className="text-red-500">*</span></Label>
+            <Label>Imagen del Producto {!isEditing && <span className="text-red-500">*</span>}</Label>
             <ImageUpload
               onImageUploaded={handleImageChange}
               currentImageUrl={formData.image}
@@ -161,28 +188,24 @@ const ProductFormDialog = ({ open, onOpenChange, onSave }: ProductFormDialogProp
 
           {/* Nombre */}
           <div className="space-y-2">
-            <Label htmlFor="name">
-              Nombre del Producto <span className="text-red-500">*</span>
-            </Label>
+            <Label htmlFor="name">Nombre del Producto <span className="text-red-500">*</span></Label>
             <Input
               id="name"
               placeholder="Ej: Zapatillas Running Pro"
               value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              onChange={e => setFormData(f => ({ ...f, name: e.target.value }))}
               required
             />
           </div>
 
           {/* Descripción Corta */}
           <div className="space-y-2">
-            <Label htmlFor="description">
-              Descripción Corta <span className="text-red-500">*</span>
-            </Label>
+            <Label htmlFor="description">Descripción Corta <span className="text-red-500">*</span></Label>
             <Textarea
               id="description"
               placeholder="Descripción breve que aparecerá en las tarjetas"
               value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              onChange={e => setFormData(f => ({ ...f, description: e.target.value }))}
               rows={2}
               required
             />
@@ -195,19 +218,17 @@ const ProductFormDialog = ({ open, onOpenChange, onSave }: ProductFormDialogProp
               id="detailedDescription"
               placeholder="Descripción completa que aparecerá en el modal de detalles"
               value={formData.detailedDescription}
-              onChange={(e) => setFormData({ ...formData, detailedDescription: e.target.value })}
+              onChange={e => setFormData(f => ({ ...f, detailedDescription: e.target.value }))}
               rows={4}
             />
           </div>
 
           {/* Categoría */}
           <div className="space-y-2">
-            <Label htmlFor="category">
-              Categoría <span className="text-red-500">*</span>
-            </Label>
+            <Label htmlFor="category">Categoría <span className="text-red-500">*</span></Label>
             <Select
               value={formData.category}
-              onValueChange={(value) => setFormData({ ...formData, category: value })}
+              onValueChange={value => setFormData(f => ({ ...f, category: value }))}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Selecciona una categoría" />
@@ -225,18 +246,16 @@ const ProductFormDialog = ({ open, onOpenChange, onSave }: ProductFormDialogProp
             </Select>
           </div>
 
-          {/* Precio y Stock */}
+          {/* Precio y Precio Original */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="price">
-                Precio (ARS) <span className="text-red-500">*</span>
-              </Label>
+              <Label htmlFor="price">Precio (ARS) <span className="text-red-500">*</span></Label>
               <Input
                 id="price"
                 type="number"
                 placeholder="150000"
                 value={formData.price}
-                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                onChange={e => setFormData(f => ({ ...f, price: e.target.value }))}
                 required
               />
             </div>
@@ -247,22 +266,20 @@ const ProductFormDialog = ({ open, onOpenChange, onSave }: ProductFormDialogProp
                 type="number"
                 placeholder="200000"
                 value={formData.originalPrice}
-                onChange={(e) => setFormData({ ...formData, originalPrice: e.target.value })}
+                onChange={e => setFormData(f => ({ ...f, originalPrice: e.target.value }))}
               />
             </div>
           </div>
 
           {/* Stock */}
           <div className="space-y-2">
-            <Label htmlFor="stock">
-              Stock Disponible <span className="text-red-500">*</span>
-            </Label>
+            <Label htmlFor="stock">Stock Disponible <span className="text-red-500">*</span></Label>
             <Input
               id="stock"
               type="number"
               placeholder="50"
               value={formData.stock}
-              onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
+              onChange={e => setFormData(f => ({ ...f, stock: e.target.value }))}
               required
             />
           </div>
@@ -275,7 +292,7 @@ const ProductFormDialog = ({ open, onOpenChange, onSave }: ProductFormDialogProp
               type="url"
               placeholder="https://www.youtube.com/embed/..."
               value={formData.videoUrl}
-              onChange={(e) => setFormData({ ...formData, videoUrl: e.target.value })}
+              onChange={e => setFormData(f => ({ ...f, videoUrl: e.target.value }))}
             />
             <p className="text-xs text-muted-foreground">
               URL de YouTube (formato embed). Aparecerá en el modal de detalles.
@@ -285,16 +302,14 @@ const ProductFormDialog = ({ open, onOpenChange, onSave }: ProductFormDialogProp
           {/* Meses - Solo para suscripciones */}
           {isSuscripcion && (
             <div className="space-y-2 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-              <Label className="text-yellow-800 font-semibold">
-                🔑 Duración de la suscripción
-              </Label>
+              <Label className="text-yellow-800 font-semibold">🔑 Duración de la suscripción</Label>
               <p className="text-xs text-yellow-700">
                 Al comprar este producto, se asignará automáticamente una clave de acceso
                 con la duración seleccionada. El cliente la recibirá por email.
               </p>
               <Select
                 value={formData.subscriptionMonths}
-                onValueChange={(v) => setFormData({ ...formData, subscriptionMonths: v })}
+                onValueChange={v => setFormData(f => ({ ...f, subscriptionMonths: v }))}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -331,9 +346,9 @@ const ProductFormDialog = ({ open, onOpenChange, onSave }: ProductFormDialogProp
             <Label htmlFor="features">Características (opcional)</Label>
             <Textarea
               id="features"
-              placeholder="Una característica por línea&#10;Amortiguación avanzada&#10;Peso ultra-ligero&#10;Diseño ergonómico"
+              placeholder={"Una característica por línea\nAmortiguación avanzada\nPeso ultra-ligero\nDiseño ergonómico"}
               value={formData.features}
-              onChange={(e) => setFormData({ ...formData, features: e.target.value })}
+              onChange={e => setFormData(f => ({ ...f, features: e.target.value }))}
               rows={5}
             />
             <p className="text-xs text-muted-foreground">
@@ -352,7 +367,7 @@ const ProductFormDialog = ({ open, onOpenChange, onSave }: ProductFormDialogProp
             </Button>
             <Button type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              Crear Producto
+              {isEditing ? "Guardar cambios" : "Crear Producto"}
             </Button>
           </DialogFooter>
         </form>
