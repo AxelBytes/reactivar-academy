@@ -82,7 +82,7 @@ const ProductFormDialog = ({ open, onOpenChange, onSave }: ProductFormDialogProp
         .map(f => f.trim());
 
       // Crear objeto del producto para Supabase
-      const newProduct = {
+      const newProduct: Record<string, any> = {
         name: formData.name,
         description: formData.description,
         detailed_description: formData.detailedDescription || null,
@@ -94,11 +94,16 @@ const ProductFormDialog = ({ open, onOpenChange, onSave }: ProductFormDialogProp
         video_url: formData.videoUrl || null,
         features: featuresArray.length > 0 ? featuresArray : null,
         pdf_url: formData.pdfUrl || null,
-        subscription_months: isSuscripcion ? parseInt(formData.subscriptionMonths) : 0,
         status: "active",
         is_new: true,
         sales: 0,
       };
+
+      // Solo incluir subscription_months si la categoría es Suscripcion
+      // (requiere que la columna exista en Supabase: ALTER TABLE products ADD COLUMN IF NOT EXISTS subscription_months integer DEFAULT 0)
+      if (isSuscripcion) {
+        newProduct.subscription_months = parseInt(formData.subscriptionMonths);
+      }
 
       // Enviar al handler de guardado (que guardará en Supabase)
       if (onSave) {
