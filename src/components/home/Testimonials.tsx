@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+mport { useState, useEffect } from "react";
 import { Star, Quote, Send, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";

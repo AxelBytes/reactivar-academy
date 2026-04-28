@@ -14,6 +14,7 @@ import {
   Home,
   LogOut,
   ShoppingBag,
+  KeyRound,
 } from "lucide-react";
 
 interface AdminLayoutProps {
@@ -32,6 +33,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     { icon: GraduationCap, label: "Cursos", path: "/admin/cursos" },
     { icon: ShoppingBag, label: "Pedidos", path: "/admin/pedidos" },
     { icon: Users, label: "Usuarios", path: "/admin/usuarios" },
+    { icon: KeyRound, label: "Suscripciones", path: "/admin/suscripciones" },
     { icon: Settings, label: "Configuración", path: "/admin/configuracion" },
   ];
 

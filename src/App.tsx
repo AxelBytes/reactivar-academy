@@ -17,6 +17,7 @@ import AdminCourses from "./pages/admin/Courses";
 import AdminOrders from "./pages/admin/Orders";
 import AdminUsers from "./pages/admin/Users";
 import AdminSettings from "./pages/admin/Settings";
+import GestionSuscripciones from "./pages/admin/GestionSuscripciones";
 import CheckoutSuccess from "./pages/checkout/Success";
 import CheckoutFailure from "./pages/checkout/Failure";
 import CheckoutPending from "./pages/checkout/Pending";
@@ -96,6 +97,14 @@ const App = () => (
                 element={
                   <ProtectedRoute requireAdmin>
                     <AdminSettings />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/suscripciones"
+                element={
+                  <ProtectedRoute requireAdmin>
+                    <GestionSuscripciones />
                   </ProtectedRoute>
                 }
               />
