@@ -21,6 +21,17 @@ const Success = () => {
   const [emailError, setEmailError] = useState<string | null>(null);
   const [subscriptionKey, setSubscriptionKey] = useState<string | null>(null);
 
+  // Detectar qué tipos de items se compraron (desde localStorage)
+  const purchaseRaw = localStorage.getItem('purchasedCourses');
+  const purchaseItems: any[] = purchaseRaw ? (JSON.parse(purchaseRaw)?.courses || []) : [];
+  const hasCourse   = purchaseItems.some((i: any) => i.type === 'course');
+  const hasProduct  = purchaseItems.some((i: any) => i.type === 'product');
+  const hasSaas     = purchaseItems.some((i: any) => i.type === 'saas' && i.subscriptionMonths > 0);
+
+  // Para distinguir PDF vs físico usamos state (se llena al consultar Supabase)
+  const [hasPdfProduct, setHasPdfProduct]           = useState(false);
+  const [hasPhysicalProduct, setHasPhysicalProduct] = useState(false);
+
   useEffect(() => {
     // Capturar pago de PayPal si viene de PayPal
     if (token && payerId) {
@@ -169,11 +180,16 @@ const Success = () => {
               };
             });
 
-            // Detectar productos de suscripción
+            // Detectar productos de suscripción, PDF y físicos
             if (productData) {
               subscriptionProducts = productData
                 .filter((p: any) => p.category === 'Suscripcion' && p.subscription_months > 0)
                 .map((p: any) => ({ name: p.name, months: p.subscription_months }));
+
+              const pdfProds  = productData.filter((p: any) => p.pdf_url && p.category === 'Digital');
+              const physProds = productData.filter((p: any) => !p.pdf_url || p.category !== 'Digital');
+              if (pdfProds.length > 0)  setHasPdfProduct(true);
+              if (physProds.length > 0) setHasPhysicalProduct(true);
             }
           }
         }
@@ -421,88 +437,99 @@ const Success = () => {
                 )}
               </div>
 
-          {/* Next Steps */}
-          <div className="space-y-4">
-            <h3 className="font-semibold">Próximos Pasos:</h3>
-            
-            <div className="flex items-start gap-3 p-3 bg-blue-50 rounded-lg">
-              <Package className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
-              <div>
-                <p className="font-medium text-sm">Productos Físicos</p>
-                <p className="text-sm text-muted-foreground">
-                  Recibirás un email con la información de envío en las próximas 24 horas.
-                </p>
-              </div>
-            </div>
+          {/* ── Mensajes dinámicos según lo que compraron ── */}
+          <div className="space-y-3">
 
-            <div className="flex items-start gap-3 p-3 bg-purple-50 rounded-lg">
-              <GraduationCap className="w-5 h-5 text-purple-600 mt-0.5 flex-shrink-0" />
-              <div>
-                <p className="font-medium text-sm">Cursos Online</p>
-                <p className="text-sm text-muted-foreground">
-                  Ya tienes acceso inmediato. Ve a "Mis Cursos" para comenzar.
+            {/* SUSCRIPCIÓN: clave activada */}
+            {(hasSaas || subscriptionKey) && (
+              <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <KeyRound className="w-5 h-5 text-yellow-700 mt-0.5 flex-shrink-0" />
+                  <div className="flex-1">
+                    <p className="font-semibold text-yellow-900">🔑 Tu clave de acceso</p>
+                    {subscriptionKey ? (
+                      <>
+                        <p className="text-sm text-yellow-700 mt-1">
+                          Tu clave al Buscador de Reglamento fue activada:
+                        </p>
+                        <p className="mt-2 font-mono text-xl font-bold text-yellow-900 bg-yellow-100 rounded-lg px-4 py-2 inline-block tracking-widest">
+                          {subscriptionKey}
+                        </p>
+                        <p className="text-xs text-yellow-700 mt-2">
+                          También te llegará por email con el link de acceso.
+                          <strong> Revisá tu carpeta de spam</strong> por las dudas.
+                        </p>
+                      </>
+                    ) : (
+                      <p className="text-sm text-yellow-700 mt-1">
+                        Tu clave de acceso se está procesando. La recibirás por email en minutos.
+                        <strong> Revisá tu carpeta de spam</strong> por las dudas.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* CURSO: acceso inmediato */}
+            {hasCourse && (
+              <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <GraduationCap className="w-5 h-5 text-purple-600 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="font-semibold text-purple-900">🎓 Acceso a tu capacitación</p>
+                    <p className="text-sm text-purple-700 mt-1">
+                      Te enviamos un email con el link de acceso a tu curso.
+                      <strong> Revisá tu carpeta de spam</strong> por las dudas.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* PRODUCTO DIGITAL (PDF) */}
+            {(hasPdfProduct || (hasProduct && !hasPhysicalProduct)) && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <Mail className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="font-semibold text-blue-900">📄 Tu producto digital</p>
+                    <p className="text-sm text-blue-700 mt-1">
+                      Te enviamos el PDF adjunto por email.{' '}
+                      <strong>Revisá tu carpeta de spam</strong> si no lo encontrás en los próximos minutos.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* PRODUCTO FÍSICO */}
+            {hasPhysicalProduct && (
+              <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <Package className="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="font-semibold text-orange-900">📦 Envío de tu pedido</p>
+                    <p className="text-sm text-orange-700 mt-1">
+                      Nos comunicaremos con vos en las próximas <strong>24–48 hs</strong> para
+                      coordinar el envío. Recibirás un email con el seguimiento del pedido.{' '}
+                      <strong>Revisá tu carpeta de spam</strong> por las dudas.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Error de email */}
+            {emailError && (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <p className="text-sm text-yellow-800">
+                  <strong>Nota:</strong> {emailError}
                 </p>
               </div>
-            </div>
+            )}
+
           </div>
-
-          {/* Clave de suscripción activada */}
-          {subscriptionKey && (
-            <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-4">
-              <div className="flex items-start gap-2">
-                <KeyRound className="w-5 h-5 text-yellow-700 mt-0.5 flex-shrink-0" />
-                <div>
-                  <p className="text-sm font-medium text-yellow-900">
-                    ¡Tu clave de acceso fue activada!
-                  </p>
-                  <p className="text-xs text-yellow-700 mt-1">
-                    Tu clave de acceso al Buscador de Reglamento:
-                  </p>
-                  <p className="mt-2 font-mono text-lg font-bold text-yellow-900 bg-yellow-100 rounded px-3 py-1 inline-block">
-                    {subscriptionKey}
-                  </p>
-                  <p className="text-xs text-yellow-700 mt-2">
-                    También la recibirás por email junto con el link de acceso.
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Email Confirmation */}
-          {emailSent && (
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-              <div className="flex items-start gap-2">
-                <Mail className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
-                <div>
-                  <p className="text-sm font-medium text-green-800">
-                    ¡Email enviado exitosamente!
-                  </p>
-                  <p className="text-sm text-green-700 mt-1">
-                    Te hemos enviado un correo con los detalles para acceder a tus capacitaciones.
-                    Si no lo encuentras, revisa tu carpeta de spam.
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {emailError && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <p className="text-sm text-yellow-800">
-                <strong>Nota:</strong> {emailError}
-              </p>
-            </div>
-          )}
-
-          {!emailSent && !emailError && (
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <p className="text-sm">
-                <strong>Importante:</strong> Te enviaremos un correo de confirmación con todos los detalles de tu compra.
-                Si no lo recibes, contacta con soporte.
-              </p>
-            </div>
-          )}
 
           {/* Action Buttons */}
           {!isCapturing && (
