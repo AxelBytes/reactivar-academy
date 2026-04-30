@@ -26,11 +26,9 @@ import {
   KeyRound,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import mercadopagoLogo from "@/assets/mercadopago-logo.png";
-import prexLogo from "@/assets/prex-logo.png";
 import paypalLogo from "@/assets/paypal-logo.png";
 
-type PaymentMethod = "mercadopago" | "prex" | "paypal" | "ualabis";
+type PaymentMethod = "paypal" | "ualabis";
 
 interface CheckoutDialogProps {
   open: boolean;
@@ -61,7 +59,7 @@ const CheckoutDialog = ({ open, onOpenChange }: CheckoutDialogProps) => {
   const { items, getTotal, clearCart } = useCart();
   const { user } = useAuth();
   const { toast } = useToast();
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("mercadopago");
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("ualabis");
   const [isProcessing, setIsProcessing] = useState(false);
 
   const {
@@ -80,63 +78,10 @@ const CheckoutDialog = ({ open, onOpenChange }: CheckoutDialogProps) => {
   const hasCourses  = items.some((item) => item.type === "course");
   const hasSaas     = items.some((item) => item.type === "saas");
 
-  const handlePrex = async () => {
-    setIsProcessing(true);
-
-    // Guardar datos para envío de email posterior (usar localStorage para persistir)
-    const courses = items.filter(item => item.type === 'course');
-    if (courses.length > 0) {
-      localStorage.setItem('purchasedCourses', JSON.stringify({
-        courses: courses.map(c => ({
-          id: c.id,
-          title: c.title,
-          instructor: c.instructor,
-          price: c.price,
-        })),
-        userEmail: user?.email || '',
-        userName: user?.name || '',
-        userDni: user?.dni || '',
-        userProvincia: user?.provincia || '',
-        userLocalidad: user?.localidad || '',
-        userPais: user?.pais || '',
-        timestamp: Date.now(),
-      }));
-    }
-
-    // Simulación de Prex - En producción, aquí integrarías con la API de Prex
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-
-    console.log("Procesando pago con Prex");
-
-    toast({
-      title: "Redirigiendo a Prex",
-      description: "Serás redirigido al checkout seguro de Prex...",
-    });
-
-    // Simulación de pago exitoso
-    setTimeout(() => {
-      toast({
-        title: "¡Pago exitoso!",
-        description: "Tu pedido ha sido procesado correctamente.",
-      });
-      clearCart();
-      
-      // Redirigir a la página de éxito
-      window.location.href = '/success?payment_id=PREX-' + Date.now() + '&status=approved';
-      
-      onOpenChange(false);
-      setIsProcessing(false);
-    }, 2000);
-  };
-
-  const handleMercadoPago = async () => {
+  const handlePayPal = async () => {
     setIsProcessing(true);
 
     try {
-      console.log('🛒 Items en carrito:', items);
-      console.log('👤 Usuario:', user);
-      
-      // Guardar TODOS los items para el email (usar localStorage para persistir)
       const allItems = items.map(item => ({
         id:    item.id,
         title: item.type === 'saas' ? item.name : item.type === 'product' ? item.name : item.title,
@@ -145,116 +90,28 @@ const CheckoutDialog = ({ open, onOpenChange }: CheckoutDialogProps) => {
         instructor: item.type === 'course' ? item.instructor : 'N/A',
         subscriptionMonths: item.type === 'saas' ? item.subscriptionMonths : 0,
       }));
-      
-      const purchaseData = {
+
+      localStorage.setItem('purchasedCourses', JSON.stringify({
         courses: allItems,
         userEmail: user?.email || '',
-        userName: user?.name || '',
-        userDni: user?.dni || '',
+        userName:  user?.name  || '',
+        userDni:   user?.dni   || '',
         userProvincia: user?.provincia || '',
         userLocalidad: user?.localidad || '',
-        userPais: user?.pais || '',
+        userPais:      user?.pais      || '',
         timestamp: Date.now(),
-      };
-      
-      console.log('💾 Guardando en localStorage:', purchaseData);
-      localStorage.setItem('purchasedCourses', JSON.stringify(purchaseData));
-      
-      // Verificar que se guardó
-      const saved = localStorage.getItem('purchasedCourses');
-      console.log('✅ Verificación localStorage:', saved ? 'GUARDADO' : 'ERROR');
+      }));
 
-      // Siempre usar la URL del sitio actual (sin barra final)
-      const baseUrl = window.location.origin.replace(/\/$/, '');
-
-      const response = await fetch(`${baseUrl}/api/payments/mercadopago/create-preference`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          items: items.map(item => {
-            const n = item.type === 'saas' ? item.name : item.type === 'product' ? item.name : item.title;
-            return {
-              id:       item.id?.toString() || '1',
-              name:     n,
-              title:    n,
-              quantity: parseInt(String(item.quantity)) || 1,
-              price:    parseFloat(String(item.price)) || 0,
-              type:     item.type,
-            };
-          }),
-          payer: {
-            email: user?.email || '',
-            name:  user?.name  || '',
-          },
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Error al crear la preferencia de pago');
-      }
-
-      const data = await response.json();
-
-      if (data.init_point) {
-        // Redirigir a MercadoPago
-        window.location.href = data.init_point;
-      } else {
-        throw new Error('No se recibió el link de pago');
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      toast({
-        title: "Error",
-        description: "No se pudo iniciar el pago. Intenta nuevamente.",
-        variant: "destructive",
-      });
-      setIsProcessing(false);
-    }
-  };
-
-  const handlePayPal = async () => {
-    setIsProcessing(true);
-
-    try {
-      // Guardar datos para envío de email posterior (usar localStorage para persistir)
-      const courses = items.filter(item => item.type === 'course');
-      if (courses.length > 0) {
-        localStorage.setItem('purchasedCourses', JSON.stringify({
-          courses: courses.map(c => ({
-            id: c.id,
-            title: c.title,
-            instructor: c.instructor,
-            price: c.price,
-          })),
-          userEmail: user?.email || '',
-          userName: user?.name || '',
-          userDni: user?.dni || '',
-          userProvincia: user?.provincia || '',
-          userLocalidad: user?.localidad || '',
-          userPais: user?.pais || '',
-          timestamp: Date.now(),
-        }));
-      }
-
-      // Siempre usar la URL del sitio actual (sin barra final)
       const baseUrl = window.location.origin.replace(/\/$/, '');
 
       const response = await fetch(`${baseUrl}/api/payments/paypal/create-order`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          items: items.map(item => ({
-            id: item.id,
-            name: item.type === 'product' ? item.name : item.title,
-            title: item.type === 'product' ? item.name : item.title,
-            quantity: item.quantity,
-            price: item.price,
-            type: item.type,
-          })),
+          items: items.map(item => {
+            const n = item.type === 'saas' ? item.name : item.type === 'product' ? item.name : item.title;
+            return { id: item.id, name: n, title: n, quantity: item.quantity, price: item.price, type: item.type };
+          }),
         }),
       });
 
@@ -354,11 +211,7 @@ const CheckoutDialog = ({ open, onOpenChange }: CheckoutDialogProps) => {
   };
 
   const handlePayment = async () => {
-    if (paymentMethod === "mercadopago") {
-      await handleMercadoPago();
-    } else if (paymentMethod === "prex") {
-      await handlePrex();
-    } else if (paymentMethod === "paypal") {
+    if (paymentMethod === "paypal") {
       await handlePayPal();
     } else if (paymentMethod === "ualabis") {
       await handleUalaBis();
@@ -416,52 +269,7 @@ const CheckoutDialog = ({ open, onOpenChange }: CheckoutDialogProps) => {
           <div className="space-y-4">
             <Label className="text-base font-semibold">Método de Pago</Label>
             <RadioGroup value={paymentMethod} onValueChange={(value) => setPaymentMethod(value as PaymentMethod)}>
-              
-              {/* Pagos Nacionales */}
               <div className="space-y-3">
-                <p className="text-sm font-medium text-muted-foreground">Pagos Nacionales</p>
-                
-                {/* MercadoPago */}
-                <div className="flex items-center space-x-3 border border-border rounded-lg p-4 hover:bg-accent/50 transition-colors cursor-pointer">
-                  <RadioGroupItem value="mercadopago" id="mercadopago" />
-                  <Label htmlFor="mercadopago" className="flex items-center gap-3 flex-1 cursor-pointer">
-                    <div className="w-14 h-14 rounded-lg bg-white flex items-center justify-center border border-border">
-                      <img 
-                        src={mercadopagoLogo} 
-                        alt="MercadoPago" 
-                        className="w-10 h-10 object-contain"
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-semibold">MercadoPago</p>
-                      <p className="text-sm text-muted-foreground">
-                        Tarjetas, efectivo, transferencia
-                      </p>
-                    </div>
-                    <ShieldCheck className="w-5 h-5 text-green-600" />
-                  </Label>
-                </div>
-
-                {/* Prex */}
-                <div className="flex items-center space-x-3 border border-border rounded-lg p-4 hover:bg-accent/50 transition-colors cursor-pointer">
-                  <RadioGroupItem value="prex" id="prex" />
-                  <Label htmlFor="prex" className="flex items-center gap-3 flex-1 cursor-pointer">
-                    <div className="w-14 h-14 rounded-lg bg-[#00D632]/10 flex items-center justify-center border border-border">
-                      <img 
-                        src={prexLogo} 
-                        alt="Prex" 
-                        className="w-10 h-10 object-contain"
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-semibold">Prex</p>
-                      <p className="text-sm text-muted-foreground">
-                        Paga con tu tarjeta Prex
-                      </p>
-                    </div>
-                    <ShieldCheck className="w-5 h-5 text-green-600" />
-                  </Label>
-                </div>
 
                 {/* Ualá Bis */}
                 <div className="flex items-center space-x-3 border border-border rounded-lg p-4 hover:bg-accent/50 transition-colors cursor-pointer">
@@ -472,39 +280,27 @@ const CheckoutDialog = ({ open, onOpenChange }: CheckoutDialogProps) => {
                     </div>
                     <div className="flex-1">
                       <p className="font-semibold">Ualá Bis</p>
-                      <p className="text-sm text-muted-foreground">
-                        Tarjeta de crédito o débito
-                      </p>
+                      <p className="text-sm text-muted-foreground">Tarjeta de crédito o débito</p>
                     </div>
                     <ShieldCheck className="w-5 h-5 text-green-600" />
                   </Label>
                 </div>
-              </div>
 
-              {/* Pago Internacional */}
-              <div className="space-y-3 pt-2">
-                <p className="text-sm font-medium text-muted-foreground">Pago Internacional</p>
-                
                 {/* PayPal */}
                 <div className="flex items-center space-x-3 border border-border rounded-lg p-4 hover:bg-accent/50 transition-colors cursor-pointer">
                   <RadioGroupItem value="paypal" id="paypal" />
                   <Label htmlFor="paypal" className="flex items-center gap-3 flex-1 cursor-pointer">
                     <div className="w-14 h-14 rounded-lg bg-white flex items-center justify-center border border-border">
-                      <img 
-                        src={paypalLogo} 
-                        alt="PayPal" 
-                        className="w-12 h-8 object-contain"
-                      />
+                      <img src={paypalLogo} alt="PayPal" className="w-12 h-8 object-contain" />
                     </div>
                     <div className="flex-1">
                       <p className="font-semibold">PayPal</p>
-                      <p className="text-sm text-muted-foreground">
-                        Pago seguro internacional
-                      </p>
+                      <p className="text-sm text-muted-foreground">Pago seguro internacional</p>
                     </div>
                     <ShieldCheck className="w-5 h-5 text-green-600" />
                   </Label>
                 </div>
+
               </div>
             </RadioGroup>
           </div>
@@ -559,15 +355,9 @@ const CheckoutDialog = ({ open, onOpenChange }: CheckoutDialogProps) => {
               {isProcessing && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               {isProcessing
                 ? "Procesando..."
-                : paymentMethod === "mercadopago"
-                ? "Procesar con MercadoPago"
-                : paymentMethod === "prex"
-                ? "Procesar con Prex"
                 : paymentMethod === "paypal"
-                ? "Procesar con PayPal"
-                : paymentMethod === "ualabis"
-                ? "Procesar con Ualá Bis"
-                : `Pagar $${getTotal().toLocaleString("es-AR")}`}
+                ? "Pagar con PayPal"
+                : "Pagar con Ualá Bis"}
             </Button>
           </div>
         </div>
