@@ -19,7 +19,9 @@ import AdminUsers from "./pages/admin/Users";
 import AdminSettings from "./pages/admin/Settings";
 import GestionSuscripciones from "./pages/admin/GestionSuscripciones";
 import SaasAdmin from "./pages/admin/SaasAdmin";
+import AdminPdfs from "./pages/admin/AdminPdfs";
 import Saas from "./pages/Saas";
+import Pdfs from "./pages/Pdfs";
 import CheckoutSuccess from "./pages/checkout/Success";
 import CheckoutFailure from "./pages/checkout/Failure";
 import CheckoutPending from "./pages/checkout/Pending";
@@ -40,6 +42,7 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/cursos" element={<Courses />} />
               <Route path="/tienda" element={<Store />} />
+              <Route path="/pdfs" element={<Pdfs />} />
               <Route path="/saas" element={<Saas />} />
               <Route path="/sobre-nosotros" element={<About />} />
               <Route path="/login" element={<Login />} />
@@ -116,6 +119,14 @@ const App = () => (
                 element={
                   <ProtectedRoute requireAdmin>
                     <SaasAdmin />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/pdfs"
+                element={
+                  <ProtectedRoute requireAdmin>
+                    <AdminPdfs />
                   </ProtectedRoute>
                 }
               />

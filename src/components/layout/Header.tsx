@@ -32,6 +32,7 @@ const Header = () => {
     { href: "/", label: "Inicio" },
     { href: "/cursos", label: "Capacitaciones" },
     { href: "/tienda", label: "Tienda" },
+    { href: "/pdfs", label: "📄 PDFs" },
     { href: "/saas", label: "🔍 Buscador" },
     { href: "/sobre-nosotros", label: "Sobre Nosotros" },
   ];

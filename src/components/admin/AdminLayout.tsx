@@ -16,6 +16,7 @@ import {
   ShoppingBag,
   KeyRound,
   Search,
+  FileText,
 } from "lucide-react";
 
 interface AdminLayoutProps {
@@ -31,6 +32,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
   const menuItems = [
     { icon: LayoutDashboard, label: "Dashboard", path: "/admin" },
     { icon: Package, label: "Productos", path: "/admin/productos" },
+    { icon: FileText, label: "PDFs", path: "/admin/pdfs" },
     { icon: GraduationCap, label: "Cursos", path: "/admin/cursos" },
     { icon: ShoppingBag, label: "Pedidos", path: "/admin/pedidos" },
     { icon: Users, label: "Usuarios", path: "/admin/usuarios" },
