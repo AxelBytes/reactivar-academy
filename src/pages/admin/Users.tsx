@@ -68,47 +68,61 @@ const Users = () => {
     try {
       setLoading(true);
 
-      // Llamar a la función RPC de Supabase (SECURITY DEFINER, solo admins)
-      const { data: authData, error: authError } = await supabase.rpc('get_users_for_admin');
-
-      if (authError) {
-        throw authError;
-      }
-
-      // Obtener estadísticas de órdenes por email
+      // Obtener estadísticas de órdenes por email (siempre disponible)
       const { data: ordersData } = await supabase
         .from('orders')
-        .select('customer_email, total');
+        .select('customer_email, total, created_at');
 
-      // Calcular estadísticas por usuario
-      const userStats: { [email: string]: { total_spent: number; orders_count: number } } = {};
-      
+      const userStats: { [email: string]: { total_spent: number; orders_count: number; last_order: string } } = {};
       ordersData?.forEach((order: any) => {
-        if (!userStats[order.customer_email]) {
-          userStats[order.customer_email] = { total_spent: 0, orders_count: 0 };
-        }
-        userStats[order.customer_email].total_spent += order.total || 0;
-        userStats[order.customer_email].orders_count += 1;
+        const em = order.customer_email;
+        if (!em) return;
+        if (!userStats[em]) userStats[em] = { total_spent: 0, orders_count: 0, last_order: order.created_at };
+        userStats[em].total_spent  += order.total || 0;
+        userStats[em].orders_count += 1;
       });
 
-      // Combinar datos
-      const usersWithStats = (authData || []).map((user: any) => ({
-        id: user.id,
-        email: user.email || '',
-        created_at: user.created_at,
-        last_sign_in_at: user.last_sign_in_at || null,
-        role: user.role || 'user',
-        total_spent: userStats[user.email || '']?.total_spent || 0,
-        orders_count: userStats[user.email || '']?.orders_count || 0,
+      // Intentar RPC primero
+      const { data: rpcData, error: rpcError } = await supabase.rpc('get_users_for_admin');
+
+      if (!rpcError && rpcData && rpcData.length > 0) {
+        const usersWithStats = rpcData.map((user: any) => ({
+          id: user.id,
+          email: user.email || '',
+          created_at: user.created_at,
+          last_sign_in_at: user.last_sign_in_at || null,
+          role: user.role || 'user',
+          total_spent:  userStats[user.email || '']?.total_spent  || 0,
+          orders_count: userStats[user.email || '']?.orders_count || 0,
+        }));
+        setUsers(usersWithStats);
+        setFilteredUsers(usersWithStats);
+        return;
+      }
+
+      // Fallback: construir lista desde pedidos (emails únicos)
+      const emailSet = new Set<string>();
+      ordersData?.forEach((o: any) => { if (o.customer_email) emailSet.add(o.customer_email); });
+
+      const fallbackUsers: User[] = Array.from(emailSet).map((email, idx) => ({
+        id: String(idx),
+        email,
+        created_at: userStats[email]?.last_order || new Date().toISOString(),
+        last_sign_in_at: null,
+        role: 'user',
+        total_spent:  userStats[email]?.total_spent  || 0,
+        orders_count: userStats[email]?.orders_count || 0,
       }));
 
-      setUsers(usersWithStats);
-      setFilteredUsers(usersWithStats);
+      setUsers(fallbackUsers);
+      setFilteredUsers(fallbackUsers);
+
+      if (rpcError) console.warn('RPC no disponible, usando fallback de pedidos:', rpcError.message);
     } catch (error: any) {
       console.error('Error cargando usuarios:', error);
       toast({
         title: "Error",
-        description: "Ejecutá el SQL de configuración en Supabase para habilitar esta función.",
+        description: "No se pudieron cargar los usuarios.",
         variant: "destructive",
       });
     } finally {
