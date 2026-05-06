@@ -47,6 +47,7 @@ interface ProductFormDialogProps {
   onOpenChange: (open: boolean) => void;
   onSave?: (product: any) => void;
   editProduct?: ProductData | null;
+  lockedCategory?: string; // Si se pasa, la categoría queda fija y no se puede cambiar
 }
 
 const EMPTY_FORM = {
@@ -64,7 +65,7 @@ const EMPTY_FORM = {
   subscriptionMonths: "1",
 };
 
-const ProductFormDialog = ({ open, onOpenChange, onSave, editProduct }: ProductFormDialogProps) => {
+const ProductFormDialog = ({ open, onOpenChange, onSave, editProduct, lockedCategory }: ProductFormDialogProps) => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState(EMPTY_FORM);
@@ -81,7 +82,7 @@ const ProductFormDialog = ({ open, onOpenChange, onSave, editProduct }: ProductF
           detailedDescription: editProduct.detailed_description      || "",
           price:               editProduct.price?.toString()         || "",
           originalPrice:       editProduct.original_price?.toString() || "",
-          category:            editProduct.category                  || "",
+          category:            lockedCategory || editProduct.category || "",
           stock:               editProduct.stock?.toString()         || "",
           image:               editProduct.image_url                 || "",
           videoUrl:            editProduct.video_url                 || "",
@@ -90,10 +91,10 @@ const ProductFormDialog = ({ open, onOpenChange, onSave, editProduct }: ProductF
           subscriptionMonths:  editProduct.subscription_months?.toString() || "1",
         });
       } else {
-        setFormData(EMPTY_FORM);
+        setFormData({ ...EMPTY_FORM, category: lockedCategory || "" });
       }
     }
-  }, [open, editProduct]);
+  }, [open, editProduct, lockedCategory]);
 
   const handleImageChange = (imageUrl: string) => setFormData(f => ({ ...f, image: imageUrl }));
   const handlePdfChange   = (pdfUrl: string)   => setFormData(f => ({ ...f, pdfUrl }));
@@ -226,6 +227,12 @@ const ProductFormDialog = ({ open, onOpenChange, onSave, editProduct }: ProductF
           {/* Categoría */}
           <div className="space-y-2">
             <Label htmlFor="category">Categoría <span className="text-red-500">*</span></Label>
+            {lockedCategory ? (
+              <div className="flex items-center gap-2 h-10 px-3 rounded-md border border-input bg-muted text-sm text-muted-foreground cursor-not-allowed">
+                📄 {lockedCategory === "Digital" ? "Producto Digital (PDF)" : lockedCategory}
+                <span className="ml-auto text-xs bg-blue-100 text-blue-700 rounded px-1.5 py-0.5">fija</span>
+              </div>
+            ) : (
             <Select
               value={formData.category}
               onValueChange={value => setFormData(f => ({ ...f, category: value }))}
@@ -244,6 +251,7 @@ const ProductFormDialog = ({ open, onOpenChange, onSave, editProduct }: ProductF
                 <SelectItem value="Equipamiento">Equipamiento</SelectItem>
               </SelectContent>
             </Select>
+            )}
           </div>
 
           {/* Precio y Precio Original */}

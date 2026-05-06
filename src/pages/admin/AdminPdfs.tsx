@@ -287,6 +287,7 @@ const AdminPdfs = () => {
         onOpenChange={open => { setIsDialogOpen(open); if (!open) setEditingProduct(null); }}
         onSave={handleSaveProduct}
         editProduct={editingProduct}
+        lockedCategory="Digital"
       />
     </AdminLayout>
   );
