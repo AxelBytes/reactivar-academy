@@ -68,8 +68,8 @@ const Users = () => {
     try {
       setLoading(true);
 
-      // Obtener usuarios de auth
-      const { data: authData, error: authError } = await supabase.auth.admin.listUsers();
+      // Llamar a la función RPC de Supabase (SECURITY DEFINER, solo admins)
+      const { data: authData, error: authError } = await supabase.rpc('get_users_for_admin');
 
       if (authError) {
         throw authError;
@@ -83,7 +83,7 @@ const Users = () => {
       // Calcular estadísticas por usuario
       const userStats: { [email: string]: { total_spent: number; orders_count: number } } = {};
       
-      ordersData?.forEach(order => {
+      ordersData?.forEach((order: any) => {
         if (!userStats[order.customer_email]) {
           userStats[order.customer_email] = { total_spent: 0, orders_count: 0 };
         }
@@ -92,12 +92,12 @@ const Users = () => {
       });
 
       // Combinar datos
-      const usersWithStats = authData.users.map(user => ({
+      const usersWithStats = (authData || []).map((user: any) => ({
         id: user.id,
         email: user.email || '',
         created_at: user.created_at,
         last_sign_in_at: user.last_sign_in_at || null,
-        role: user.user_metadata?.role || 'user',
+        role: user.role || 'user',
         total_spent: userStats[user.email || '']?.total_spent || 0,
         orders_count: userStats[user.email || '']?.orders_count || 0,
       }));
@@ -108,7 +108,7 @@ const Users = () => {
       console.error('Error cargando usuarios:', error);
       toast({
         title: "Error",
-        description: "No se pudieron cargar los usuarios. Verifica tus permisos.",
+        description: "Ejecutá el SQL de configuración en Supabase para habilitar esta función.",
         variant: "destructive",
       });
     } finally {
