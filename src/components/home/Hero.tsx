@@ -7,7 +7,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ShoppingCart, ArrowRight, UserPlus, CreditCard, BookOpen, Mail, CheckCircle2 } from "lucide-react";
-import heroBanner from "@/assets/hero-banner.jpg";
+import heroBanner from "@/assets/hero-voleibol.png";
+import profesorImg from "@/assets/profesor.png";
 
 const steps = [
   {
@@ -62,29 +63,42 @@ const Hero = () => {
       </div>
 
       <div className="container mx-auto px-4 relative z-10 pt-20">
-        <div className="max-w-2xl">
-          <span className="inline-block px-4 py-2 rounded-full bg-primary/20 text-primary font-medium text-sm mb-6 backdrop-blur-sm">
-            Plataforma #1 en Capacitación Deportiva
-          </span>
-          
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-secondary-foreground leading-tight mb-6">
-            Crea tu mejor versión como
-            <span className="text-primary block mt-2">Entrenador/formador de deportistas Newconeros.</span>
-          </h1>
-          
-          <p className="text-lg md:text-xl text-secondary-foreground/80 mb-8 leading-relaxed">
-            Accede a capacitaciones en video y materiales específicos del deporte; todo el paso a paso para fortalecer las bases integrales de tus practicantes y crear deportistas Newconeros que perduran en el tiempo evitando todo tipo de lesiones y frustraciones en el proceso.
-          </p>
+        <div className="flex flex-col lg:flex-row items-center gap-10 lg:gap-16">
+          <div className="max-w-2xl flex-1">
+            <span className="inline-block px-4 py-2 rounded-full bg-primary/20 text-primary font-medium text-sm mb-6 backdrop-blur-sm">
+              Plataforma #1 en Capacitación Deportiva
+            </span>
+            
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-secondary-foreground leading-tight mb-6">
+              Crea tu mejor versión como
+              <span className="text-primary block mt-2">Entrenador/formador de deportistas Newconeros.</span>
+            </h1>
+            
+            <p className="text-lg md:text-xl text-secondary-foreground/80 mb-8 leading-relaxed">
+              Accede a capacitaciones en video y materiales específicos del deporte; todo el paso a paso para fortalecer las bases integrales de tus practicantes y crear deportistas Newconeros que perduran en el tiempo evitando todo tipo de lesiones y frustraciones en el proceso.
+            </p>
 
-          <div className="flex flex-col sm:flex-row gap-4">
-            <Button variant="hero" size="xl" className="group">
-              Explorar Cursos
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </Button>
-            <Button variant="heroOutline" size="xl" className="group" onClick={() => setShowGuide(true)}>
-              <ShoppingCart className="w-5 h-5" />
-              Cómo Comprar
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Button variant="hero" size="xl" className="group">
+                Explorar Cursos
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </Button>
+              <Button variant="heroOutline" size="xl" className="group" onClick={() => setShowGuide(true)}>
+                <ShoppingCart className="w-5 h-5" />
+                Cómo Comprar
+              </Button>
+            </div>
+          </div>
+
+          <div className="hidden lg:flex flex-shrink-0 items-end justify-center">
+            <div className="relative w-72 xl:w-80 h-[420px] xl:h-[460px] rounded-2xl overflow-hidden border-4 border-white/30 shadow-2xl backdrop-blur-sm">
+              <img
+                src={profesorImg}
+                alt="Profesor de capacitación deportiva"
+                className="w-full h-full object-cover object-top"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-secondary/60 via-transparent to-transparent" />
+            </div>
           </div>
         </div>
       </div>
