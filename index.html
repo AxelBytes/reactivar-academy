@@ -15,24 +15,102 @@
     <meta name="theme-color" content="#3b82f6" />
     <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#1e293b" />
     
-    <!-- SEO Básico (las páginas lo sobrescriben con react-helmet) -->
-    <title>Reactivar Academy - Capacitaciones de Newcom y Formación Deportiva</title>
-    <meta name="description" content="Reactivar Academy - Plataforma de capacitación para entrenadores y formadores de deportistas Newconeros. Cursos de Newcom, formación deportiva integral por Diego Machado. La mejor herramienta para formadores de Newcom en Argentina." />
-    <meta name="keywords" content="newcom, newcom deporte, capacitacion newcom, entrenador newcom, formador newcom, deportistas newconeros, reactivar academy, diego machado, newcom argentina, cursos newcom, arbitro newcom, planillero newcom, deporte newcom, formacion deportiva newcom" />
+    <!-- SEO Principal -->
+    <title>Reactivar Academy - Newcom | Capacitaciones y Formación Deportiva</title>
+    <meta name="description" content="Reactivar Academy - Plataforma #1 de capacitación en Newcom para entrenadores y formadores de deportistas. Cursos online, ebooks y buscador de reglamento oficial. Por Diego Machado, Argentina." />
+    <meta name="keywords" content="newcom, newcom deporte, capacitacion newcom, entrenador newcom, formador newcom, deportistas newconeros, reactivar academy, diego machado newcom, newcom argentina, cursos newcom, arbitro newcom, planillero newcom, reglamento newcom, formacion deportiva newcom, deporte newcom" />
     <meta name="author" content="Diego Machado" />
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
     <link rel="canonical" href="https://reactivar-academy.vercel.app/" />
     
     <!-- Open Graph / Facebook -->
-    <meta property="og:title" content="Reactivar Academy - Capacitaciones de Newcom" />
-    <meta property="og:description" content="La mejor plataforma de capacitación para entrenadores y formadores de deportistas Newconeros. Cursos online por Diego Machado." />
+    <meta property="og:title" content="Reactivar Academy - Newcom | Capacitaciones y Formación Deportiva" />
+    <meta property="og:description" content="Plataforma #1 de capacitación en Newcom. Cursos, ebooks y buscador de reglamento oficial por Diego Machado." />
     <meta property="og:url" content="https://reactivar-academy.vercel.app/" />
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="es_AR" />
-    <meta property="og:site_name" content="Reactivar Academy" />
+    <meta property="og:site_name" content="Reactivar Academy - Newcom" />
+    <meta property="og:image" content="https://reactivar-academy.vercel.app/og-image.jpg" />
     
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:creator" content="@reactivaracademy" />
+    <meta name="twitter:site" content="@reactivaracademy" />
+    <meta name="twitter:title" content="Reactivar Academy - Newcom" />
+    <meta name="twitter:description" content="Plataforma #1 de capacitación en Newcom para entrenadores y formadores de deportistas." />
+
+    <!-- JSON-LD estático para Google (se carga antes del JS) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "SportsOrganization",
+          "@id": "https://reactivar-academy.vercel.app/#organization",
+          "name": "Reactivar Academy - Newcom",
+          "alternateName": "Reactivar Academy",
+          "url": "https://reactivar-academy.vercel.app",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://reactivar-academy.vercel.app/logo.svg"
+          },
+          "description": "Plataforma #1 de capacitación para entrenadores y formadores del deporte Newcom en Argentina. Cursos online, ebooks y buscador de reglamento oficial.",
+          "founder": {
+            "@type": "Person",
+            "name": "Diego Machado",
+            "jobTitle": "Entrenador y formador de Newcom"
+          },
+          "sport": "Newcom",
+          "areaServed": "Argentina",
+          "sameAs": [
+            "https://www.facebook.com/share/1887vTePKg/",
+            "https://www.instagram.com/machado_reactivar_newcom"
+          ],
+          "contactPoint": {
+            "@type": "ContactPoint",
+            "email": "Profedeeducacionfisica22@gmail.com",
+            "contactType": "customer support",
+            "availableLanguage": "Spanish"
+          }
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://reactivar-academy.vercel.app/#website",
+          "name": "Reactivar Academy - Newcom",
+          "url": "https://reactivar-academy.vercel.app",
+          "description": "Capacitaciones de Newcom, ebooks y buscador de reglamento oficial para entrenadores y formadores.",
+          "publisher": {
+            "@id": "https://reactivar-academy.vercel.app/#organization"
+          },
+          "inLanguage": "es-AR"
+        },
+        {
+          "@type": "EducationalOrganization",
+          "name": "Reactivar Academy - Newcom",
+          "url": "https://reactivar-academy.vercel.app",
+          "description": "Plataforma de capacitación online para entrenadores y formadores del deporte Newcom.",
+          "educationalCredentialAwarded": "Certificado de capacitación en Newcom",
+          "hasOfferCatalog": {
+            "@type": "OfferCatalog",
+            "name": "Capacitaciones de Newcom",
+            "itemListElement": [
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Course",
+                  "name": "Capacitaciones de Newcom",
+                  "description": "Cursos online para entrenadores y formadores de deportistas Newconeros",
+                  "provider": {
+                    "@type": "Organization",
+                    "name": "Reactivar Academy - Newcom"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+    </script>
     
     <!-- Preconnect a dominios externos -->
     <link rel="preconnect" href="https://lhjzxwthuqpqsvqpvsxw.supabase.co" crossorigin />

@@ -11,6 +11,16 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://reactivar-academy.vercel.app/pdfs</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://reactivar-academy.vercel.app/saas</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://reactivar-academy.vercel.app/tienda</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -23,6 +33,6 @@
   <url>
     <loc>https://reactivar-academy.vercel.app/login</loc>
     <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
+    <priority>0.4</priority>
   </url>
 </urlset>
