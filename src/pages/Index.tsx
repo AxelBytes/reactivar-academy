@@ -2,9 +2,8 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import Hero from "@/components/home/Hero";
 import FeaturedCourses from "@/components/home/FeaturedCourses";
-import FeaturedProducts from "@/components/home/FeaturedProducts";
-import Features from "@/components/home/Features";
-import Testimonials from "@/components/home/Testimonials";
+import FeaturedEbooks from "@/components/home/FeaturedEbooks";
+import ReglamentoSection from "@/components/home/ReglamentoSection";
 import CTA from "@/components/home/CTA";
 import { SEO } from "@/components/SEO";
 
@@ -35,9 +34,8 @@ const Index = () => {
       <main>
         <Hero />
         <FeaturedCourses />
-        <FeaturedProducts />
-        <Features />
-        <Testimonials />
+        <FeaturedEbooks />
+        <ReglamentoSection />
         <CTA />
       </main>
       <Footer />
