@@ -62,7 +62,7 @@ const FeaturedEbooks = () => {
             Ebooks
           </h2>
           <p className="text-lg text-muted-foreground">
-            Descargá al instante materiales educativos en PDF diseñados para profesores y entrenadores
+            Diseñado por el profesor Diego Machado y su equipo de trabajo. Para profesores, entrenadores y también jugadores que quieran aprender y elevar su nivel en competencia.
           </p>
           <div className="flex flex-wrap justify-center gap-4 mt-4 text-sm text-blue-700">
             <span className="flex items-center gap-1"><Download className="w-4 h-4" /> Descarga instantánea</span>

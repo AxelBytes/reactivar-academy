@@ -303,13 +303,42 @@
           </div>
         </div>
 
-        <!-- Contador -->
-        <p id="contador" class="text-blue-200 text-xs opacity-70 mt-2.5 text-right min-h-[1rem]"></p>
+        <!-- Toggle IA / Clásico -->
+        <div class="flex items-center justify-between mt-3">
+          <p id="contador" class="text-blue-200 text-xs opacity-70 min-h-[1rem]"></p>
+          <button id="btn-modo-ia" onclick="toggleModoIA()"
+                  class="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl
+                         bg-white/15 text-white hover:bg-white/25 active:bg-white/30 transition-all">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 14.93V15a1 1 0 0 0-2 0v1.93A8 8 0 0 1 4.07 9H6a1 1 0 0 0 0-2H4.07A8 8 0 0 1 11 4.07V6a1 1 0 0 0 2 0V4.07A8 8 0 0 1 19.93 11H18a1 1 0 0 0 0 2h1.93A8 8 0 0 1 13 16.93z"/>
+            </svg>
+            <span id="texto-modo-ia">✨ Modo IA</span>
+          </button>
+        </div>
       </div>
     </header>
 
     <!-- Área de resultados -->
     <main class="flex-1 max-w-2xl mx-auto w-full px-4 py-4 pb-8 safe-bottom">
+      <!-- Respuesta IA -->
+      <div id="card-ia" style="display:none" class="mb-4 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl shadow-lg p-5 text-white">
+        <div class="flex items-center gap-2 mb-3">
+          <div class="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center">
+            <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 14.93V15a1 1 0 0 0-2 0v1.93A8 8 0 0 1 4.07 9H6a1 1 0 0 0 0-2H4.07A8 8 0 0 1 11 4.07V6a1 1 0 0 0 2 0V4.07A8 8 0 0 1 19.93 11H18a1 1 0 0 0 0 2h1.93A8 8 0 0 1 13 16.93z"/>
+            </svg>
+          </div>
+          <span class="text-xs font-bold uppercase tracking-wider opacity-80">Respuesta IA · Gemini</span>
+        </div>
+        <div id="ia-skeleton" class="space-y-2">
+          <div class="skeleton h-3 w-full" style="background:rgba(255,255,255,0.2)"></div>
+          <div class="skeleton h-3 w-5/6" style="background:rgba(255,255,255,0.2)"></div>
+          <div class="skeleton h-3 w-4/6" style="background:rgba(255,255,255,0.2)"></div>
+        </div>
+        <p id="ia-respuesta" class="text-sm leading-7 whitespace-pre-wrap" style="display:none"></p>
+        <p class="text-xs opacity-50 mt-3">Basado en los artículos del Reglamento Oficial de Newcom</p>
+      </div>
+
       <div id="resultados" class="space-y-3"></div>
     </main>
 
@@ -419,6 +448,7 @@
     // ── Estado ────────────────────────────────────────────────────────────────
     var sesion = { apiKey: '', nombre: '', diasRestantes: 0 };
     var articuloActivo = null;
+    var modoIA = false;
 
     // ── Helper: verificar que google.script.run esté disponible ─────────────
     // Solo existe cuando el HTML es servido por Google Apps Script (HtmlService).
@@ -568,6 +598,60 @@
 
 
     // ════════════════════════════════════════════════
+    //  TOGGLE MODO IA
+    // ════════════════════════════════════════════════
+
+    function toggleModoIA() {
+      modoIA = !modoIA;
+      var btn  = document.getElementById('btn-modo-ia');
+      var texto = document.getElementById('texto-modo-ia');
+      if (modoIA) {
+        btn.classList.remove('bg-white/15');
+        btn.classList.add('bg-yellow-400/30', 'border', 'border-yellow-300/40');
+        texto.textContent = '✨ IA Activa';
+        mostrarToast('Modo IA activado — hacé tu pregunta', 'success');
+      } else {
+        btn.classList.add('bg-white/15');
+        btn.classList.remove('bg-yellow-400/30', 'border', 'border-yellow-300/40');
+        texto.textContent = '✨ Modo IA';
+        ocultarCardIA();
+        mostrarToast('Modo clásico activado', 'info');
+      }
+      // Limpiar resultados al cambiar modo
+      document.getElementById('resultados').innerHTML = '';
+      document.getElementById('contador').textContent = '';
+      document.getElementById('busqueda').value = '';
+      document.getElementById('busqueda').focus();
+    }
+
+    function ocultarCardIA() {
+      var card = document.getElementById('card-ia');
+      card.style.display = 'none';
+      document.getElementById('ia-respuesta').style.display = 'none';
+      document.getElementById('ia-skeleton').style.display  = 'block';
+    }
+
+    function mostrarRespuestaIA(texto) {
+      var card     = document.getElementById('card-ia');
+      var skeleton = document.getElementById('ia-skeleton');
+      var respuesta = document.getElementById('ia-respuesta');
+      card.style.display      = 'block';
+      skeleton.style.display  = 'none';
+      respuesta.style.display = 'block';
+      respuesta.textContent   = texto;
+    }
+
+    function mostrarCargandoIA() {
+      var card     = document.getElementById('card-ia');
+      var skeleton = document.getElementById('ia-skeleton');
+      var respuesta = document.getElementById('ia-respuesta');
+      card.style.display      = 'block';
+      skeleton.style.display  = 'block';
+      respuesta.style.display = 'none';
+    }
+
+
+    // ════════════════════════════════════════════════
     //  BUSCADOR
     // ════════════════════════════════════════════════
 
@@ -585,6 +669,7 @@
       if (q.length < 3) {
         document.getElementById('resultados').innerHTML = '';
         document.getElementById('contador').textContent = '';
+        ocultarCardIA();
         return;
       }
 
@@ -593,19 +678,54 @@
         return;
       }
 
-      mostrarSkeletons();
-      document.getElementById('loader').classList.remove('hidden');
+      if (modoIA) {
+        // ── Modo IA: preguntar a Gemini ───────────────
+        mostrarCargandoIA();
+        mostrarSkeletons();
+        document.getElementById('loader').classList.remove('hidden');
 
-      google.script.run
-        .withSuccessHandler(renderResultados)
-        .withFailureHandler(function (err) {
-          document.getElementById('loader').classList.add('hidden');
-          mostrarToast('Error de conexión con el servidor', 'error');
-          document.getElementById('resultados').innerHTML = '';
-          console.error('Apps Script error:', err);
-        })
-        .buscarDesdeUI(q, sesion.apiKey);
-    }, 300));
+        google.script.run
+          .withSuccessHandler(function (res) {
+            document.getElementById('loader').classList.add('hidden');
+            if (res && res.error) {
+              mostrarToast(res.error, 'error');
+              ocultarCardIA();
+              document.getElementById('resultados').innerHTML = '';
+              return;
+            }
+            mostrarRespuestaIA(res.respuesta || 'Sin respuesta.');
+            renderResultados(res.articulos || []);
+            document.getElementById('contador').textContent =
+              (res.articulos && res.articulos.length > 0)
+                ? res.articulos.length + ' artículo' + (res.articulos.length !== 1 ? 's' : '') + ' fuente'
+                : '';
+          })
+          .withFailureHandler(function (err) {
+            document.getElementById('loader').classList.add('hidden');
+            ocultarCardIA();
+            mostrarToast('Error al conectar con Gemini', 'error');
+            document.getElementById('resultados').innerHTML = '';
+            console.error('Gemini error:', err);
+          })
+          .responderConGeminiDesdeUI(q, sesion.apiKey);
+
+      } else {
+        // ── Modo clásico: búsqueda por palabras clave ─
+        ocultarCardIA();
+        mostrarSkeletons();
+        document.getElementById('loader').classList.remove('hidden');
+
+        google.script.run
+          .withSuccessHandler(renderResultados)
+          .withFailureHandler(function (err) {
+            document.getElementById('loader').classList.add('hidden');
+            mostrarToast('Error de conexión con el servidor', 'error');
+            document.getElementById('resultados').innerHTML = '';
+            console.error('Apps Script error:', err);
+          })
+          .buscarDesdeUI(q, sesion.apiKey);
+      }
+    }, 400));
 
     function mostrarSkeletons() {
       var html = '';

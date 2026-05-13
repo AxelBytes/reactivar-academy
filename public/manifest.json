@@ -1,89 +1,46 @@
 {
-  "name": "Reactivar Academy - Cursos de Fitness Online",
+  "name": "Reactivar Academy - Newcom | Capacitaciones por Diego Machado",
   "short_name": "Reactivar Academy",
-  "description": "Academia de fitness y entrenamiento profesional online. Cursos de alta calidad y programas personalizados.",
+  "description": "Plataforma #1 de capacitación en Newcom. Cursos online, ebooks y buscador de reglamento oficial por Diego Machado.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#3b82f6",
   "orientation": "portrait-primary",
+  "lang": "es-AR",
+  "scope": "/",
   "icons": [
     {
-      "src": "/icon-72x72.png",
-      "sizes": "72x72",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "src": "/favicon.ico",
+      "sizes": "16x16 32x32 48x48",
+      "type": "image/x-icon"
     },
     {
-      "src": "/icon-96x96.png",
-      "sizes": "96x96",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/icon-128x128.png",
-      "sizes": "128x128",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/icon-144x144.png",
-      "sizes": "144x144",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/icon-152x152.png",
-      "sizes": "152x152",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/icon-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/icon-384x384.png",
-      "sizes": "384x384",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/icon-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png",
+      "src": "/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
       "purpose": "any maskable"
     }
   ],
-  "categories": ["education", "fitness", "lifestyle"],
-  "screenshots": [
-    {
-      "src": "/screenshot1.png",
-      "sizes": "540x720",
-      "type": "image/png"
-    },
-    {
-      "src": "/screenshot2.png",
-      "sizes": "540x720",
-      "type": "image/png"
-    }
-  ],
+  "categories": ["education", "sports", "lifestyle"],
   "shortcuts": [
     {
-      "name": "Ver Cursos",
+      "name": "Capacitaciones",
       "short_name": "Cursos",
-      "description": "Explorar todos los cursos disponibles",
-      "url": "/cursos",
-      "icons": [{ "src": "/icon-96x96.png", "sizes": "96x96" }]
+      "description": "Ver todas las capacitaciones de Newcom",
+      "url": "/cursos"
     },
     {
-      "name": "Tienda",
-      "short_name": "Tienda",
-      "description": "Ver productos en la tienda",
-      "url": "/tienda",
-      "icons": [{ "src": "/icon-96x96.png", "sizes": "96x96" }]
+      "name": "Ebooks de Newcom",
+      "short_name": "Ebooks",
+      "description": "Material PDF descargable",
+      "url": "/pdfs"
+    },
+    {
+      "name": "Buscador del Reglamento",
+      "short_name": "Reglamento",
+      "description": "Buscador inteligente del Reglamento de Newcom",
+      "url": "/saas"
     }
   ]
 }

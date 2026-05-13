@@ -593,6 +593,182 @@ function registrarDesdeUI(articuloId, apiKey) {
   return registrarInteraccion(articuloId);
 }
 
+function responderConGeminiDesdeUI(query, apiKey) {
+  var v = verificarAcceso(apiKey);
+  if (!v.valido) return { error: v.mensaje };
+  return responderConGemini(query);
+}
+
+
+// =============================================================================
+//  INTEGRACIÓN GEMINI — Respuesta inteligente sobre el Reglamento de Newcom
+//
+//  CONFIGURACIÓN (una sola vez):
+//    Apps Script → Configuración (engranaje) → Propiedades de secuencia de comandos
+//    → Agregar propiedad:  GEMINI_API_KEY  =  tu clave AIza...
+// =============================================================================
+function responderConGemini(query) {
+  query = String(query || "").trim();
+  if (query.length < 3) return { error: "La consulta es muy corta." };
+
+  // 1. Buscar artículos relevantes con el motor existente
+  var articulos = buscarEnReglamento(query);
+
+  if (!articulos || articulos.length === 0) {
+    return {
+      respuesta : "No encontré artículos del reglamento relacionados con tu consulta. Probá con otras palabras.",
+      articulos : [],
+    };
+  }
+
+  // 2. Construir el contexto con los 6 artículos más relevantes
+  var contexto = articulos.slice(0, 6).map(function(a) {
+    return (a.articulo ? a.articulo + ". " : "") +
+           (a.titulo   ? a.titulo + "\n"  : "") +
+           (a.contenido || "");
+  }).join("\n\n---\n\n");
+
+  // 3. Armar el prompt
+  var prompt =
+    "Sos un asistente experto en el Reglamento Oficial de Newcom. " +
+    "Respondé la pregunta del usuario basándote ÚNICAMENTE en los artículos del reglamento que te doy a continuación. " +
+    "Si la respuesta no está en los artículos, decilo claramente. " +
+    "Respondé en español rioplatense, de forma clara, directa y sin inventar nada.\n\n" +
+    "═══ ARTÍCULOS DEL REGLAMENTO ═══\n\n" + contexto +
+    "\n\n═══ PREGUNTA DEL USUARIO ═══\n\n" + query;
+
+  // 4. Llamar a la API de Gemini
+  var resultado = llamarGeminiAPI(prompt);
+
+  if (resultado.error) {
+    Logger.log("⚠️ Error Gemini en responderConGemini: " + resultado.error);
+  }
+
+  return {
+    respuesta : resultado.texto || ("⚠️ " + (resultado.error || "No pude generar una respuesta.")),
+    articulos : articulos.slice(0, 6),
+  };
+}
+
+
+// =============================================================================
+//  LLAMADA A LA API DE GEMINI (via UrlFetchApp)
+// =============================================================================
+function llamarGeminiAPI(prompt) {
+  var apiKey = PropertiesService.getScriptProperties().getProperty("GEMINI_API_KEY");
+  if (!apiKey) {
+    Logger.log("❌ GEMINI_API_KEY no configurada en las propiedades del script.");
+    return { texto: null, error: "API Key no configurada. Guardala en Propiedades del script." };
+  }
+
+  var url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=" + apiKey;
+
+  var payload = {
+    contents: [{
+      parts: [{ text: prompt }]
+    }],
+    generationConfig: {
+      temperature    : 0.2,
+      maxOutputTokens: 1024,
+    },
+    safetySettings: [
+      { category: "HARM_CATEGORY_HARASSMENT",        threshold: "BLOCK_NONE" },
+      { category: "HARM_CATEGORY_HATE_SPEECH",        threshold: "BLOCK_NONE" },
+      { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",  threshold: "BLOCK_NONE" },
+      { category: "HARM_CATEGORY_DANGEROUS_CONTENT",  threshold: "BLOCK_NONE" },
+    ],
+  };
+
+  var options = {
+    method           : "POST",
+    contentType      : "application/json",
+    payload          : JSON.stringify(payload),
+    muteHttpExceptions: true,
+  };
+
+  try {
+    var response = UrlFetchApp.fetch(url, options);
+    var codigo   = response.getResponseCode();
+    var cuerpo   = response.getContentText();
+    var json     = JSON.parse(cuerpo);
+
+    if (codigo !== 200) {
+      Logger.log("❌ Gemini HTTP " + codigo + ": " + cuerpo);
+      var msg = (json.error && json.error.message) ? json.error.message : "Error HTTP " + codigo;
+      return { texto: null, error: msg };
+    }
+
+    if (json.candidates && json.candidates[0] &&
+        json.candidates[0].content && json.candidates[0].content.parts) {
+      return { texto: json.candidates[0].content.parts[0].text, error: null };
+    }
+
+    Logger.log("⚠️ Respuesta inesperada de Gemini: " + cuerpo);
+    return { texto: null, error: "Respuesta inesperada de la API." };
+  } catch (err) {
+    Logger.log("❌ Error llamando a Gemini: " + err.message);
+    return { texto: null, error: err.message };
+  }
+}
+
+
+// =============================================================================
+//  LISTAR MODELOS DISPONIBLES — Ejecutar para ver qué modelos tenés disponibles
+//  Editor → seleccioná "listarModelosGemini" → ▶ Ejecutar → Ver → Registros
+// =============================================================================
+function listarModelosGemini() {
+  var apiKey = PropertiesService.getScriptProperties().getProperty("GEMINI_API_KEY");
+  var url = "https://generativelanguage.googleapis.com/v1beta/models?key=" + apiKey;
+  var response = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
+  var json = JSON.parse(response.getContentText());
+
+  Logger.log("══════════════════════════════════════");
+  Logger.log("📋 MODELOS DISPONIBLES PARA TU API KEY");
+  Logger.log("══════════════════════════════════════");
+
+  if (json.models) {
+    json.models.forEach(function(m) {
+      // Solo mostrar los que soportan generateContent
+      if (m.supportedGenerationMethods &&
+          m.supportedGenerationMethods.indexOf("generateContent") !== -1) {
+        Logger.log("✅ " + m.name + " → " + (m.displayName || ""));
+      }
+    });
+  } else {
+    Logger.log("❌ Error: " + response.getContentText());
+  }
+  Logger.log("══════════════════════════════════════");
+}
+
+
+// =============================================================================
+//  TEST DE GEMINI — Ejecutar desde el editor para verificar la conexión
+//  Editor → seleccioná "testGemini" → ▶ Ejecutar → Ver → Registros
+// =============================================================================
+function testGemini() {
+  Logger.log("══════════════════════════════════════");
+  Logger.log("🧪 TEST DE CONEXIÓN CON GEMINI");
+  Logger.log("══════════════════════════════════════");
+
+  var apiKey = PropertiesService.getScriptProperties().getProperty("GEMINI_API_KEY");
+  if (!apiKey) {
+    Logger.log("❌ GEMINI_API_KEY no está guardada.");
+    Logger.log("→ Andá a: Configuración ⚙️ → Propiedades → Agregar: GEMINI_API_KEY");
+    return;
+  }
+  Logger.log("✅ API Key encontrada: " + apiKey.substring(0, 8) + "...");
+
+  var resultado = llamarGeminiAPI("Respondé solo: 'Conexión exitosa con Gemini ✅'");
+
+  if (resultado.error) {
+    Logger.log("❌ Error de Gemini: " + resultado.error);
+  } else {
+    Logger.log("✅ Respuesta de Gemini: " + resultado.texto);
+    Logger.log("══════════════════════════════════════");
+    Logger.log("¡Todo funciona correctamente!");
+  }
+}
+
 // =============================================================================
 //  ACTIVAR CLAVE ESPECÍFICA — Ejecutar una vez para activar tu clave de prueba
 //  1. Cambiá TU_EMAIL_AQUI por tu email real

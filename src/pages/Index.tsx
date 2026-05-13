@@ -4,7 +4,10 @@ import Hero from "@/components/home/Hero";
 import FeaturedCourses from "@/components/home/FeaturedCourses";
 import FeaturedEbooks from "@/components/home/FeaturedEbooks";
 import ReglamentoSection from "@/components/home/ReglamentoSection";
+import Testimonials from "@/components/home/Testimonials";
 import CTA from "@/components/home/CTA";
+import NewcomFAQ from "@/components/home/NewcomFAQ";
+import SeoContent from "@/components/home/SeoContent";
 import { SEO } from "@/components/SEO";
 
 const Index = () => {
@@ -36,7 +39,10 @@ const Index = () => {
         <FeaturedCourses />
         <FeaturedEbooks />
         <ReglamentoSection />
+        <Testimonials />
+        <NewcomFAQ />
         <CTA />
+        <SeoContent />
       </main>
       <Footer />
     </div>

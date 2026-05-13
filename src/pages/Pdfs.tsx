@@ -63,8 +63,20 @@ const Pdfs = () => {
   return (
     <>
       <SEO
-        title="Productos Digitales PDF - Reactivar Academy"
-        description="Descargá nuestros materiales educativos en PDF. Reglamentos, guías y recursos para profesores de educación física."
+        title="Ebooks y PDFs de Newcom - Reactivar Academy | Diego Machado"
+        description="Descargá ebooks y materiales en PDF sobre Newcom diseñados por Diego Machado y su equipo. Guías para entrenadores, profesores y jugadores que quieren elevar su nivel."
+        keywords={[
+          'ebooks newcom',
+          'pdf newcom',
+          'material newcom',
+          'guia newcom',
+          'reglamento newcom pdf',
+          'manuales newcom',
+          'descargas newcom',
+          'material entrenador newcom',
+          'diego machado pdf',
+          'reactivar academy descargas',
+        ]}
       />
       <Header />
 

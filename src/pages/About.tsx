@@ -2,6 +2,7 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Trophy, Users, Video, Award, ArrowRight } from "lucide-react";
+import { SEO } from "@/components/SEO";
 
 const stats = [
   { value: "50+", label: "Cursos Disponibles", icon: Video },
@@ -34,6 +35,19 @@ const team = [
 const About = () => {
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Sobre Nosotros - Reactivar Academy Newcom | Diego Machado"
+        description="Conocé a Diego Machado y el equipo de Reactivar Academy. Profesores especializados en Newcom que forman entrenadores y deportistas en toda Argentina."
+        keywords={[
+          'diego machado newcom',
+          'sobre reactivar academy',
+          'profesor de newcom',
+          'historia newcom argentina',
+          'equipo reactivar academy',
+          'entrenadores de newcom',
+          'formacion deportiva newcom',
+        ]}
+      />
       <Header />
       
       <main className="pt-20">

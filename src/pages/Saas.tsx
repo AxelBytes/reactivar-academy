@@ -14,6 +14,8 @@ import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import CheckoutDialog from "@/components/checkout/CheckoutDialog";
+import { SEO } from "@/components/SEO";
+import { Helmet } from "react-helmet-async";
 
 interface SaasPlan {
   id: number;
@@ -93,8 +95,65 @@ export default function Saas() {
     setCheckoutOpen(true);
   };
 
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: [
+      {
+        "@type": "Question",
+        name: "¿Cómo recibo mi clave de acceso al Buscador de Reglamento de Newcom?",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "Al completar el pago, tu clave se activa automáticamente y te llega por email en minutos.",
+        },
+      },
+      {
+        "@type": "Question",
+        name: "¿En qué dispositivos puedo usar el Buscador de Reglamento de Newcom?",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "El buscador funciona en cualquier navegador: celular, tablet o computadora.",
+        },
+      },
+      {
+        "@type": "Question",
+        name: "¿Qué pasa cuando vence mi suscripción al Buscador de Reglamento?",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "Tu clave se desactiva automáticamente. Podés renovar en cualquier momento.",
+        },
+      },
+      {
+        "@type": "Question",
+        name: "¿Puedo cambiar de plan de suscripción al Buscador de Reglamento de Newcom?",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "Sí. Al renovar podés elegir un plan diferente. Si renovás antes de que venza, se extiende desde la fecha actual.",
+        },
+      },
+    ],
+  };
+
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Buscador del Reglamento de Newcom | Reactivar Academy"
+        description="Accedé al buscador inteligente del Reglamento Oficial de Newcom. Encontrá cualquier artículo en segundos desde tu celular. Suscripción mensual sin permanencia."
+        keywords={[
+          'reglamento newcom',
+          'buscador reglamento newcom',
+          'reglamento oficial newcom',
+          'arbitro newcom',
+          'planillero newcom',
+          'reglas newcom',
+          'reglamento newcom argentina',
+          'reglamento newcom pdf',
+          'capitulos reglamento newcom',
+        ]}
+      />
+      <Helmet>
+        <script type="application/ld+json">{JSON.stringify(faqSchema)}</script>
+      </Helmet>
       <Header />
 
       {/* Hero */}
