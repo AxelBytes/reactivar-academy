@@ -24,13 +24,13 @@ llamada **"Gestión de Suscripciones"** que se conecte con un backend de Google 
 
 La URL base del backend es:
 ```
-VITE_GAS_URL=https://script.google.com/macros/s/TU_ID_AQUI/exec
+VITE_GAS_URL=https://script.google.com/macros/s/AKfycbwdj-SWii1BxrLX3omHKBt3nVhIripP2PffWVnAJHRcR7iC1ie0w2ZoVZSw_IDJWzA-/exec
 ```
 (guardarla en el archivo .env del proyecto)
 
 El admin secret para autenticar las llamadas al backend es:
 ```
-VITE_ADMIN_SECRET=TU_SECRET_AQUI
+LionelAdmin1984$##
 ```
 (también en .env, nunca hardcodeado)
 
@@ -166,8 +166,8 @@ Agregar el ítem "Gestión de Suscripciones" en el menú lateral del panel admin
 
 ### VARIABLES DE ENTORNO (.env)
 ```
-VITE_GAS_URL=https://script.google.com/macros/s/TU_ID/exec
-VITE_ADMIN_SECRET=tu_admin_secret_aqui
+VITE_GAS_URL=https://script.google.com/macros/s/AKfycbwdj-SWii1BxrLX3omHKBt3nVhIripP2PffWVnAJHRcR7iC1ie0w2ZoVZSw_IDJWzA-/exec
+VITE_ADMIN_SECRET=LionelAdmin1984$##
 ```
 
 Entregame:
