@@ -199,15 +199,47 @@ export default async function handler(req, res) {
     `;
 
     // Adjuntar PDFs si hay productos digitales
-    const pdfAttachments = courses
-      .filter(c => c.pdfUrl)
-      .map(c => ({
-        url: c.pdfUrl,
-        name: `${(c.title || c.name || 'material').replace(/[^a-zA-Z0-9]/g, '_')}.pdf`,
-      }));
+    const pdfAttachments = [];
+    const coursesWithPdf = courses.filter(c => c.pdfUrl);
 
-    if (pdfAttachments.length > 0) {
-      console.log(`📎 Adjuntando ${pdfAttachments.length} PDF(s) al email`);
+    if (coursesWithPdf.length > 0) {
+      console.log(`📎 Procesando ${coursesWithPdf.length} PDF(s) para adjuntar...`);
+      
+      for (const course of coursesWithPdf) {
+        try {
+          console.log(`📥 Descargando PDF desde: ${course.pdfUrl}`);
+          
+          // Descargar el PDF desde la URL
+          const pdfResponse = await fetch(course.pdfUrl);
+          
+          if (!pdfResponse.ok) {
+            console.error(`❌ Error descargando PDF: ${pdfResponse.status} ${pdfResponse.statusText}`);
+            continue; // Saltar este PDF si falla la descarga
+          }
+          
+          // Convertir a ArrayBuffer
+          const pdfBuffer = await pdfResponse.arrayBuffer();
+          
+          // Convertir a Base64
+          const base64Content = Buffer.from(pdfBuffer).toString('base64');
+          
+          // Generar nombre de archivo limpio
+          const fileName = `${(course.title || course.name || 'material').replace(/[^a-zA-Z0-9\s-]/g, '_').replace(/\s+/g, '_')}.pdf`;
+          
+          pdfAttachments.push({
+            content: base64Content,  // Base64 del PDF
+            name: fileName
+          });
+          
+          console.log(`✅ PDF convertido exitosamente: ${fileName} (${(pdfBuffer.byteLength / 1024 / 1024).toFixed(2)} MB)`);
+          
+        } catch (pdfError) {
+          console.error(`❌ Error procesando PDF "${course.title}":`, pdfError.message);
+          // Continuar con los demás PDFs aunque uno falle
+        }
+      }
+      
+      console.log(`📦 Total de PDFs adjuntos: ${pdfAttachments.length} de ${coursesWithPdf.length}`);
     }
 
     // Enviar email usando Brevo (antes Sendinblue)
