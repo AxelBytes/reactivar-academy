@@ -7,6 +7,10 @@ import { useCart } from "@/contexts/CartContext";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
 import EbookDetailDialog from "@/components/ebooks/EbookDetailDialog";
+import ScrollReveal from "@/components/animations/ScrollReveal";
+import StaggerContainer from "@/components/animations/StaggerContainer";
+import StaggerItem from "@/components/animations/StaggerItem";
+import { motion } from "framer-motion";
 
 const FeaturedEbooks = () => {
   const [ebooks, setEbooks] = useState<any[]>([]);
@@ -55,6 +59,7 @@ const FeaturedEbooks = () => {
   return (
     <section className="py-16 lg:py-24 bg-blue-50">
       <div className="container mx-auto px-4">
+        <ScrollReveal width="100%" duration={0.8}>
         <div className="relative max-w-4xl mx-auto mb-14 px-6 md:px-10 py-10 md:py-14 rounded-3xl overflow-hidden bg-gradient-to-br from-primary via-primary to-blue-600 shadow-2xl border-4 border-primary/20">
           <div className="absolute inset-0 opacity-10" style={{
             backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-rule='evenodd'%3E%3Cpath d='M0 40L40 0H20L0 20M40 40V20L20 40'/%3E%3C/g%3E%3C/svg%3E")`,
@@ -86,16 +91,26 @@ const FeaturedEbooks = () => {
             </div>
           </div>
         </div>
+        </ScrollReveal>
 
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-10 w-10 animate-spin text-blue-600" />
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <StaggerContainer 
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+            staggerDelay={0.15}
+          >
             {ebooks.map((product) => (
-              <article
-                key={product.id}
+              <StaggerItem key={product.id}>
+              <motion.article
+                whileHover={{ 
+                  scale: 1.03,
+                  rotateY: 2,
+                  rotateX: -2,
+                  transition: { duration: 0.3 }
+                }}
                 className="group bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-blue-100 flex flex-col cursor-pointer"
                 onClick={() => setSelectedEbook(product)}
               >
@@ -164,9 +179,10 @@ const FeaturedEbooks = () => {
                     </Button>
                   </div>
                 </div>
-              </article>
+              </motion.article>
+              </StaggerItem>
             ))}
-          </div>
+          </StaggerContainer>
         )}
 
         <div className="text-center mt-12">

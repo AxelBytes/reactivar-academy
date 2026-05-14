@@ -9,6 +9,7 @@ import {
 import { ShoppingCart, ArrowRight, UserPlus, CreditCard, BookOpen, Mail, CheckCircle2 } from "lucide-react";
 import heroBanner from "@/assets/hero-voleibol.png";
 import profesorImg from "@/assets/profesor.png";
+import { motion, useScroll, useTransform } from "framer-motion";
 
 const steps = [
   {
@@ -50,21 +51,28 @@ const steps = [
 
 const Hero = () => {
   const [showGuide, setShowGuide] = useState(false);
+  const { scrollY } = useScroll();
+  const y = useTransform(scrollY, [0, 500], [0, 150]);
 
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden">
-      <div className="absolute inset-0">
+      <motion.div className="absolute inset-0" style={{ y }}>
         <img
           src={heroBanner}
           alt="Entrenamiento deportivo profesional"
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-secondary/98 via-secondary/90 to-secondary/40" />
-      </div>
+      </motion.div>
 
       <div className="container mx-auto px-4 relative z-10 pt-20">
         <div className="flex flex-col lg:flex-row items-center gap-10 lg:gap-16">
-          <div className="max-w-2xl flex-1">
+          <motion.div 
+            className="max-w-2xl flex-1"
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+          >
             <div className="relative p-8 md:p-10 rounded-3xl overflow-hidden bg-gradient-to-br from-white/95 via-white/90 to-white/85 dark:from-gray-900/95 dark:via-gray-900/90 dark:to-gray-900/85 shadow-2xl border-4 border-white/40 dark:border-gray-700/40 backdrop-blur-md">
               <div className="absolute inset-0 opacity-5" style={{
                 backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%230ea5e9' fill-rule='evenodd'%3E%3Cpath d='M0 40L40 0H20L0 20M40 40V20L20 40'/%3E%3C/g%3E%3C/svg%3E")`,
@@ -110,9 +118,14 @@ const Hero = () => {
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
 
-          <div className="hidden lg:flex flex-shrink-0 flex-col items-center gap-4">
+          <motion.div 
+            className="hidden lg:flex flex-shrink-0 flex-col items-center gap-4"
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, delay: 0.5 }}
+          >
             <div className="relative w-72 xl:w-80 h-[420px] xl:h-[460px] rounded-2xl overflow-hidden border-4 border-white/30 shadow-2xl backdrop-blur-sm">
               <img
                 src={profesorImg}
@@ -126,7 +139,7 @@ const Hero = () => {
               <p className="text-secondary-foreground/90 text-sm mt-1">Profesor de Ed. Física</p>
               <p className="text-primary text-sm font-semibold mt-0.5">Especialización en Newcom</p>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
 
