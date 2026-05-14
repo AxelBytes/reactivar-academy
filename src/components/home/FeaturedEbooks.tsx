@@ -53,21 +53,35 @@ const FeaturedEbooks = () => {
   return (
     <section className="py-16 lg:py-24 bg-blue-50">
       <div className="container mx-auto px-4">
-        <div className="text-center max-w-2xl mx-auto mb-12">
-          <span className="inline-flex items-center gap-2 text-blue-600 font-medium text-sm uppercase tracking-wider">
-            <FileText className="w-4 h-4" />
-            Materiales digitales
-          </span>
-          <h2 className="text-4xl md:text-5xl font-bold text-blue-600 mt-3 mb-4">
-            Ebooks
-          </h2>
-          <p className="text-lg text-muted-foreground">
-            Diseñado por el profesor Diego Machado y su equipo de trabajo. Para profesores, entrenadores y también jugadores que quieran aprender y elevar su nivel en competencia.
-          </p>
-          <div className="flex flex-wrap justify-center gap-4 mt-4 text-sm text-blue-700">
-            <span className="flex items-center gap-1"><Download className="w-4 h-4" /> Descarga instantánea</span>
-            <span className="flex items-center gap-1">📧 Enviado por email</span>
-            <span className="flex items-center gap-1">📱 Usalo en cualquier dispositivo</span>
+        <div className="relative max-w-4xl mx-auto mb-14 px-6 md:px-10 py-10 md:py-14 rounded-3xl overflow-hidden bg-gradient-to-br from-primary via-primary to-blue-600 shadow-2xl border-4 border-primary/20">
+          <div className="absolute inset-0 opacity-10" style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-rule='evenodd'%3E%3Cpath d='M0 40L40 0H20L0 20M40 40V20L20 40'/%3E%3C/g%3E%3C/svg%3E")`,
+          }} />
+          <div className="absolute -top-12 -right-12 w-48 h-48 bg-white/10 rounded-full blur-2xl" />
+          <div className="absolute -bottom-12 -left-12 w-48 h-48 bg-white/10 rounded-full blur-2xl" />
+
+          <div className="relative text-center">
+            <span className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-white/20 backdrop-blur-sm text-primary-foreground font-bold text-sm uppercase tracking-widest mb-5 border border-white/30">
+              <FileText className="w-4 h-4" />
+              Materiales digitales
+            </span>
+            <h2 className="text-5xl md:text-7xl lg:text-8xl font-black text-primary-foreground mb-5 leading-none tracking-tight drop-shadow-lg">
+              <span className="bg-gradient-to-r from-yellow-300 via-yellow-200 to-white bg-clip-text text-transparent">Ebooks</span>
+            </h2>
+            <p className="text-xl md:text-2xl text-primary-foreground/90 font-medium max-w-2xl mx-auto leading-relaxed mb-6">
+              Diseñado por el profesor Diego Machado y su equipo de trabajo. Para profesores, entrenadores y también jugadores que quieran aprender y elevar su nivel en competencia.
+            </p>
+            <div className="flex flex-wrap justify-center gap-4 text-sm md:text-base text-primary-foreground/95 font-medium">
+              <span className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full border border-white/30">
+                <Download className="w-4 h-4" /> Descarga instantánea
+              </span>
+              <span className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full border border-white/30">
+                📧 Enviado por email
+              </span>
+              <span className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full border border-white/30">
+                📱 Usalo en cualquier dispositivo
+              </span>
+            </div>
           </div>
         </div>
 
