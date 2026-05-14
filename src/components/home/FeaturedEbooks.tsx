@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { FileText, ShoppingCart, ArrowRight, Download, Loader2, Flame } from "lucide-react";
+import { FileText, ShoppingCart, ArrowRight, Download, Loader2 } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
@@ -58,7 +58,7 @@ const FeaturedEbooks = () => {
             <FileText className="w-4 h-4" />
             Materiales digitales
           </span>
-          <h2 className="text-4xl md:text-5xl font-bold text-foreground mt-3 mb-4">
+          <h2 className="text-4xl md:text-5xl font-bold text-blue-600 mt-3 mb-4">
             Ebooks
           </h2>
           <p className="text-lg text-muted-foreground">
