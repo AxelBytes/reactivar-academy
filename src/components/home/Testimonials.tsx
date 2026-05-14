@@ -106,7 +106,7 @@ const Testimonials = () => {
     <section className="py-16 lg:py-24 bg-gradient-to-b from-background to-secondary/20">
       <div className="container mx-auto px-4">
         {/* Section Header */}
-        <ScrollReveal width="100%" duration={0.8}>
+        <ScrollReveal width="100%" duration={0.8} direction="left">
           <div className="relative max-w-4xl mx-auto mb-14 px-6 md:px-10 py-10 md:py-14 rounded-3xl overflow-hidden bg-gradient-to-br from-primary via-primary to-purple-600 shadow-2xl border-4 border-primary/20">
             <div className="absolute inset-0 opacity-10" style={{
               backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-rule='evenodd'%3E%3Cpath d='M0 40L40 0H20L0 20M40 40V20L20 40'/%3E%3C/g%3E%3C/svg%3E")`,
@@ -133,7 +133,7 @@ const Testimonials = () => {
         {/* Video Testimonials */}
         {videoTestimonials.length > 0 && (
           <div className="mb-16">
-            <ScrollReveal width="100%">
+            <ScrollReveal width="100%" direction="down">
               <h3 className="text-2xl md:text-3xl font-bold text-foreground mb-8 text-center bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
                 Testimonios en Video
               </h3>
@@ -251,7 +251,7 @@ const Testimonials = () => {
         )}
 
         {/* Write a Review */}
-        <ScrollReveal width="100%" duration={0.6} delay={0.2}>
+        <ScrollReveal width="100%" duration={0.6} delay={0.2} direction="right">
           <div className="max-w-2xl mx-auto mt-8">
             <div className="bg-card rounded-xl p-6 md:p-8 shadow-xl border-2 border-primary/20 hover:border-primary/40 transition-all">
               <h3 className="text-2xl font-bold text-card-foreground mb-2 bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
