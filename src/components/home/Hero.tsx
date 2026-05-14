@@ -99,7 +99,11 @@ const Hero = () => {
                     Explorar Cursos
                     <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                   </Button>
-                  <Button variant="heroOutline" size="xl" className="group shadow-lg hover:shadow-xl transition-all hover:scale-105" onClick={() => setShowGuide(true)}>
+                  <Button 
+                    size="xl" 
+                    className="group shadow-xl hover:shadow-2xl transition-all hover:scale-105 bg-gray-800 hover:bg-gray-900 text-white border-2 border-gray-700"
+                    onClick={() => setShowGuide(true)}
+                  >
                     <ShoppingCart className="w-5 h-5" />
                     Cómo Comprar
                   </Button>
