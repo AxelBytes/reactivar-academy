@@ -77,16 +77,16 @@ const Hero = () => {
                   Plataforma #1 en Capacitación Deportiva especializada en el Deporte Newcom
                 </span>
                 
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-foreground leading-tight mb-6">
-                  Crea tu mejor versión como
-                  <span className="block mt-2 bg-gradient-to-r from-primary via-blue-600 to-blue-700 bg-clip-text text-transparent drop-shadow-sm">
-                    Formador/entrenador.
+                <h1 className="text-3xl md:text-4xl lg:text-5xl font-black text-foreground leading-tight mb-6">
+                  Crea tu mejor versión como:
+                  <span className="block mt-3 bg-gradient-to-r from-primary via-blue-600 to-blue-700 bg-clip-text text-transparent drop-shadow-sm">
+                    Formador / Entrenador
                   </span>
                   <span className="block mt-2 bg-gradient-to-r from-amber-500 via-yellow-500 to-orange-500 bg-clip-text text-transparent drop-shadow-sm">
-                    Deportista autodidacta.
+                    Deportista autodidacta
                   </span>
                   <span className="block mt-2 bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500 bg-clip-text text-transparent drop-shadow-sm">
-                    Autoridad en este deporte.
+                    Autoridad en este deporte
                   </span>
                 </h1>
                 
