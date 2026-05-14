@@ -59,34 +59,52 @@ const Hero = () => {
           alt="Entrenamiento deportivo profesional"
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-secondary/95 via-secondary/80 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-secondary/98 via-secondary/90 to-secondary/40" />
       </div>
 
       <div className="container mx-auto px-4 relative z-10 pt-20">
         <div className="flex flex-col lg:flex-row items-center gap-10 lg:gap-16">
           <div className="max-w-2xl flex-1">
-            <span className="inline-block px-4 py-2 rounded-full bg-primary/20 text-primary font-medium text-sm mb-6 backdrop-blur-sm">
-              Plataforma #1 en Capacitación Deportiva especializada en el Deporte Newcom
-            </span>
-            
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-secondary-foreground leading-tight mb-6">
-              Crea tu mejor versión como
-              <span className="text-primary block mt-2">deportista siendo autodidacta con las mejores herramientas!!!</span>
-            </h1>
-            
-            <p className="text-lg md:text-xl text-secondary-foreground/80 mb-8 leading-relaxed">
-              Materiales para formarte como entrenador o también materiales para crecer como jugador de manera autodidacta!!!
-            </p>
+            <div className="relative p-8 md:p-10 rounded-3xl overflow-hidden bg-gradient-to-br from-white/95 via-white/90 to-white/85 dark:from-gray-900/95 dark:via-gray-900/90 dark:to-gray-900/85 shadow-2xl border-4 border-white/40 dark:border-gray-700/40 backdrop-blur-md">
+              <div className="absolute inset-0 opacity-5" style={{
+                backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%230ea5e9' fill-rule='evenodd'%3E%3Cpath d='M0 40L40 0H20L0 20M40 40V20L20 40'/%3E%3C/g%3E%3C/svg%3E")`,
+              }} />
+              <div className="absolute -top-10 -right-10 w-40 h-40 bg-primary/10 rounded-full blur-3xl" />
+              <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-blue-500/10 rounded-full blur-3xl" />
 
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Button variant="hero" size="xl" className="group">
-                Explorar Cursos
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </Button>
-              <Button variant="heroOutline" size="xl" className="group" onClick={() => setShowGuide(true)}>
-                <ShoppingCart className="w-5 h-5" />
-                Cómo Comprar
-              </Button>
+              <div className="relative">
+                <span className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-primary/20 text-primary font-bold text-sm mb-6 backdrop-blur-sm border border-primary/30 shadow-lg">
+                  Plataforma #1 en Capacitación Deportiva especializada en el Deporte Newcom
+                </span>
+                
+                <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-foreground leading-tight mb-6">
+                  Crea tu mejor versión como
+                  <span className="block mt-2 bg-gradient-to-r from-primary via-blue-600 to-blue-700 bg-clip-text text-transparent drop-shadow-sm">
+                    Formador/entrenador.
+                  </span>
+                  <span className="block mt-2 bg-gradient-to-r from-amber-500 via-yellow-500 to-orange-500 bg-clip-text text-transparent drop-shadow-sm">
+                    Deportista autodidacta.
+                  </span>
+                  <span className="block mt-2 bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500 bg-clip-text text-transparent drop-shadow-sm">
+                    Autoridad en este deporte.
+                  </span>
+                </h1>
+                
+                <p className="text-lg md:text-xl text-foreground/80 mb-8 leading-relaxed font-medium">
+                  También encontra todo para practicar el deporte Newcom.
+                </p>
+
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <Button variant="hero" size="xl" className="group shadow-xl hover:shadow-2xl transition-all hover:scale-105">
+                    Explorar Cursos
+                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  </Button>
+                  <Button variant="heroOutline" size="xl" className="group shadow-lg hover:shadow-xl transition-all hover:scale-105" onClick={() => setShowGuide(true)}>
+                    <ShoppingCart className="w-5 h-5" />
+                    Cómo Comprar
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
 
