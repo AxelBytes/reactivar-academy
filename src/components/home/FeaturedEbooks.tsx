@@ -6,10 +6,12 @@ import { FileText, ShoppingCart, ArrowRight, Download, Loader2 } from "lucide-re
 import { useCart } from "@/contexts/CartContext";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
+import EbookDetailDialog from "@/components/ebooks/EbookDetailDialog";
 
 const FeaturedEbooks = () => {
   const [ebooks, setEbooks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedEbook, setSelectedEbook] = useState<any | null>(null);
   const { addProduct, isInCart } = useCart();
   const { toast } = useToast();
 
@@ -94,7 +96,8 @@ const FeaturedEbooks = () => {
             {ebooks.map((product) => (
               <article
                 key={product.id}
-                className="group bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-blue-100 flex flex-col"
+                className="group bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-blue-100 flex flex-col cursor-pointer"
+                onClick={() => setSelectedEbook(product)}
               >
                 <div className="relative h-52 bg-gradient-to-br from-blue-50 to-blue-100 overflow-hidden">
                   {product.image_url ? (
@@ -144,7 +147,10 @@ const FeaturedEbooks = () => {
                     </div>
                     <Button
                       className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 text-base font-semibold"
-                      onClick={() => handleAddToCart(product)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleAddToCart(product);
+                      }}
                       disabled={isInCart(product.id, "product")}
                     >
                       {isInCart(product.id, "product") ? (
@@ -172,6 +178,12 @@ const FeaturedEbooks = () => {
           </Button>
         </div>
       </div>
+
+      <EbookDetailDialog
+        ebook={selectedEbook}
+        open={!!selectedEbook}
+        onOpenChange={(open) => !open && setSelectedEbook(null)}
+      />
     </section>
   );
 };
