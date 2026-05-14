@@ -1,34 +1,15 @@
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
-import { Trophy, Users, Video, Award, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { SEO } from "@/components/SEO";
-
-const stats = [
-  { value: "50+", label: "Cursos Disponibles", icon: Video },
-  { value: "10K+", label: "Estudiantes Activos", icon: Users },
-  { value: "25+", label: "Instructores Expertos", icon: Award },
-  { value: "98%", label: "Satisfacción", icon: Trophy },
-];
 
 const team = [
   {
-    name: "Carlos Mendoza",
-    role: "Director de Entrenamiento",
-    bio: "Ex atleta olímpico con más de 15 años de experiencia en entrenamiento deportivo profesional.",
-    initials: "CM",
-  },
-  {
-    name: "Ana García",
-    role: "Especialista en Nutrición",
-    bio: "Nutricionista deportiva certificada con experiencia en equipos de alto rendimiento.",
-    initials: "AG",
-  },
-  {
-    name: "Roberto Díaz",
-    role: "Psicólogo Deportivo",
-    bio: "Especialista en preparación mental y gestión del rendimiento competitivo.",
-    initials: "RD",
+    name: "Diego Machado",
+    role: "Fundador y Director",
+    bio: "Profesor de Educación Física especializado en Newcom. Pionero en la formación deportiva especializada en este deporte en Argentina.",
+    initials: "DM",
   },
 ];
 
@@ -56,32 +37,13 @@ const About = () => {
           <div className="container mx-auto px-4">
             <div className="max-w-3xl mx-auto text-center">
               <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6">
-                Transformando el <span className="text-primary">Deporte</span> a Través de la Educación
+                Transformando el <span className="text-primary">Newcom</span> a Través de la Educación
               </h1>
               <p className="text-lg text-secondary-foreground/80 leading-relaxed">
-                En SportEduPro, creemos que el conocimiento es la base del éxito deportivo. 
-                Nuestra misión es hacer accesible la formación de élite para todos los atletas, 
-                sin importar su nivel o ubicación.
+                En Reactivar Academy, creemos que el conocimiento es la base del éxito deportivo. 
+                Nuestra misión es hacer accesible la formación especializada en Newcom para todos los atletas, 
+                entrenadores y apasionados del deporte, sin importar su nivel o ubicación.
               </p>
-            </div>
-          </div>
-        </section>
-
-        {/* Stats */}
-        <section className="py-16 bg-background">
-          <div className="container mx-auto px-4">
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-              {stats.map((stat, index) => (
-                <div key={index} className="text-center">
-                  <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                    <stat.icon className="w-8 h-8 text-primary" />
-                  </div>
-                  <div className="text-3xl md:text-4xl font-bold text-foreground mb-2">
-                    {stat.value}
-                  </div>
-                  <div className="text-muted-foreground text-sm">{stat.label}</div>
-                </div>
-              ))}
             </div>
           </div>
         </section>
@@ -95,17 +57,17 @@ const About = () => {
                   Nuestra Misión
                 </span>
                 <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-2 mb-6">
-                  Democratizar el Acceso a la Formación Deportiva de Élite
+                  Formación Especializada en Newcom al Alcance de Todos
                 </h2>
                 <p className="text-muted-foreground leading-relaxed mb-6">
-                  Fundamos SportEduPro con una visión clara: que cualquier persona apasionada 
-                  por el deporte tenga acceso a las mismas herramientas de formación que utilizan 
-                  los atletas profesionales.
+                  Fundamos Reactivar Academy con una visión clara: que cualquier persona apasionada 
+                  por el Newcom tenga acceso a las mejores herramientas de formación, ya sea para 
+                  convertirse en entrenador profesional o para crecer como deportista autodidacta.
                 </p>
                 <p className="text-muted-foreground leading-relaxed mb-6">
-                  Nuestro equipo de instructores está compuesto por atletas de élite, entrenadores 
-                  certificados y especialistas en diversas disciplinas deportivas, todos comprometidos 
-                  con tu desarrollo.
+                  Bajo la dirección del Profesor Diego Machado, especialista en Educación Física con 
+                  especialización en Newcom, ofrecemos capacitaciones de calidad, materiales educativos 
+                  y herramientas tecnológicas diseñadas específicamente para este deporte.
                 </p>
                 <Button>
                   Conocer Nuestros Cursos
@@ -115,15 +77,16 @@ const About = () => {
               <div className="relative">
                 <div className="bg-primary/10 rounded-2xl p-8 lg:p-12">
                   <blockquote className="text-lg lg:text-xl text-foreground italic leading-relaxed">
-                    "El verdadero potencial de un atleta se desbloquea cuando combina 
-                    el entrenamiento físico con el conocimiento y la preparación mental."
+                    "El Newcom es más que un deporte, es una herramienta de formación integral. 
+                    Mi objetivo es que cada entrenador y deportista tenga acceso al conocimiento 
+                    necesario para desarrollarse al máximo en este deporte."
                   </blockquote>
                   <div className="mt-6 flex items-center gap-4">
                     <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold">
-                      CM
+                      DM
                     </div>
                     <div>
-                      <p className="font-semibold text-foreground">Carlos Mendoza</p>
+                      <p className="font-semibold text-foreground">Diego Machado</p>
                       <p className="text-sm text-muted-foreground">Fundador y Director</p>
                     </div>
                   </div>
@@ -138,17 +101,17 @@ const About = () => {
           <div className="container mx-auto px-4">
             <div className="text-center max-w-2xl mx-auto mb-12">
               <span className="text-primary font-medium text-sm uppercase tracking-wider">
-                Nuestro Equipo
+                Nuestro Fundador
               </span>
               <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-2 mb-4">
-                Expertos que Te Guiarán
+                Conocé a Diego Machado
               </h2>
               <p className="text-muted-foreground">
-                Conoce a los profesionales detrás de nuestras capacitaciones
+                El profesional detrás de Reactivar Academy y las capacitaciones de Newcom
               </p>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-8">
+            <div className="max-w-md mx-auto">
               {team.map((member, index) => (
                 <div
                   key={index}
