@@ -1,8 +1,12 @@
 import { useState, useEffect } from "react";
-import { Star, Quote, Send, Play } from "lucide-react";
+import { Star, Quote, Send, Play, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
+import ScrollReveal from "@/components/animations/ScrollReveal";
+import StaggerContainer from "@/components/animations/StaggerContainer";
+import StaggerItem from "@/components/animations/StaggerItem";
+import { motion } from "framer-motion";
 
 interface VideoTestimonial {
   id: number;
@@ -99,38 +103,61 @@ const Testimonials = () => {
   };
 
   return (
-    <section className="py-16 lg:py-24 bg-background">
+    <section className="py-16 lg:py-24 bg-gradient-to-b from-background to-secondary/20">
       <div className="container mx-auto px-4">
         {/* Section Header */}
-        <div className="text-center max-w-2xl mx-auto mb-12">
-          <span className="text-primary font-medium text-sm uppercase tracking-wider">
-            Testimonios
-          </span>
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-2 mb-4">
-            Lo que Dicen Nuestros Estudiantes
-          </h2>
-          <p className="text-muted-foreground">
-            Mirá las experiencias de quienes ya son parte de Reactivar Academy
-          </p>
-        </div>
+        <ScrollReveal width="100%" duration={0.8}>
+          <div className="relative max-w-4xl mx-auto mb-14 px-6 md:px-10 py-10 md:py-14 rounded-3xl overflow-hidden bg-gradient-to-br from-primary via-primary to-purple-600 shadow-2xl border-4 border-primary/20">
+            <div className="absolute inset-0 opacity-10" style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-rule='evenodd'%3E%3Cpath d='M0 40L40 0H20L0 20M40 40V20L20 40'/%3E%3C/g%3E%3C/svg%3E")`,
+            }} />
+            <div className="absolute -top-12 -right-12 w-48 h-48 bg-white/10 rounded-full blur-2xl" />
+            <div className="absolute -bottom-12 -left-12 w-48 h-48 bg-white/10 rounded-full blur-2xl" />
+
+            <div className="relative text-center">
+              <span className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-white/20 backdrop-blur-sm text-primary-foreground font-bold text-sm uppercase tracking-widest mb-5 border border-white/30">
+                <Users className="w-4 h-4" />
+                Testimonios Reales
+              </span>
+              <h2 className="text-5xl md:text-7xl lg:text-8xl font-black text-primary-foreground mb-5 leading-none tracking-tight drop-shadow-lg">
+                Lo que Dicen<br />
+                <span className="bg-gradient-to-r from-yellow-300 via-yellow-200 to-white bg-clip-text text-transparent">Nuestros Estudiantes</span>
+              </h2>
+              <p className="text-xl md:text-2xl text-primary-foreground/90 font-medium max-w-2xl mx-auto leading-relaxed">
+                Mirá las experiencias de quienes ya son parte de Reactivar Academy
+              </p>
+            </div>
+          </div>
+        </ScrollReveal>
 
         {/* Video Testimonials */}
         {videoTestimonials.length > 0 && (
           <div className="mb-16">
-            <h3 className="text-xl font-semibold text-foreground mb-6 text-center">
-              Testimonios en Video
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <ScrollReveal width="100%">
+              <h3 className="text-2xl md:text-3xl font-bold text-foreground mb-8 text-center bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+                Testimonios en Video
+              </h3>
+            </ScrollReveal>
+            <StaggerContainer 
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+              staggerDelay={0.1}
+            >
               {videoTestimonials.map((video) => (
-                <div
-                  key={video.id}
-                  className="relative rounded-xl overflow-hidden shadow-md border border-border group cursor-pointer"
-                  onClick={() =>
-                    setActiveVideo(
-                      activeVideo === video.youtubeId ? null : video.youtubeId
-                    )
-                  }
-                >
+                <StaggerItem key={video.id}>
+                  <motion.div
+                    whileHover={{ 
+                      scale: 1.05,
+                      rotateY: 3,
+                      rotateX: -3,
+                      transition: { duration: 0.3 }
+                    }}
+                    className="relative rounded-xl overflow-hidden shadow-lg border-2 border-primary/20 hover:border-primary/50 group cursor-pointer transition-all"
+                    onClick={() =>
+                      setActiveVideo(
+                        activeVideo === video.youtubeId ? null : video.youtubeId
+                      )
+                    }
+                  >
                   {activeVideo === video.youtubeId ? (
                     <iframe
                       src={`https://www.youtube.com/embed/${video.youtubeId}?autoplay=1`}
@@ -160,20 +187,29 @@ const Testimonials = () => {
                       </p>
                     </div>
                   )}
-                </div>
+                </motion.div>
+                </StaggerItem>
               ))}
-            </div>
+            </StaggerContainer>
           </div>
         )}
 
         {/* User Reviews - solo visibles para usuarios logueados */}
         {isAuthenticated && reviews.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+          <StaggerContainer 
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12"
+            staggerDelay={0.1}
+          >
             {reviews.map((review) => (
-              <div
-                key={review.id}
-                className="relative bg-card rounded-xl p-6 shadow-md border border-border hover:shadow-lg transition-shadow"
-              >
+              <StaggerItem key={review.id}>
+                <motion.div
+                  whileHover={{ 
+                    scale: 1.03,
+                    y: -5,
+                    transition: { duration: 0.2 }
+                  }}
+                  className="relative bg-card rounded-xl p-6 shadow-md border-2 border-border hover:border-primary/50 hover:shadow-xl transition-all h-full"
+                >
                 <div className="absolute -top-3 -left-3 w-10 h-10 rounded-full bg-primary flex items-center justify-center">
                   <Quote className="w-5 h-5 text-primary-foreground" />
                 </div>
@@ -208,17 +244,19 @@ const Testimonials = () => {
                     </p>
                   </div>
                 </div>
-              </div>
+              </motion.div>
+              </StaggerItem>
             ))}
-          </div>
+          </StaggerContainer>
         )}
 
         {/* Write a Review */}
-        <div className="max-w-2xl mx-auto mt-8">
-          <div className="bg-card rounded-xl p-6 md:p-8 shadow-md border border-border">
-            <h3 className="text-xl font-semibold text-card-foreground mb-2">
-              Dejá tu reseña
-            </h3>
+        <ScrollReveal width="100%" duration={0.6} delay={0.2}>
+          <div className="max-w-2xl mx-auto mt-8">
+            <div className="bg-card rounded-xl p-6 md:p-8 shadow-xl border-2 border-primary/20 hover:border-primary/40 transition-all">
+              <h3 className="text-2xl font-bold text-card-foreground mb-2 bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+                Dejá tu reseña
+              </h3>
 
             {!isAuthenticated ? (
               <div className="text-center py-6">
@@ -316,6 +354,7 @@ const Testimonials = () => {
             )}
           </div>
         </div>
+        </ScrollReveal>
       </div>
     </section>
   );
