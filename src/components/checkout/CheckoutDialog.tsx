@@ -35,7 +35,17 @@ interface CheckoutDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-// Schema de validación con Zod
+// Schema de validación para datos del comprador
+const buyerSchema = z.object({
+  email: z.string().email("Email inválido"),
+  name: z.string().min(2, "Nombre muy corto"),
+  dni: z.string().optional(),
+  pais: z.string().optional(),
+  provincia: z.string().optional(),
+  localidad: z.string().optional(),
+});
+
+// Schema de validación con Zod para tarjeta (legacy, no se usa)
 const cardSchema = z.object({
   cardNumber: z.string()
     .min(16, "Número de tarjeta incompleto")
@@ -54,6 +64,7 @@ const cardSchema = z.object({
 });
 
 type CardFormData = z.infer<typeof cardSchema>;
+type BuyerFormData = z.infer<typeof buyerSchema>;
 
 const CheckoutDialog = ({ open, onOpenChange }: CheckoutDialogProps) => {
   const { items, getTotal, clearCart } = useCart();
@@ -61,6 +72,24 @@ const CheckoutDialog = ({ open, onOpenChange }: CheckoutDialogProps) => {
   const { toast } = useToast();
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("ualabis");
   const [isProcessing, setIsProcessing] = useState(false);
+
+  // Formulario para datos del comprador
+  const {
+    register: registerBuyer,
+    handleSubmit: handleSubmitBuyer,
+    formState: { errors: buyerErrors },
+    watch: watchBuyer,
+  } = useForm<BuyerFormData>({
+    resolver: zodResolver(buyerSchema),
+    defaultValues: {
+      email: user?.email || "",
+      name: user?.name || "",
+      dni: user?.dni || "",
+      pais: user?.pais || "",
+      provincia: user?.provincia || "",
+      localidad: user?.localidad || "",
+    },
+  });
 
   const {
     register,
@@ -91,14 +120,17 @@ const CheckoutDialog = ({ open, onOpenChange }: CheckoutDialogProps) => {
         subscriptionMonths: item.type === 'saas' ? item.subscriptionMonths : 0,
       }));
 
+      // Obtener datos del formulario del comprador
+      const buyerData = watchBuyer();
+      
       localStorage.setItem('purchasedCourses', JSON.stringify({
         courses: allItems,
-        userEmail: user?.email || '',
-        userName:  user?.name  || '',
-        userDni:   user?.dni   || '',
-        userProvincia: user?.provincia || '',
-        userLocalidad: user?.localidad || '',
-        userPais:      user?.pais      || '',
+        userEmail: buyerData.email || '',
+        userName:  buyerData.name  || '',
+        userDni:   buyerData.dni   || '',
+        userProvincia: buyerData.provincia || '',
+        userLocalidad: buyerData.localidad || '',
+        userPais:      buyerData.pais      || '',
         timestamp: Date.now(),
       }));
 
@@ -151,14 +183,17 @@ const CheckoutDialog = ({ open, onOpenChange }: CheckoutDialogProps) => {
         subscriptionMonths: item.type === 'saas' ? item.subscriptionMonths : 0,
       }));
 
+      // Obtener datos del formulario del comprador
+      const buyerData = watchBuyer();
+      
       const purchaseData = {
         courses: allItems,
-        userEmail: user?.email || '',
-        userName:  user?.name  || '',
-        userDni:   user?.dni   || '',
-        userProvincia: user?.provincia || '',
-        userLocalidad: user?.localidad || '',
-        userPais:      user?.pais      || '',
+        userEmail: buyerData.email || '',
+        userName:  buyerData.name  || '',
+        userDni:   buyerData.dni   || '',
+        userProvincia: buyerData.provincia || '',
+        userLocalidad: buyerData.localidad || '',
+        userPais:      buyerData.pais      || '',
         timestamp: Date.now(),
       };
 
@@ -211,6 +246,30 @@ const CheckoutDialog = ({ open, onOpenChange }: CheckoutDialogProps) => {
   };
 
   const handlePayment = async () => {
+    // Validar formulario del comprador primero
+    const buyerData = watchBuyer();
+    
+    if (!buyerData.email || !buyerData.name) {
+      toast({
+        title: "Datos incompletos",
+        description: "Por favor completá tu email y nombre para continuar",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validar formato de email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(buyerData.email)) {
+      toast({
+        title: "Email inválido",
+        description: "Por favor ingresá un email válido",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Continuar con el pago
     if (paymentMethod === "paypal") {
       await handlePayPal();
     } else if (paymentMethod === "ualabis") {
@@ -262,6 +321,97 @@ const CheckoutDialog = ({ open, onOpenChange }: CheckoutDialogProps) => {
             <div className="flex items-center justify-between font-bold">
               <span>Total</span>
               <span className="text-lg text-primary">${getTotal().toLocaleString("es-AR")}</span>
+            </div>
+          </div>
+
+          {/* Datos del Comprador */}
+          <div className="space-y-4 border border-border rounded-lg p-4 bg-accent/10">
+            <h3 className="text-base font-semibold flex items-center gap-2">
+              <ShieldCheck className="w-5 h-5 text-primary" />
+              Datos del Comprador
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              El email es donde recibirás tu compra {hasCourses && "y acceso al curso"}{hasProducts && "y los PDFs"}
+            </p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Email - Obligatorio */}
+              <div className="md:col-span-2 space-y-2">
+                <Label htmlFor="buyer-email" className="flex items-center gap-1">
+                  Email <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="buyer-email"
+                  type="email"
+                  placeholder="tu@email.com"
+                  {...registerBuyer("email")}
+                  className={buyerErrors.email ? "border-destructive" : ""}
+                />
+                {buyerErrors.email && (
+                  <p className="text-xs text-destructive">{buyerErrors.email.message}</p>
+                )}
+              </div>
+
+              {/* Nombre - Obligatorio */}
+              <div className="md:col-span-2 space-y-2">
+                <Label htmlFor="buyer-name" className="flex items-center gap-1">
+                  Nombre Completo <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="buyer-name"
+                  type="text"
+                  placeholder="Juan Pérez"
+                  {...registerBuyer("name")}
+                  className={buyerErrors.name ? "border-destructive" : ""}
+                />
+                {buyerErrors.name && (
+                  <p className="text-xs text-destructive">{buyerErrors.name.message}</p>
+                )}
+              </div>
+
+              {/* DNI - Opcional */}
+              <div className="space-y-2">
+                <Label htmlFor="buyer-dni">DNI / Documento (opcional)</Label>
+                <Input
+                  id="buyer-dni"
+                  type="text"
+                  placeholder="12345678"
+                  {...registerBuyer("dni")}
+                />
+              </div>
+
+              {/* País - Opcional */}
+              <div className="space-y-2">
+                <Label htmlFor="buyer-pais">País (opcional)</Label>
+                <Input
+                  id="buyer-pais"
+                  type="text"
+                  placeholder="Argentina"
+                  {...registerBuyer("pais")}
+                />
+              </div>
+
+              {/* Provincia - Opcional */}
+              <div className="space-y-2">
+                <Label htmlFor="buyer-provincia">Provincia (opcional)</Label>
+                <Input
+                  id="buyer-provincia"
+                  type="text"
+                  placeholder="Buenos Aires"
+                  {...registerBuyer("provincia")}
+                />
+              </div>
+
+              {/* Localidad - Opcional */}
+              <div className="space-y-2">
+                <Label htmlFor="buyer-localidad">Localidad (opcional)</Label>
+                <Input
+                  id="buyer-localidad"
+                  type="text"
+                  placeholder="Mar del Plata"
+                  {...registerBuyer("localidad")}
+                />
+              </div>
             </div>
           </div>
 
