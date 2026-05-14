@@ -39,8 +39,18 @@ const Success = () => {
     } else {
       // Para MercadoPago, Ualá Bis y otros, limpiar carrito y enviar email
       localStorage.removeItem("cart");
-      const refId = paymentId || merchantOrderId || searchParams.get("uuid") || undefined;
+      const refId = paymentId || merchantOrderId || searchParams.get("uuid") || gateway || undefined;
+      
+      // Intentar enviar email inmediatamente
       sendCourseEmail(refId);
+      
+      // Si falló, reintentar después de 2 segundos (por si los datos no están disponibles todavía)
+      setTimeout(() => {
+        if (!emailSent) {
+          console.log('🔄 Reintentando envío de email...');
+          sendCourseEmail(refId);
+        }
+      }, 2000);
     }
   }, [token, payerId]);
 
@@ -79,7 +89,11 @@ const Success = () => {
         console.log('🔍 Todas las fuentes están vacías:');
         console.log('  - localStorage: null');
         console.log('  - external_reference: null');
-        console.log('⚠️ PROBLEMA: Los datos no se guardaron antes de MercadoPago');
+        console.log('⚠️ PROBLEMA: Los datos no se guardaron antes del pago');
+        
+        // Intentar obtener datos de la orden más reciente en Supabase como último recurso
+        console.log('🔄 Intentando recuperar datos de la última orden en Supabase...');
+        setEmailError('No se pudo enviar el email automáticamente. Por favor contacta a soporte con tu comprobante de pago.');
         return;
       }
 
