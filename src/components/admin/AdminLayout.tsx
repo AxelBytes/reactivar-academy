@@ -17,6 +17,7 @@ import {
   KeyRound,
   Search,
   FileText,
+  Video,
 } from "lucide-react";
 
 interface AdminLayoutProps {
@@ -36,6 +37,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     { icon: GraduationCap, label: "Cursos", path: "/admin/cursos" },
     { icon: ShoppingBag, label: "Pedidos", path: "/admin/pedidos" },
     { icon: Users, label: "Usuarios", path: "/admin/usuarios" },
+    { icon: Video, label: "Testimonios", path: "/admin/testimonios" },
     { icon: Search,   label: "SaaS Buscador",  path: "/admin/saas" },
     { icon: KeyRound, label: "Suscripciones",  path: "/admin/suscripciones" },
     { icon: Settings, label: "Configuración",  path: "/admin/configuracion" },

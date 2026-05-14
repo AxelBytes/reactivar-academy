@@ -22,6 +22,7 @@ import AdminSettings from "./pages/admin/Settings";
 import GestionSuscripciones from "./pages/admin/GestionSuscripciones";
 import SaasAdmin from "./pages/admin/SaasAdmin";
 import AdminPdfs from "./pages/admin/AdminPdfs";
+import AdminTestimonials from "./pages/admin/Testimonials";
 import Saas from "./pages/Saas";
 import Pdfs from "./pages/Pdfs";
 import CheckoutSuccess from "./pages/checkout/Success";
@@ -134,6 +135,14 @@ const App = () => {
                 element={
                   <ProtectedRoute requireAdmin>
                     <AdminPdfs />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/testimonios"
+                element={
+                  <ProtectedRoute requireAdmin>
+                    <AdminTestimonials />
                   </ProtectedRoute>
                 }
               />

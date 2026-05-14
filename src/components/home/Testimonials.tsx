@@ -10,8 +10,9 @@ import { motion } from "framer-motion";
 
 interface VideoTestimonial {
   id: number;
-  youtubeId: string;
+  youtube_id: string;
   title: string;
+  created_at: string;
 }
 
 interface Review {
@@ -22,19 +23,10 @@ interface Review {
   created_at: string;
 }
 
-const videoTestimonials: VideoTestimonial[] = [
-  { id: 1, youtubeId: "RIBca2Do-gs", title: "Testimonio 1" },
-  { id: 2, youtubeId: "3UUojxQvl1I", title: "Testimonio 2" },
-  { id: 3, youtubeId: "wKH41RBxnCU", title: "Testimonio 3" },
-  { id: 4, youtubeId: "pxujtXL4SZE", title: "Testimonio 4" },
-  { id: 5, youtubeId: "dvkBRocbpzU", title: "Testimonio 5" },
-  { id: 6, youtubeId: "dk7j_zmZ1CA", title: "Testimonio 6" },
-  { id: 7, youtubeId: "MxlJoew71XM", title: "Testimonio 7" },
-];
-
 const Testimonials = () => {
   const { user, isAuthenticated } = useAuth();
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [videoTestimonials, setVideoTestimonials] = useState<VideoTestimonial[]>([]);
   const [newRating, setNewRating] = useState(5);
   const [newContent, setNewContent] = useState("");
   const [hoverRating, setHoverRating] = useState(0);
@@ -44,7 +36,19 @@ const Testimonials = () => {
 
   useEffect(() => {
     fetchReviews();
+    fetchVideoTestimonials();
   }, []);
+
+  const fetchVideoTestimonials = async () => {
+    const { data, error } = await supabase
+      .from("video_testimonials")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (!error && data) {
+      setVideoTestimonials(data);
+    }
+  };
 
   const fetchReviews = async () => {
     const { data, error } = await supabase
@@ -154,13 +158,13 @@ const Testimonials = () => {
                     className="relative rounded-xl overflow-hidden shadow-lg border-2 border-primary/20 hover:border-primary/50 group cursor-pointer transition-all"
                     onClick={() =>
                       setActiveVideo(
-                        activeVideo === video.youtubeId ? null : video.youtubeId
+                        activeVideo === video.youtube_id ? null : video.youtube_id
                       )
                     }
                   >
-                  {activeVideo === video.youtubeId ? (
+                  {activeVideo === video.youtube_id ? (
                     <iframe
-                      src={`https://www.youtube.com/embed/${video.youtubeId}?autoplay=1`}
+                      src={`https://www.youtube.com/embed/${video.youtube_id}?autoplay=1`}
                       title={video.title}
                       className="w-full aspect-video"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -169,7 +173,7 @@ const Testimonials = () => {
                   ) : (
                     <div className="relative">
                       <img
-                        src={`https://img.youtube.com/vi/${video.youtubeId}/hqdefault.jpg`}
+                        src={`https://img.youtube.com/vi/${video.youtube_id}/hqdefault.jpg`}
                         alt={video.title}
                         className="w-full aspect-video object-cover group-hover:scale-105 transition-transform duration-300"
                       />
@@ -180,7 +184,7 @@ const Testimonials = () => {
                       </div>
                     </div>
                   )}
-                  {activeVideo !== video.youtubeId && (
+                  {activeVideo !== video.youtube_id && (
                     <div className="p-3 bg-card">
                       <p className="text-sm font-medium text-card-foreground truncate">
                         {video.title}
