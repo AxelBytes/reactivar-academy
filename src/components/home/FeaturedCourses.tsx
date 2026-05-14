@@ -91,7 +91,7 @@ const FeaturedCourses = () => {
   if (!loading && courses.length === 0) return null;
 
   return (
-    <section className="py-16 lg:py-24 bg-background">
+    <section id="capacitaciones" className="py-16 lg:py-24 bg-background scroll-mt-20">
       <div className="container mx-auto px-4">
         <ScrollReveal width="100%" duration={0.8} direction="left">
           <div className="relative max-w-4xl mx-auto mb-14 px-6 md:px-10 py-10 md:py-14 rounded-3xl overflow-hidden bg-gradient-to-br from-primary via-primary to-blue-600 shadow-2xl border-4 border-primary/20">
