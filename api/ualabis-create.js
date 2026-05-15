@@ -71,6 +71,7 @@ export default async function handler(req, res) {
     console.log('=== UALABIS CREATE ORDER ===');
     console.log('Items recibidos:', JSON.stringify(items, null, 2));
     console.log('Payer:', JSON.stringify(payer, null, 2));
+    console.log('📧 Email del comprador:', payer?.email || '❌ No recibido');
 
     if (!items || items.length === 0) {
       return res.status(400).json({ error: 'Se requieren items para crear el pago' });
@@ -133,6 +134,36 @@ export default async function handler(req, res) {
       status: orderData.status,
       checkout_link: orderData.links?.checkout_link ? 'SI' : 'NO',
     });
+
+    // Guardar datos del comprador en Supabase para usar en el webhook
+    try {
+      const { createClient } = await import('@supabase/supabase-js');
+      const supabase = createClient(
+        process.env.VITE_SUPABASE_URL,
+        process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY
+      );
+
+      const { error: insertError } = await supabase
+        .from('pending_orders')
+        .insert({
+          uuid: orderData.uuid,
+          external_reference: externalRef,
+          user_email: payer?.email || '',
+          user_name: payer?.name || '',
+          items: JSON.stringify(items),
+          amount: total,
+          created_at: new Date().toISOString(),
+        });
+
+      if (insertError) {
+        console.error('⚠️ Error guardando pending_order:', insertError.message);
+      } else {
+        console.log('✅ Datos del comprador guardados para UUID:', orderData.uuid);
+      }
+    } catch (dbError) {
+      console.error('⚠️ Error conectando a Supabase:', dbError.message);
+      // No bloquear el pago si falla Supabase
+    }
 
     return res.status(200).json({
       uuid: orderData.uuid,
