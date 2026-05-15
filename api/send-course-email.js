@@ -44,15 +44,15 @@ export default async function handler(req, res) {
     const sanitizedEmail = userEmail.toLowerCase().trim();
     const sanitizedName = userName ? sanitizeString(userName) : 'Cliente';
 
-    // Aquí usaremos Brevo para enviar el email
-    const BREVO_API_KEY = process.env.BREVO_API_KEY;
+    // Aquí usaremos Resend para enviar el email
+    const RESEND_API_KEY = process.env.RESEND_API_KEY;
     
-    if (!BREVO_API_KEY) {
-      console.error('❌ BREVO_API_KEY no configurada en variables de entorno');
+    if (!RESEND_API_KEY) {
+      console.error('❌ RESEND_API_KEY no configurada en variables de entorno');
       return res.status(500).json({ error: 'Servicio de email no configurado' });
     }
 
-    console.log('✅ BREVO_API_KEY encontrada');
+    console.log('✅ RESEND_API_KEY encontrada');
 
     // Construir el HTML del email
     const hasAccessLinks = courses.some(c => c.accessUrl);
@@ -242,46 +242,42 @@ export default async function handler(req, res) {
       console.log(`📦 Total de PDFs adjuntos: ${pdfAttachments.length} de ${coursesWithPdf.length}`);
     }
 
-    // Enviar email usando Brevo (antes Sendinblue)
-    console.log('🚀 Enviando email a Brevo API...');
+    // Enviar email usando Resend
+    console.log('🚀 Enviando email a Resend API...');
 
     const emailPayload = {
-      sender: {
-        name: 'REACTIVAR ACADEMY',
-        email: 'newcomreactivar22@gmail.com'
-      },
-      to: [{ email: userEmail, name: userName || 'Estudiante' }],
+      from: 'REACTIVAR ACADEMY <onboarding@resend.dev>',
+      to: [userEmail],
       subject: '🎓 Acceso a tus Capacitaciones - REACTIVAR ACADEMY',
-      htmlContent: emailHTML,
-      ...(pdfAttachments.length > 0 && { attachment: pdfAttachments }),
+      html: emailHTML,
+      ...(pdfAttachments.length > 0 && { attachments: pdfAttachments }),
     };
 
-    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+    const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
-        'api-key': BREVO_API_KEY,
-        'Content-Type': 'application/json',
-        'accept': 'application/json'
+        'Authorization': `Bearer ${RESEND_API_KEY}`,
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify(emailPayload),
     });
 
-    console.log('📡 Respuesta de Brevo - Status:', response.status);
+    console.log('📡 Respuesta de Resend - Status:', response.status);
 
     if (!response.ok) {
       const errorData = await response.json();
-      console.error('❌ Error de Brevo:', JSON.stringify(errorData, null, 2));
+      console.error('❌ Error de Resend:', JSON.stringify(errorData, null, 2));
       throw new Error(`Error al enviar email: ${response.status} - ${JSON.stringify(errorData)}`);
     }
 
     const data = await response.json();
-    console.log('✅ Email enviado exitosamente via Brevo:', data.messageId);
+    console.log('✅ Email enviado exitosamente via Resend:', data.id);
     console.log('📬 Destinatario:', userEmail);
 
     return res.status(200).json({ 
       success: true, 
-      message: 'Email enviado exitosamente via Brevo',
-      emailId: data.messageId,
+      message: 'Email enviado exitosamente via Resend',
+      emailId: data.id,
       recipient: userEmail
     });
 
