@@ -249,12 +249,21 @@ export default async function handler(req, res) {
     const nodemailer = await import('nodemailer');
 
     const transporter = nodemailer.default.createTransport({
-      service: 'gmail',
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true,
       auth: {
         user: GMAIL_USER,
-        pass: GMAIL_APP_PASSWORD,
+        pass: GMAIL_APP_PASSWORD.replace(/\s/g, ''), // Eliminar espacios por si acaso
       },
+      tls: {
+        rejectUnauthorized: false
+      }
     });
+
+    // Verificar conexión antes de enviar
+    await transporter.verify();
+    console.log('✅ Conexión SMTP verificada correctamente');
 
     // Preparar adjuntos para Nodemailer
     const attachments = pdfAttachments.map(pdf => ({
