@@ -44,15 +44,16 @@ export default async function handler(req, res) {
     const sanitizedEmail = userEmail.toLowerCase().trim();
     const sanitizedName = userName ? sanitizeString(userName) : 'Cliente';
 
-    // Aquí usaremos Resend para enviar el email
-    const RESEND_API_KEY = process.env.RESEND_API_KEY;
+    // Usar Gmail + Nodemailer para enviar el email
+    const GMAIL_USER = process.env.GMAIL_USER;
+    const GMAIL_APP_PASSWORD = process.env.GMAIL_APP_PASSWORD;
     
-    if (!RESEND_API_KEY) {
-      console.error('❌ RESEND_API_KEY no configurada en variables de entorno');
+    if (!GMAIL_USER || !GMAIL_APP_PASSWORD) {
+      console.error('❌ GMAIL_USER o GMAIL_APP_PASSWORD no configuradas');
       return res.status(500).json({ error: 'Servicio de email no configurado' });
     }
 
-    console.log('✅ RESEND_API_KEY encontrada');
+    console.log('✅ Credenciales de Gmail encontradas:', GMAIL_USER);
 
     // Construir el HTML del email
     const hasAccessLinks = courses.some(c => c.accessUrl);
@@ -242,42 +243,44 @@ export default async function handler(req, res) {
       console.log(`📦 Total de PDFs adjuntos: ${pdfAttachments.length} de ${coursesWithPdf.length}`);
     }
 
-    // Enviar email usando Resend
-    console.log('🚀 Enviando email a Resend API...');
+    // Enviar email usando Gmail + Nodemailer
+    console.log('🚀 Enviando email via Gmail (Nodemailer)...');
 
-    const emailPayload = {
-      from: 'REACTIVAR ACADEMY <onboarding@resend.dev>',
-      to: [userEmail],
-      subject: '🎓 Acceso a tus Capacitaciones - REACTIVAR ACADEMY',
-      html: emailHTML,
-      ...(pdfAttachments.length > 0 && { attachments: pdfAttachments }),
-    };
+    const nodemailer = await import('nodemailer');
 
-    const response = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${RESEND_API_KEY}`,
-        'Content-Type': 'application/json'
+    const transporter = nodemailer.default.createTransport({
+      service: 'gmail',
+      auth: {
+        user: GMAIL_USER,
+        pass: GMAIL_APP_PASSWORD,
       },
-      body: JSON.stringify(emailPayload),
     });
 
-    console.log('📡 Respuesta de Resend - Status:', response.status);
+    // Preparar adjuntos para Nodemailer
+    const attachments = pdfAttachments.map(pdf => ({
+      filename: pdf.name,
+      content: pdf.content,
+      encoding: 'base64',
+    }));
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error('❌ Error de Resend:', JSON.stringify(errorData, null, 2));
-      throw new Error(`Error al enviar email: ${response.status} - ${JSON.stringify(errorData)}`);
-    }
+    const mailOptions = {
+      from: `REACTIVAR ACADEMY <${GMAIL_USER}>`,
+      to: userEmail,
+      subject: '🎓 Acceso a tus Capacitaciones - REACTIVAR ACADEMY',
+      html: emailHTML,
+      ...(attachments.length > 0 && { attachments }),
+    };
 
-    const data = await response.json();
-    console.log('✅ Email enviado exitosamente via Resend:', data.id);
+    console.log('📤 Enviando a:', userEmail);
+    const info = await transporter.sendMail(mailOptions);
+
+    console.log('✅ Email enviado exitosamente via Gmail:', info.messageId);
     console.log('📬 Destinatario:', userEmail);
 
     return res.status(200).json({ 
       success: true, 
-      message: 'Email enviado exitosamente via Resend',
-      emailId: data.id,
+      message: 'Email enviado exitosamente via Gmail',
+      emailId: info.messageId,
       recipient: userEmail
     });
 
