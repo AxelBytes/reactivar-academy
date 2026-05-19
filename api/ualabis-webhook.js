@@ -110,9 +110,14 @@ export default async function handler(req, res) {
 
           // Llamar al endpoint de envío de email
           const baseUrl = process.env.VITE_FRONTEND_URL || 'https://reactivar-academy.vercel.app';
+          const webhookTimestamp = Date.now().toString();
           const emailResponse = await fetch(`${baseUrl}/api/send-course-email`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+              'Content-Type': 'application/json',
+              'x-timestamp': webhookTimestamp,
+              'x-internal-signature': `payment_${webhookTimestamp}`,
+            },
             body: JSON.stringify({
               userEmail: pendingOrder.user_email,
               userName: pendingOrder.user_name,

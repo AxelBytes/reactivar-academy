@@ -1,13 +1,40 @@
 // API endpoint para enviar emails cuando se compran cursos
 import { checkRateLimit, getClientIp } from './_utils/rate-limiter.js';
 import { isValidEmail, sanitizeString } from './_utils/validators.js';
+import crypto from 'crypto';
+
+// Verificar que la petición viene del propio sistema (no de un usuario externo)
+function verifyInternalSignature(req) {
+  const signature = req.headers['x-internal-signature'];
+  const timestamp = req.headers['x-timestamp'];
+
+  if (!signature || !timestamp) return false;
+
+  // Verificar que el timestamp no tenga más de 10 minutos
+  const now = Date.now();
+  const reqTime = parseInt(timestamp);
+  if (Math.abs(now - reqTime) > 10 * 60 * 1000) return false;
+
+  // Verificar que la firma tenga el formato correcto: "payment_{timestamp}"
+  const expectedSig = `payment_${timestamp}`;
+  return signature === expectedSig;
+}
 
 export default async function handler(req, res) {
-  // CORS headers
+  // CORS headers - Solo permitir desde el propio dominio
+  const origin = req.headers.origin || '';
+  const allowedOrigins = [
+    'https://reactivar-academy.vercel.app',
+    'http://localhost:5173',
+    'http://localhost:3000',
+  ];
+
+  if (allowedOrigins.includes(origin) || origin.includes('vercel.app')) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
   res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-internal-signature, x-timestamp');
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
@@ -17,8 +44,14 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Método no permitido' });
   }
 
-  // ⚡ RATE LIMITING - Máximo 5 emails por minuto por IP
-  if (!checkRateLimit(req, res, 5, 60000)) {
+  // 🔒 VERIFICAR FIRMA INTERNA
+  if (!verifyInternalSignature(req)) {
+    console.warn('🚫 Petición rechazada: firma inválida desde', getClientIp(req));
+    return res.status(403).json({ error: 'No autorizado' });
+  }
+
+  // ⚡ RATE LIMITING - Máximo 3 emails por minuto por IP
+  if (!checkRateLimit(req, res, 3, 60000)) {
     console.log(`🚫 Rate limit excedido para IP: ${getClientIp(req)}`);
     return;
   }

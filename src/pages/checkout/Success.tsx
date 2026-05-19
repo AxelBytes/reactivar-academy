@@ -245,10 +245,13 @@ const Success = () => {
       }
 
       // 3. ENVIAR EMAIL DE CONFIRMACIÓN
+      const timestamp = Date.now().toString();
       const response = await fetch(`${baseUrl}/api/send-course-email`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'x-timestamp': timestamp,
+          'x-internal-signature': `payment_${timestamp}`,
         },
         body: JSON.stringify({
           userEmail,
