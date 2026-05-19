@@ -44,16 +44,15 @@ export default async function handler(req, res) {
     const sanitizedEmail = userEmail.toLowerCase().trim();
     const sanitizedName = userName ? sanitizeString(userName) : 'Cliente';
 
-    // Usar Gmail + Nodemailer para enviar el email
-    const GMAIL_USER = process.env.GMAIL_USER;
-    const GMAIL_APP_PASSWORD = process.env.GMAIL_APP_PASSWORD;
+    // Usar Brevo para enviar el email
+    const BREVO_API_KEY = process.env.BREVO_API_KEY;
     
-    if (!GMAIL_USER || !GMAIL_APP_PASSWORD) {
-      console.error('❌ GMAIL_USER o GMAIL_APP_PASSWORD no configuradas');
+    if (!BREVO_API_KEY) {
+      console.error('❌ BREVO_API_KEY no configurada en variables de entorno');
       return res.status(500).json({ error: 'Servicio de email no configurado' });
     }
 
-    console.log('✅ Credenciales de Gmail encontradas:', GMAIL_USER);
+    console.log('✅ BREVO_API_KEY encontrada');
 
     // Construir el HTML del email
     const hasAccessLinks = courses.some(c => c.accessUrl);
@@ -243,53 +242,46 @@ export default async function handler(req, res) {
       console.log(`📦 Total de PDFs adjuntos: ${pdfAttachments.length} de ${coursesWithPdf.length}`);
     }
 
-    // Enviar email usando Gmail + Nodemailer
-    console.log('🚀 Enviando email via Gmail (Nodemailer)...');
+    // Enviar email usando Brevo
+    console.log('🚀 Enviando email via Brevo...');
 
-    const nodemailer = await import('nodemailer');
-
-    const transporter = nodemailer.default.createTransport({
-      host: 'smtp.gmail.com',
-      port: 465,
-      secure: true,
-      auth: {
-        user: GMAIL_USER,
-        pass: GMAIL_APP_PASSWORD.replace(/\s/g, ''), // Eliminar espacios por si acaso
+    const emailPayload = {
+      sender: {
+        name: 'REACTIVAR ACADEMY',
+        email: 'newcomreactivar22@gmail.com'
       },
-      tls: {
-        rejectUnauthorized: false
-      }
-    });
-
-    // Verificar conexión antes de enviar
-    await transporter.verify();
-    console.log('✅ Conexión SMTP verificada correctamente');
-
-    // Preparar adjuntos para Nodemailer
-    const attachments = pdfAttachments.map(pdf => ({
-      filename: pdf.name,
-      content: pdf.content,
-      encoding: 'base64',
-    }));
-
-    const mailOptions = {
-      from: `REACTIVAR ACADEMY <${GMAIL_USER}>`,
-      to: userEmail,
+      to: [{ email: userEmail, name: sanitizedName }],
       subject: '🎓 Acceso a tus Capacitaciones - REACTIVAR ACADEMY',
-      html: emailHTML,
-      ...(attachments.length > 0 && { attachments }),
+      htmlContent: emailHTML,
+      ...(pdfAttachments.length > 0 && { attachment: pdfAttachments }),
     };
 
-    console.log('📤 Enviando a:', userEmail);
-    const info = await transporter.sendMail(mailOptions);
+    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: {
+        'api-key': BREVO_API_KEY,
+        'Content-Type': 'application/json',
+        'accept': 'application/json'
+      },
+      body: JSON.stringify(emailPayload),
+    });
 
-    console.log('✅ Email enviado exitosamente via Gmail:', info.messageId);
+    console.log('📡 Respuesta de Brevo - Status:', response.status);
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('❌ Error de Brevo:', JSON.stringify(errorData, null, 2));
+      throw new Error(`Error al enviar email: ${response.status} - ${JSON.stringify(errorData)}`);
+    }
+
+    const data = await response.json();
+    console.log('✅ Email enviado exitosamente via Brevo:', data.messageId);
     console.log('📬 Destinatario:', userEmail);
 
     return res.status(200).json({ 
       success: true, 
-      message: 'Email enviado exitosamente via Gmail',
-      emailId: info.messageId,
+      message: 'Email enviado exitosamente via Brevo',
+      emailId: data.messageId,
       recipient: userEmail
     });
 
