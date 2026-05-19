@@ -185,8 +185,14 @@ const Success = () => {
 
           if (accessData || productData) {
             coursesWithAccess = finalCourses.map((course: any) => {
-              const foundCourse = accessData?.find((a: any) => String(a.id) === String(course.id));
-              const foundProduct = productData?.find((p: any) => String(p.id) === String(course.id));
+              // Solo buscar access_url si el item es de tipo 'course'
+              const foundCourse = course.type === 'course'
+                ? accessData?.find((a: any) => String(a.id) === String(course.id))
+                : null;
+              // Solo buscar pdf_url si el item es de tipo 'product'
+              const foundProduct = course.type === 'product'
+                ? productData?.find((p: any) => String(p.id) === String(course.id))
+                : null;
               return {
                 ...course,
                 accessUrl: foundCourse?.access_url || null,
