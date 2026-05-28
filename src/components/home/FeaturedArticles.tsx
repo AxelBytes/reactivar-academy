@@ -1,43 +1,59 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { BookOpen, ArrowRight, Clock, User } from "lucide-react";
+import { ShoppingBag, ArrowRight, ShoppingCart, Loader2 } from "lucide-react";
+import { useCart } from "@/contexts/CartContext";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/lib/supabase";
 import ScrollReveal from "@/components/animations/ScrollReveal";
 import StaggerContainer from "@/components/animations/StaggerContainer";
 import StaggerItem from "@/components/animations/StaggerItem";
 import { motion } from "framer-motion";
 
-const articles = [
-  {
-    id: 1,
-    title: "Historia y Evolución del Newcom",
-    excerpt: "Descubrí los orígenes de este deporte fascinante y cómo se ha desarrollado a lo largo de los años en Argentina y el mundo.",
-    image: "https://images.unsplash.com/photo-1612872087720-bb876e2e67d1?w=800&q=80",
-    author: "Diego Machado",
-    readTime: "5 min",
-    category: "Historia",
-  },
-  {
-    id: 2,
-    title: "Técnicas Fundamentales para Principiantes",
-    excerpt: "Conocé las bases técnicas esenciales que todo jugador de Newcom debe dominar para comenzar su camino en el deporte.",
-    image: "https://images.unsplash.com/photo-1547347298-4074fc3086f0?w=800&q=80",
-    author: "Diego Machado",
-    readTime: "8 min",
-    category: "Técnica",
-  },
-  {
-    id: 3,
-    title: "Reglamento Oficial: Puntos Clave",
-    excerpt: "Una guía completa sobre los aspectos más importantes del reglamento oficial de Newcom que todo jugador y entrenador debe conocer.",
-    image: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=800&q=80",
-    author: "Diego Machado",
-    readTime: "6 min",
-    category: "Reglamento",
-  },
-];
-
 const FeaturedArticles = () => {
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { addProduct, isInCart } = useCart();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("products")
+          .select("*")
+          .eq("status", "active")
+          .eq("category", "Fisico")
+          .order("created_at", { ascending: false })
+          .limit(3);
+
+        if (!error && data) setProducts(data);
+      } catch (err) {
+        console.error("Error cargando artículos deportivos:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
+
+  const handleAddToCart = (product: any) => {
+    addProduct({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.image_url || "",
+      category: product.category,
+    });
+    toast({
+      title: "Artículo agregado al carrito",
+      description: `${product.name} fue agregado. Podés continuar comprando.`,
+    });
+  };
+
+  if (!loading && products.length === 0) return null;
+
   return (
     <section className="py-16 lg:py-24 bg-gradient-to-b from-slate-50 to-white">
       <div className="container mx-auto px-4">
@@ -51,87 +67,113 @@ const FeaturedArticles = () => {
 
             <div className="relative text-center">
               <span className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-white/20 backdrop-blur-sm text-white font-bold text-sm uppercase tracking-widest mb-5 border border-white/30">
-                <BookOpen className="w-4 h-4" />
-                Conocimiento deportivo
+                <ShoppingBag className="w-4 h-4" />
+                Equipamiento deportivo
               </span>
               <h2 className="text-5xl md:text-7xl lg:text-8xl font-black text-white mb-5 leading-none tracking-tight drop-shadow-lg">
                 <span className="bg-gradient-to-r from-yellow-300 via-yellow-200 to-white bg-clip-text text-transparent">Artículos</span>
               </h2>
               <p className="text-xl md:text-2xl text-white/90 font-medium max-w-2xl mx-auto leading-relaxed">
-                Los mejores artículos específicos para el deporte Newcom. Información, técnicas y estrategias para mejorar tu juego.
+                Los mejores artículos específicos para el deporte Newcom. Pelotas, redes, equipamiento y todo lo necesario para practicar.
               </p>
             </div>
           </div>
         </ScrollReveal>
 
-        <StaggerContainer 
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-          staggerDelay={0.15}
-        >
-          {articles.map((article) => (
-            <StaggerItem key={article.id}>
-              <motion.article
-                whileHover={{ 
-                  scale: 1.03,
-                  rotateY: 2,
-                  rotateX: -2,
-                  transition: { duration: 0.3 }
-                }}
-                className="group bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-cyan-100 flex flex-col h-full"
-              >
-                <div className="relative h-52 bg-gradient-to-br from-cyan-50 to-blue-100 overflow-hidden">
-                  <img
-                    src={article.image}
-                    alt={article.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                  <div className="absolute top-4 left-4">
-                    <Badge className="bg-cyan-500 text-white text-xs font-medium px-3 py-1">
-                      {article.category}
-                    </Badge>
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-10 w-10 animate-spin text-cyan-600" />
+          </div>
+        ) : (
+          <StaggerContainer 
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+            staggerDelay={0.15}
+          >
+            {products.map((product) => (
+              <StaggerItem key={product.id}>
+                <motion.article
+                  whileHover={{ 
+                    scale: 1.03,
+                    rotateY: 2,
+                    rotateX: -2,
+                    transition: { duration: 0.3 }
+                  }}
+                  className="group bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-cyan-100 flex flex-col h-full"
+                >
+                  <div className="relative h-52 bg-gradient-to-br from-cyan-50 to-blue-100 overflow-hidden">
+                    {product.image_url ? (
+                      <img
+                        src={product.image_url}
+                        alt={product.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <ShoppingBag className="w-24 h-24 text-cyan-200" />
+                      </div>
+                    )}
+                    <div className="absolute top-4 left-4">
+                      <Badge className="bg-cyan-500 text-white text-xs font-medium px-3 py-1">
+                        <ShoppingBag className="w-3 h-3 mr-1" />
+                        Físico
+                      </Badge>
+                    </div>
+                    {product.original_price && product.original_price > product.price && (
+                      <div className="absolute top-4 right-4">
+                        <Badge className="bg-red-500 text-white text-xs">
+                          -{Math.round((1 - product.price / product.original_price) * 100)}% OFF
+                        </Badge>
+                      </div>
+                    )}
                   </div>
-                </div>
 
-                <div className="p-6 flex flex-col flex-1">
-                  <h3 className="text-xl font-bold text-foreground mb-3 group-hover:text-cyan-600 transition-colors leading-tight">
-                    {article.title}
-                  </h3>
-                  <p className="text-muted-foreground text-base mb-4 line-clamp-3 flex-1">
-                    {article.excerpt}
-                  </p>
+                  <div className="p-6 flex flex-col flex-1">
+                    <h3 className="text-xl font-bold text-foreground mb-3 group-hover:text-cyan-600 transition-colors leading-tight">
+                      {product.name}
+                    </h3>
+                    <p className="text-muted-foreground text-base mb-4 line-clamp-3 flex-1">
+                      {product.description}
+                    </p>
 
-                  <div className="flex items-center justify-between pt-4 border-t border-cyan-100">
-                    <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <User className="w-4 h-4" />
-                        {article.author}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Clock className="w-4 h-4" />
-                        {article.readTime}
-                      </span>
+                    <div className="flex items-center justify-between pt-4 border-t border-cyan-100">
+                      <div>
+                        <span className="text-3xl font-bold text-cyan-700">
+                          ${product.price.toLocaleString("es-AR")}
+                        </span>
+                        {product.original_price && product.original_price > product.price && (
+                          <span className="block text-sm text-muted-foreground line-through">
+                            ${product.original_price.toLocaleString("es-AR")}
+                          </span>
+                        )}
+                      </div>
+                      <Button
+                        className="bg-cyan-600 hover:bg-cyan-700 text-white px-6 py-3 text-base font-semibold"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleAddToCart(product);
+                        }}
+                        disabled={isInCart(product.id, "product")}
+                      >
+                        {isInCart(product.id, "product") ? (
+                          "En el carrito ✓"
+                        ) : (
+                          <>
+                            <ShoppingCart className="w-4 h-4 mr-2" />
+                            Comprar
+                          </>
+                        )}
+                      </Button>
                     </div>
                   </div>
-
-                  <Button
-                    className="w-full mt-4 bg-cyan-500 hover:bg-cyan-600 text-white font-semibold"
-                    asChild
-                  >
-                    <Link to={`/articulos/${article.id}`}>
-                      Leer Artículo
-                      <ArrowRight className="w-4 h-4 ml-2" />
-                    </Link>
-                  </Button>
-                </div>
-              </motion.article>
-            </StaggerItem>
-          ))}
-        </StaggerContainer>
+                </motion.article>
+              </StaggerItem>
+            ))}
+          </StaggerContainer>
+        )}
 
         <div className="text-center mt-12">
           <Button variant="outline" size="lg" asChild className="text-base border-2 border-cyan-500 text-cyan-600 hover:bg-cyan-500 hover:text-white px-8 py-4">
-            <Link to="/articulos">
+            <Link to="/productos">
               Ver Todos los Artículos
               <ArrowRight className="w-5 h-5" />
             </Link>
