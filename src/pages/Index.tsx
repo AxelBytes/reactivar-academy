@@ -4,6 +4,7 @@ import Hero from "@/components/home/Hero";
 import FeaturedCourses from "@/components/home/FeaturedCourses";
 import FeaturedEbooks from "@/components/home/FeaturedEbooks";
 import ReglamentoSection from "@/components/home/ReglamentoSection";
+import FeaturedArticles from "@/components/home/FeaturedArticles";
 import Testimonials from "@/components/home/Testimonials";
 import CTA from "@/components/home/CTA";
 import NewcomFAQ from "@/components/home/NewcomFAQ";
@@ -39,6 +40,7 @@ const Index = () => {
         <FeaturedCourses />
         <FeaturedEbooks />
         <ReglamentoSection />
+        <FeaturedArticles />
         <Testimonials />
         <NewcomFAQ />
         <CTA />
