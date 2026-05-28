@@ -49,7 +49,7 @@ const FeaturedBooks = () => {
       category: product.category,
     });
     toast({
-      title: "Libro agregado al carrito",
+      title: "Mini Ebook agregado al carrito",
       description: `${product.name} fue agregado. Podés continuar comprando.`,
     });
   };
@@ -70,13 +70,13 @@ const FeaturedBooks = () => {
           <div className="relative text-center">
             <span className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-white/25 backdrop-blur-sm text-white font-bold text-sm uppercase tracking-widest mb-5 border border-white/40">
               <Book className="w-4 h-4" />
-              Biblioteca Digital
+              Material de Consulta
             </span>
             <h2 className="text-5xl md:text-7xl lg:text-8xl font-black text-white mb-5 leading-none tracking-tight drop-shadow-lg">
-              <span className="bg-gradient-to-r from-yellow-200 via-white to-yellow-100 bg-clip-text text-transparent">Books</span>
+              <span className="bg-gradient-to-r from-yellow-200 via-white to-yellow-100 bg-clip-text text-transparent">Mini Ebooks</span>
             </h2>
             <p className="text-xl md:text-2xl text-white/95 font-medium max-w-2xl mx-auto leading-relaxed mb-6">
-              Libros en formato digital PDF. Leé, aprendé y llevá tu biblioteca donde vayas.
+              Material digital en formato PDF. Guías rápidas y contenido específico para tu consulta.
             </p>
             <div className="flex flex-wrap justify-center gap-4 text-sm md:text-base text-white/95 font-medium">
               <span className="flex items-center gap-2 bg-white/15 backdrop-blur-sm px-4 py-2 rounded-full border border-white/30">
@@ -129,7 +129,7 @@ const FeaturedBooks = () => {
                   <div className="absolute top-4 left-4">
                     <Badge className="bg-cyan-500 text-white text-xs font-medium px-3 py-1">
                       <Book className="w-3 h-3 mr-1" />
-                      Libro Digital
+                      Mini Ebook
                     </Badge>
                   </div>
                   {product.original_price && product.original_price > product.price && (
@@ -187,8 +187,8 @@ const FeaturedBooks = () => {
 
         <div className="text-center mt-12">
           <Button variant="outline" size="lg" asChild className="text-base border-2 border-cyan-500 text-cyan-600 hover:bg-cyan-500 hover:text-white px-8 py-4">
-            <Link to="/libros">
-              Ver Todos los Libros
+            <Link to="/mini-ebooks">
+              Ver Todos los Mini Ebooks
               <ArrowRight className="w-5 h-5" />
             </Link>
           </Button>

@@ -250,7 +250,7 @@ const ProductFormDialog = ({ open, onOpenChange, onSave, editProduct, lockedCate
                   <SelectItem value="Digital">📄 Ebook Educativo (PDF)</SelectItem>
                 )}
                 {!excludeCategories.includes("Books") && (
-                  <SelectItem value="Books">📚 Libro Digital (PDF)</SelectItem>
+                  <SelectItem value="Books">📚 Mini Ebook (PDF)</SelectItem>
                 )}
                 {!excludeCategories.includes("Fisico") && (
                   <SelectItem value="Fisico">🏐 Artículo Deportivo Físico</SelectItem>
