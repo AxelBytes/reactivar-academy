@@ -48,6 +48,7 @@ interface ProductFormDialogProps {
   onSave?: (product: any) => void;
   editProduct?: ProductData | null;
   lockedCategory?: string; // Si se pasa, la categoría queda fija y no se puede cambiar
+  excludeCategories?: string[]; // Categorías que no se pueden seleccionar
 }
 
 const EMPTY_FORM = {
@@ -65,7 +66,7 @@ const EMPTY_FORM = {
   subscriptionMonths: "1",
 };
 
-const ProductFormDialog = ({ open, onOpenChange, onSave, editProduct, lockedCategory }: ProductFormDialogProps) => {
+const ProductFormDialog = ({ open, onOpenChange, onSave, editProduct, lockedCategory, excludeCategories = [] }: ProductFormDialogProps) => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState(EMPTY_FORM);
@@ -242,9 +243,15 @@ const ProductFormDialog = ({ open, onOpenChange, onSave, editProduct, lockedCate
                 <SelectValue placeholder="Selecciona una categoría" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Suscripcion">🔑 Suscripción (clave de acceso)</SelectItem>
-                <SelectItem value="Digital">📄 Producto Digital (PDF)</SelectItem>
-                <SelectItem value="Fisico">🏐 Artículo Deportivo Físico</SelectItem>
+                {!excludeCategories.includes("Suscripcion") && (
+                  <SelectItem value="Suscripcion">🔑 Suscripción (clave de acceso)</SelectItem>
+                )}
+                {!excludeCategories.includes("Digital") && (
+                  <SelectItem value="Digital">📄 Producto Digital (PDF)</SelectItem>
+                )}
+                {!excludeCategories.includes("Fisico") && (
+                  <SelectItem value="Fisico">🏐 Artículo Deportivo Físico</SelectItem>
+                )}
                 <SelectItem value="Calzado">👟 Calzado</SelectItem>
                 <SelectItem value="Pesas">🏋️ Pesas</SelectItem>
                 <SelectItem value="Accesorios">🎽 Accesorios</SelectItem>

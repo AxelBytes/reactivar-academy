@@ -61,6 +61,7 @@ const Products = () => {
       const { data, error } = await supabase
         .from("products")
         .select("*")
+        .neq("category", "Digital") // Excluir PDFs (categoría Digital)
         .order("created_at", { ascending: false });
 
       if (error) {
@@ -178,14 +179,14 @@ const Products = () => {
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Productos</h1>
+            <h1 className="text-3xl font-bold text-foreground">Productos Físicos</h1>
             <p className="text-muted-foreground mt-2">
-              Gestiona el catálogo de productos
+              Gestiona artículos deportivos, equipamiento y productos físicos
             </p>
           </div>
           <Button onClick={() => { setEditingProduct(null); setIsDialogOpen(true); }}>
             <Plus className="w-4 h-4 mr-2" />
-            Nuevo Producto
+            Nuevo Producto Físico
           </Button>
         </div>
 
@@ -330,6 +331,7 @@ const Products = () => {
         }}
         onSave={handleSaveProduct}
         editProduct={editingProduct}
+        excludeCategories={["Digital", "Suscripcion"]}
       />
     </AdminLayout>
   );
