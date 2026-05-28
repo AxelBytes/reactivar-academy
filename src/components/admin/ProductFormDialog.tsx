@@ -100,7 +100,7 @@ const ProductFormDialog = ({ open, onOpenChange, onSave, editProduct, lockedCate
   const handleImageChange = (imageUrl: string) => setFormData(f => ({ ...f, image: imageUrl }));
   const handlePdfChange   = (pdfUrl: string)   => setFormData(f => ({ ...f, pdfUrl }));
 
-  const isDigital     = formData.category === "Digital";
+  const isDigital     = formData.category === "Digital" || formData.category === "Books";
   const isSuscripcion = formData.category === "Suscripcion";
   const isFisico      = formData.category === "Fisico";
 
@@ -247,7 +247,10 @@ const ProductFormDialog = ({ open, onOpenChange, onSave, editProduct, lockedCate
                   <SelectItem value="Suscripcion">🔑 Suscripción (clave de acceso)</SelectItem>
                 )}
                 {!excludeCategories.includes("Digital") && (
-                  <SelectItem value="Digital">📄 Producto Digital (PDF)</SelectItem>
+                  <SelectItem value="Digital">📄 Ebook Educativo (PDF)</SelectItem>
+                )}
+                {!excludeCategories.includes("Books") && (
+                  <SelectItem value="Books">📚 Libro Digital (PDF)</SelectItem>
                 )}
                 {!excludeCategories.includes("Fisico") && (
                   <SelectItem value="Fisico">🏐 Artículo Deportivo Físico</SelectItem>

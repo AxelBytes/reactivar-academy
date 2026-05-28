@@ -3,6 +3,7 @@ import Footer from "@/components/layout/Footer";
 import Hero from "@/components/home/Hero";
 import FeaturedCourses from "@/components/home/FeaturedCourses";
 import FeaturedEbooks from "@/components/home/FeaturedEbooks";
+import FeaturedBooks from "@/components/home/FeaturedBooks";
 import ReglamentoSection from "@/components/home/ReglamentoSection";
 import FeaturedArticles from "@/components/home/FeaturedArticles";
 import Testimonials from "@/components/home/Testimonials";
@@ -39,6 +40,7 @@ const Index = () => {
         <Hero />
         <FeaturedCourses />
         <FeaturedEbooks />
+        <FeaturedBooks />
         <ReglamentoSection />
         <FeaturedArticles />
         <Testimonials />
