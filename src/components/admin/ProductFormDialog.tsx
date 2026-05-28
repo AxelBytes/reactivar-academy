@@ -101,6 +101,7 @@ const ProductFormDialog = ({ open, onOpenChange, onSave, editProduct, lockedCate
 
   const isDigital     = formData.category === "Digital";
   const isSuscripcion = formData.category === "Suscripcion";
+  const isFisico      = formData.category === "Fisico";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -243,12 +244,13 @@ const ProductFormDialog = ({ open, onOpenChange, onSave, editProduct, lockedCate
               <SelectContent>
                 <SelectItem value="Suscripcion">🔑 Suscripción (clave de acceso)</SelectItem>
                 <SelectItem value="Digital">📄 Producto Digital (PDF)</SelectItem>
-                <SelectItem value="Calzado">Calzado</SelectItem>
-                <SelectItem value="Pesas">Pesas</SelectItem>
-                <SelectItem value="Accesorios">Accesorios</SelectItem>
-                <SelectItem value="Ropa">Ropa Deportiva</SelectItem>
-                <SelectItem value="Suplementos">Suplementos</SelectItem>
-                <SelectItem value="Equipamiento">Equipamiento</SelectItem>
+                <SelectItem value="Fisico">🏐 Artículo Deportivo Físico</SelectItem>
+                <SelectItem value="Calzado">👟 Calzado</SelectItem>
+                <SelectItem value="Pesas">🏋️ Pesas</SelectItem>
+                <SelectItem value="Accesorios">🎽 Accesorios</SelectItem>
+                <SelectItem value="Ropa">👕 Ropa Deportiva</SelectItem>
+                <SelectItem value="Suplementos">💊 Suplementos</SelectItem>
+                <SelectItem value="Equipamiento">⚽ Equipamiento</SelectItem>
               </SelectContent>
             </Select>
             )}
@@ -291,6 +293,29 @@ const ProductFormDialog = ({ open, onOpenChange, onSave, editProduct, lockedCate
               required
             />
           </div>
+
+          {/* Información de Envío - Solo para productos físicos */}
+          {isFisico && (
+            <div className="space-y-2 p-4 bg-cyan-50 border border-cyan-200 rounded-lg">
+              <div className="flex items-start gap-2">
+                <div className="bg-cyan-500 text-white rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 text-sm font-bold">
+                  📦
+                </div>
+                <div className="flex-1">
+                  <Label className="text-cyan-800 font-semibold">Información de Envío</Label>
+                  <p className="text-sm text-cyan-700 mt-1">
+                    <strong>Envío: Acordar por WhatsApp</strong>
+                  </p>
+                  <p className="text-xs text-cyan-600 mt-1">
+                    ⏳ Próximamente: Calculador automático de envíos
+                  </p>
+                  <p className="text-xs text-cyan-600 mt-2">
+                    El cliente deberá coordinar el envío directamente por WhatsApp después de la compra.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Video URL */}
           <div className="space-y-2">
