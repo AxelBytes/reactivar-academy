@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Book, ShoppingCart, ArrowRight, Download, Loader2 } from "lucide-react";
+import { Book, ShoppingCart, ArrowRight, Download, Loader2, Share2 } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
@@ -18,6 +18,7 @@ const FeaturedBooks = () => {
   const [selectedBook, setSelectedBook] = useState<any | null>(null);
   const { addProduct, isInCart } = useCart();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const load = async () => {
@@ -142,14 +143,17 @@ const FeaturedBooks = () => {
                 </div>
 
                 <div className="p-6 flex flex-col flex-1">
-                  <h3 className="text-xl font-bold text-foreground mb-2 group-hover:text-cyan-600 transition-colors leading-tight">
+                  <h3
+                    className="text-xl font-bold text-foreground mb-2 group-hover:text-cyan-600 transition-colors leading-tight cursor-pointer"
+                    onClick={() => navigate(`/producto/${product.id}`)}
+                  >
                     {product.name}
                   </h3>
                   <p className="text-muted-foreground text-base mb-4 line-clamp-3 flex-1">
                     {product.description}
                   </p>
 
-                  <div className="flex items-center justify-between pt-4 border-t border-cyan-100">
+                  <div className="space-y-3 pt-4 border-t border-cyan-100">
                     <div>
                       <span className="text-3xl font-bold text-cyan-700">
                         ${product.price.toLocaleString("es-AR")}
@@ -160,23 +164,30 @@ const FeaturedBooks = () => {
                         </span>
                       )}
                     </div>
-                    <Button
-                      className="bg-cyan-600 hover:bg-cyan-700 text-white px-6 py-3 text-base font-semibold"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleAddToCart(product);
-                      }}
-                      disabled={isInCart(product.id, "product")}
-                    >
-                      {isInCart(product.id, "product") ? (
-                        "En el carrito ✓"
-                      ) : (
-                        <>
-                          <ShoppingCart className="w-4 h-4 mr-2" />
-                          Comprar
-                        </>
-                      )}
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        className="flex-1 bg-cyan-600 hover:bg-cyan-700 text-white font-semibold"
+                        onClick={() => handleAddToCart(product)}
+                        disabled={isInCart(product.id, "product")}
+                      >
+                        {isInCart(product.id, "product") ? (
+                          "En el carrito ✓"
+                        ) : (
+                          <>
+                            <ShoppingCart className="w-4 h-4 mr-2" />
+                            Comprar
+                          </>
+                        )}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => navigate(`/producto/${product.id}`)}
+                        title="Compartir"
+                      >
+                        <Share2 className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </motion.article>

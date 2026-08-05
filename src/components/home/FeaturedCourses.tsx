@@ -159,7 +159,10 @@ const FeaturedCourses = () => {
                 </div>
 
                 <div className="p-6">
-                  <h3 className="text-lg font-semibold text-card-foreground mb-2 group-hover:text-primary transition-colors">
+                  <h3
+                    className="text-lg font-semibold text-card-foreground mb-2 group-hover:text-primary transition-colors cursor-pointer"
+                    onClick={() => navigate(`/curso/${course.id}`)}
+                  >
                     {course.title}
                   </h3>
                   <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
@@ -194,20 +197,33 @@ const FeaturedCourses = () => {
                         </span>
                       )}
                     </div>
-                    <Button
-                      size="sm"
-                      className="group/btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleBuyCourse(course);
-                      }}
-                      disabled={isInCart(course.id, "course")}
-                    >
-                      {isInCart(course.id, "course") ? "En el Carrito" : "Comprar"}
-                      {!isInCart(course.id, "course") && (
-                        <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
-                      )}
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        size="sm"
+                        className="group/btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleBuyCourse(course);
+                        }}
+                        disabled={isInCart(course.id, "course")}
+                      >
+                        {isInCart(course.id, "course") ? "En el Carrito" : "Comprar"}
+                        {!isInCart(course.id, "course") && (
+                          <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                        )}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/curso/${course.id}`);
+                        }}
+                        title="Compartir curso"
+                      >
+                        <Share2 className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </motion.article>
