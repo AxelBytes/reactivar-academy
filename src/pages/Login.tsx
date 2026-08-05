@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -309,9 +309,16 @@ const PAISES = [
 
 const Login = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { login, register } = useAuth();
   const { toast } = useToast();
-  
+
+  // Si venimos de un link de producto/curso compartido (?redirect=...),
+  // volvemos ahí después de loguearse o registrarse. Por defecto abrimos
+  // en la pestaña de registro para captar al usuario nuevo.
+  const redirectTo = searchParams.get("redirect") || "/";
+  const defaultTab = searchParams.get("tab") === "login" ? "login" : (searchParams.get("redirect") ? "register" : "login");
+
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [registerData, setRegisterData] = useState({ 
     name: "", 
@@ -345,7 +352,7 @@ const Login = () => {
         title: "¡Bienvenido!",
         description: "Has iniciado sesión exitosamente.",
       });
-      navigate("/");
+      navigate(redirectTo);
     } else {
       setError(result.error || "Error al iniciar sesión");
     }
@@ -393,7 +400,7 @@ const Login = () => {
         title: "¡Cuenta creada!",
         description: "Tu cuenta ha sido creada exitosamente.",
       });
-      navigate("/");
+      navigate(redirectTo);
     } else {
       setError(result.error || "Error al registrarse");
     }
@@ -412,7 +419,14 @@ const Login = () => {
       </div>
 
       <div className="w-full max-w-md">
-        <Tabs defaultValue="login" className="w-full">
+        {searchParams.get("redirect") && (
+          <Alert className="mb-4 border-primary/30 bg-primary/5">
+            <AlertDescription>
+              Para ver este contenido, primero necesitás crear tu cuenta gratis (o iniciar sesión si ya tenés una). Una vez completado, te llevamos directo a lo que estabas buscando.
+            </AlertDescription>
+          </Alert>
+        )}
+        <Tabs defaultValue={defaultTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-4">
             <TabsTrigger value="login">Iniciar Sesión</TabsTrigger>
             <TabsTrigger value="register">Registrarse</TabsTrigger>

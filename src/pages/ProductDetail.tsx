@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Navigate } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ShoppingCart, ArrowLeft, Loader2, FileText, Book, ShoppingBag } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import ShareButtons from "@/components/ShareButtons";
 import { SEO } from "@/components/SEO";
@@ -14,12 +15,15 @@ import { SEO } from "@/components/SEO";
 const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const { addProduct, isInCart } = useCart();
   const { toast } = useToast();
 
   useEffect(() => {
+    if (!isAuthenticated) return;
+
     const loadProduct = async () => {
       try {
         const { data, error } = await supabase
@@ -43,7 +47,13 @@ const ProductDetail = () => {
     };
 
     if (id) loadProduct();
-  }, [id]);
+  }, [id, isAuthenticated]);
+
+  // Si el usuario llega desde un link compartido sin estar registrado,
+  // lo mandamos a crear cuenta y luego lo traemos de vuelta a este producto
+  if (!isAuthenticated) {
+    return <Navigate to={`/login?redirect=${encodeURIComponent(`/producto/${id}`)}&tab=register`} replace />;
+  }
 
   const handleAddToCart = () => {
     if (!product) return;
