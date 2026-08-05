@@ -10,6 +10,8 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import LoadingScreen from "@/components/LoadingScreen";
 import Index from "./pages/Index";
 import Courses from "./pages/Courses";
+import CourseDetail from "./pages/CourseDetail";
+import ProductDetail from "./pages/ProductDetail";
 import Store from "./pages/Store";
 import About from "./pages/About";
 import Login from "./pages/Login";
@@ -49,6 +51,8 @@ const App = () => {
               {/* Public Routes */}
               <Route path="/" element={<Index />} />
               <Route path="/cursos" element={<Courses />} />
+              <Route path="/curso/:id" element={<CourseDetail />} />
+              <Route path="/producto/:id" element={<ProductDetail />} />
               <Route path="/tienda" element={<Store />} />
               <Route path="/pdfs" element={<Pdfs />} />
               <Route path="/saas" element={<Saas />} />

@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { FileText, ShoppingCart, ArrowRight, Download, Loader2 } from "lucide-react";
+import { FileText, ShoppingCart, ArrowRight, Download, Loader2, Share2 } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
@@ -11,6 +11,7 @@ import ScrollReveal from "@/components/animations/ScrollReveal";
 import StaggerContainer from "@/components/animations/StaggerContainer";
 import StaggerItem from "@/components/animations/StaggerItem";
 import { motion } from "framer-motion";
+import ShareButtons from "@/components/ShareButtons";
 
 const FeaturedEbooks = () => {
   const [ebooks, setEbooks] = useState<any[]>([]);
@@ -18,6 +19,7 @@ const FeaturedEbooks = () => {
   const [selectedEbook, setSelectedEbook] = useState<any | null>(null);
   const { addProduct, isInCart } = useCart();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const load = async () => {
@@ -111,8 +113,7 @@ const FeaturedEbooks = () => {
                   rotateX: -2,
                   transition: { duration: 0.3 }
                 }}
-                className="group bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-blue-100 flex flex-col cursor-pointer"
-                onClick={() => setSelectedEbook(product)}
+                className="group bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-blue-100 flex flex-col"
               >
                 <div className="relative h-52 bg-gradient-to-br from-blue-50 to-blue-100 overflow-hidden">
                   {product.image_url ? (
@@ -142,41 +143,52 @@ const FeaturedEbooks = () => {
                 </div>
 
                 <div className="p-6 flex flex-col flex-1">
-                  <h3 className="text-xl font-bold text-foreground mb-2 group-hover:text-blue-600 transition-colors leading-tight">
+                  <h3 
+                    className="text-xl font-bold text-foreground mb-2 group-hover:text-blue-600 transition-colors leading-tight cursor-pointer"
+                    onClick={() => navigate(`/producto/${product.id}`)}
+                  >
                     {product.name}
                   </h3>
                   <p className="text-muted-foreground text-base mb-4 line-clamp-3 flex-1">
                     {product.description}
                   </p>
 
-                  <div className="flex items-center justify-between pt-4 border-t border-blue-100">
-                    <div>
-                      <span className="text-3xl font-bold text-blue-700">
-                        ${product.price.toLocaleString("es-AR")}
-                      </span>
-                      {product.original_price && product.original_price > product.price && (
-                        <span className="block text-sm text-muted-foreground line-through">
-                          ${product.original_price.toLocaleString("es-AR")}
+                  <div className="space-y-3 pt-4 border-t border-blue-100">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <span className="text-3xl font-bold text-blue-700">
+                          ${product.price.toLocaleString("es-AR")}
                         </span>
-                      )}
+                        {product.original_price && product.original_price > product.price && (
+                          <span className="block text-sm text-muted-foreground line-through">
+                            ${product.original_price.toLocaleString("es-AR")}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                    <Button
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 text-base font-semibold"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleAddToCart(product);
-                      }}
-                      disabled={isInCart(product.id, "product")}
-                    >
-                      {isInCart(product.id, "product") ? (
-                        "En el carrito ✓"
-                      ) : (
-                        <>
-                          <ShoppingCart className="w-4 h-4 mr-2" />
-                          Comprar
-                        </>
-                      )}
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold"
+                        onClick={() => handleAddToCart(product)}
+                        disabled={isInCart(product.id, "product")}
+                      >
+                        {isInCart(product.id, "product") ? (
+                          "En el carrito ✓"
+                        ) : (
+                          <>
+                            <ShoppingCart className="w-4 h-4 mr-2" />
+                            Comprar
+                          </>
+                        )}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => navigate(`/producto/${product.id}`)}
+                      >
+                        <Share2 className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </motion.article>

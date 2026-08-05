@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import CourseDetailDialog from "@/components/courses/CourseDetailDialog";
-import { Star, Clock, Users, ArrowRight, Loader2, Flame } from "lucide-react";
+import { Star, Clock, Users, ArrowRight, Loader2, Flame, Share2 } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
@@ -32,6 +32,7 @@ const FeaturedCourses = () => {
   const { addCourse, isInCart } = useCart();
   const { toast } = useToast();
   const [selectedCourse, setSelectedCourse] = useState<any | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const loadCourses = async () => {
@@ -135,8 +136,7 @@ const FeaturedCourses = () => {
                   rotateX: -2,
                   transition: { duration: 0.3 }
                 }}
-                className="group bg-card rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-border cursor-pointer"
-                onClick={() => setSelectedCourse(course)}
+                className="group bg-card rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-border"
               >
                 <div className="relative overflow-hidden aspect-video">
                   <img
